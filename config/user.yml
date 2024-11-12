@@ -1,0 +1,12 @@
+server:
+  name: "UserServer"
+  host: 127.0.0.1
+  port: 8888
+
+rpc:
+  host: 127.0.0.1
+  port: 50055
+
+etcd:
+  host: 127.0.0.1
+  port: 2379

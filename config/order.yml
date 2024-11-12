@@ -1,0 +1,12 @@
+server:
+  name: "OrderServer"
+  host: 127.0.0.1
+  port: 8885
+
+rpc:
+  host: 127.0.0.1
+  port: 50055
+
+etcd:
+  host: 127.0.0.1
+  port: 2379

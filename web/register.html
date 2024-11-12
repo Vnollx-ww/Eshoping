@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>注册</title>
+    <script>
+        function clearPlaceholder(id){
+            const Input=document.getElementById(id)
+            if(Input.value!==''){
+                Input.placeholder='';
+            }
+        }
+        function restorePlaceholder(id) {
+            const Input = document.getElementById(id);
+            if (Input.value === '') {
+                if(id==='username')
+                    Input.placeholder = '请输入用户名'; // 恢复 placeholder
+                else if(id==='password')
+                    Input.placeholder = '请输入密码';
+                else if(id==='repassword')
+                    Input.placeholder='请再次输入密码';
+                else if(id==='captcha')
+                    Input.placeholder='请输入验证码'
+            }
+        }
+    </script>
+    <script>
+        function check(){
+            var username=document.getElementById("username").value;
+            var password=document.getElementById("password").value;
+            var repassword=document.getElementById("repassword").value;
+            if(username===""){
+                alert("用户名不能为空!");
+                return false;
+            }
+            if(password===""){
+                alert("密码不能为空!");
+                return false;
+            }
+            if(password!==repassword){
+                alert("两次密码不一致!");
+                return false;
+            }
+            return true;
+        }
+    </script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        #registerdiv {
+            width: 350px;
+            height: 400px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            opacity: 0.8;
+            border-radius: 5px;
+            background-color: lavender;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #title{
+            text-align: center;
+        }
+        #subdiv {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .button {
+            margin: 5px 10px; /* 外边距 */
+            padding: 10px 15px; /* 内边距 */
+            background: linear-gradient(135deg, deepskyblue, dodgerblue); /* 渐变背景 */
+            color: white; /* 字体颜色 */
+            border: none; /* 去掉边框 */
+            border-radius: 8px; /* 圆角 */
+            cursor: pointer; /* 鼠标悬停时显示为可点击 */
+            transition: background 0.3s, transform 0.3s; /* 背景和变换过渡效果 */
+            font-size: 16px; /* 字体大小 */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 阴影 */
+        }
+        .button:hover {
+            background: linear-gradient(135deg, dodgerblue, deepskyblue); /* 改变渐变方向 */
+            transform: translateY(-2px); /* 提升效果 */
+        }
+        input[type="text"] {
+            width: 100%; /* 让输入框宽度填满 */
+            padding: 10px; /* 增加内边距 */
+            margin: 5px 0; /* 添加外边距 */
+            border: 1px solid #ccc; /* 边框样式 */
+            border-radius: 4px; /* 边角圆润 */
+            box-sizing: border-box; /* 包括边框和内边距在内的宽度计算 */
+        }
+        input[type="password"] {
+            width: 100%; /* 让输入框宽度填满 */
+            padding: 10px; /* 增加内边距 */
+            margin: 5px 0; /* 添加外边距 */
+            border: 1px solid #ccc; /* 边框样式 */
+            border-radius: 4px; /* 边角圆润 */
+            box-sizing: border-box; /* 包括边框和内边距在内的宽度计算 */
+        }
+    </style>
+</head>
+<body>
+<div id="registerdiv" >
+    <form action="register" method="post" id="form">
+        <h1 id="title">请进行注册</h1>
+        <p id="user">
+            <input type="text" id="username" placeholder="请输入用户名" onfocus="clearPlaceholder(id)" onblur="restorePlaceholder(id)"/>
+        </p>
+        <p id="pass">
+            <input type="password" id="password" placeholder="请输入密码" onfocus="clearPlaceholder(id)" onblur="restorePlaceholder(id)"/>
+        </p>
+        <p id="repass">
+            <input type="password" id="repassword" placeholder="请再次输入密码" onfocus="clearPlaceholder(id)" onblur="restorePlaceholder(id)"/>
+        </p>
+        <div id="subdiv">
+            <input type="submit" class="button" id="注册">
+            <input type="reset" class="button" id="重置">
+            <a href="login">返回登陆</a>
+        </div>
+    </form>
+</div>
+<script>
+    document.getElementById("form").addEventListener('submit', async function (e) {
+        if(!check()){
+            e.preventDefault();
+            return ;
+        }
+        e.preventDefault();
+        var username = document.getElementById('username').value;
+        var password = document.getElementById('password').value;
+        console.log(username)
+        console.log(password)
+        try {
+            const response = await fetch("register", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+            var data = await response.json();
+            console.log(data)
+            alert(data.status_msg);
+            if (response.ok) {
+                setTimeout(() => {
+                    window.location.href = "login";
+                }, 1000);
+            }
+        } catch (error) {
+            console.error("发生错误:", error);
+            alert("发生错误，请重试");
+        }
+    });
+</script>
+</body>
+</html>
