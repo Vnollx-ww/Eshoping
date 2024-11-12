@@ -83,7 +83,7 @@ func Register(ctx context.Context, c *app.RequestContext) {
 func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
 		UserId int64
-		Token  string
+		Token  string `json:"token"`
 	}
 	if err := c.Bind(&reqbody); err != nil {
 		// 如果解析 JSON 失败，返回 400 错误
@@ -95,8 +95,7 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 	}
 	log.Println(reqbody)
 	req := &user.GetUserInfoRequest{
-		UserId: reqbody.UserId,
-		Token:  reqbody.Token,
+		Token: reqbody.Token,
 	}
 	res, _ := rpc.GetUserInfo(ctx, req)
 	if res.StatusCode == -1 {
@@ -116,12 +115,13 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 }
 func UpdateName(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
-		UserId  int64
-		Token   string
-		NewName string
+		UserId  int64  `json:"UserId"`
+		Token   string `json:"token"`
+		NewName string `json:"NewName"`
 	}
 	if err := c.Bind(&reqbody); err != nil {
 		// 如果解析 JSON 失败，返回 400 错误
+		log.Println(err)
 		c.JSON(http.StatusBadRequest, base.Base{
 			StatusCode: http.StatusBadRequest,
 			StatusMsg:  "无效的请求格式",
@@ -153,7 +153,7 @@ func UpdateName(ctx context.Context, c *app.RequestContext) {
 func UpdatePassword(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
 		UserId  int64
-		Token   string
+		Token   string `json:"token"`
 		OldPass string
 		NewPass string
 	}
@@ -191,7 +191,7 @@ func UpdatePassword(ctx context.Context, c *app.RequestContext) {
 func UpdateBalance(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
 		UserId     int64
-		Token      string
+		Token      string `json:"token"`
 		AddBalance int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
@@ -227,7 +227,7 @@ func UpdateBalance(ctx context.Context, c *app.RequestContext) {
 func UpdateCost(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
 		UserId  int64
-		Token   string
+		Token   string `json:"token"`
 		AddCost int64
 	}
 	if err := c.Bind(&reqbody); err != nil {

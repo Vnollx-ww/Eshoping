@@ -3,6 +3,7 @@ package main
 import (
 	"Eshop/dal/db"
 	user "Eshop/kitex_gen/user"
+	"Eshop/pkg/middlerware"
 	"context"
 	"log"
 )
@@ -38,10 +39,20 @@ func (s *UserServiceImpl) UserLogin(ctx context.Context, req *user.UserLoginRequ
 		}
 		return res, nil
 	}
+	token, err := middlerware.NewToken(req.Username)
+	if err != nil {
+		log.Println(err.Error())
+		res := &user.UserLoginResponse{
+			StatusCode: -1,
+			StatusMsg:  "token生成失败",
+		}
+		return res, nil
+	}
 	res := &user.UserLoginResponse{
 		StatusCode: 0,
-		StatusMsg:  "登录成功",
+		StatusMsg:  "欢迎你! " + req.Username,
 		UserId:     int64(usr.ID),
+		Token:      token,
 	}
 	return res, nil
 }
@@ -86,7 +97,17 @@ func (s *UserServiceImpl) UserRegiter(ctx context.Context, req *user.UserRegiste
 
 // GetUserInfo implements the UserServiceImpl interface.
 func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfoRequest) (resp *user.GetUserInfoResponse, err error) {
-	usr, err := db.GetUserByID(ctx, req.UserId)
+	mc, err := middlerware.ParseToken(req.Token)
+	if err != nil || mc == nil {
+		log.Println(err.Error())
+		res := &user.GetUserInfoResponse{
+			StatusCode: -1,
+			StatusMsg:  "token解析失败",
+		}
+		return res, nil
+	}
+	log.Println(mc)
+	usr, err := db.GetUserByName(ctx, mc.Username)
 	log.Println(req)
 	if err != nil {
 		log.Println(err.Error())
@@ -119,7 +140,16 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 
 // UpdateName implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UpdateName(ctx context.Context, req *user.UpdateNameRequest) (resp *user.UpdateNameResponse, err error) {
-	usr, err := db.GetUserByID(ctx, req.UserId)
+	mc, err := middlerware.ParseToken(req.Token)
+	if err != nil || mc == nil {
+		log.Println(err.Error())
+		res := &user.UpdateNameResponse{
+			StatusCode: -1,
+			StatusMsg:  "token解析失败",
+		}
+		return res, nil
+	}
+	usr, err := db.GetUserByName(ctx, mc.Username)
 	log.Println(req)
 	if err != nil {
 		log.Println(err.Error())
@@ -136,7 +166,7 @@ func (s *UserServiceImpl) UpdateName(ctx context.Context, req *user.UpdateNameRe
 		}
 		return res, nil
 	}
-	err = db.UpdateName(ctx, req.UserId, req.Newname_)
+	err = db.UpdateName(ctx, usr, req.Newname_)
 	if err != nil {
 		log.Println(err)
 		res := &user.UpdateNameResponse{

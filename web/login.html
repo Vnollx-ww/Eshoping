@@ -106,8 +106,6 @@
         e.preventDefault();
         var username = document.getElementById("username").value;
         var password = document.getElementById("password").value;
-        console.log(username)
-        console.log(password)
         //var captcha =document.getElementById("captcha").value;
         try {
             const response = await fetch("login", {
@@ -118,10 +116,11 @@
                 body: JSON.stringify({ username, password })
             });//向后端发起请求以json格式
             var data=await response.json()
-            console.log(data)
+            console.log(data.status_msg)
+            localStorage.setItem("token",data.token)
             if (response.ok) {
                 alert("登录成功！")
-                localStorage.setItem('message', data.message);
+                localStorage.setItem('message', data.status_msg);
                 setTimeout(() => {
                     window.location.href = "homepage";//如果返回响应正确，则进入主页面
                 }, 1000);

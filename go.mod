@@ -10,6 +10,7 @@ require (
 	github.com/cloudwego/hertz v0.9.3
 	github.com/cloudwego/kitex v0.11.3
 	github.com/go-sql-driver/mysql v1.8.1
+	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/jinzhu/gorm v1.9.16
 	github.com/kitex-contrib/registry-etcd v0.2.5
 	github.com/spf13/viper v1.19.0

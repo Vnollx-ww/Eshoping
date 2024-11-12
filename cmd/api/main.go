@@ -21,16 +21,16 @@ var (
 func registerGroup(hz *server.Hertz) {
 	hz.GET("/", func(ctx context.Context, c *app.RequestContext) {
 		// 你可以通过 c.File() 返回文件
-		c.File("D:/GolandProgram/Eshop/web/index.html")
+		c.File("D:/GolandProgram/Eshoping/web/index.html")
 	})
 	hz.GET("/login", func(ctx context.Context, c *app.RequestContext) {
-		c.File("D:/GolandProgram/Eshop/web/login.html")
+		c.File("D:/GolandProgram/Eshoping/web/login.html")
 	})
 	hz.GET("/register", func(ctx context.Context, c *app.RequestContext) {
-		c.File("D:/GolandProgram/Eshop/web/register.html")
+		c.File("D:/GolandProgram/Eshoping/web/register.html")
 	})
 	hz.GET("/homepage", func(ctx context.Context, c *app.RequestContext) {
-		c.File("D:/GolandProgram/Eshop/web/homepage.html")
+		c.File("D:/GolandProgram/Eshoping/web/homepage.html")
 	})
 	hz.POST("/register", handler.Register)
 	hz.POST("/login", handler.Login)
@@ -52,7 +52,7 @@ func registerGroup(hz *server.Hertz) {
 
 func main() {
 	hz := server.New(server.WithHostPorts("localhost:8889"))
-	//hz.Static("/images", "./web/images")
+	hz.Static("/images", "./web/images")
 	registerGroup(hz)
 	hz.Spin()
 }

@@ -42,17 +42,14 @@ func GetUserByID(ctx context.Context, ID int64) (*User, error) {
 		return nil, err
 	}
 }
-func UpdateName(ctx context.Context, ID int64, name string) error {
-	user := new(User)
+func UpdateName(ctx context.Context, user *User, name string) error {
 	db := GetDB()
-	//db.Where("user_Id = ?", userId).First(&user)
-	if err := db.Where("ID = ?", ID).First(&user).Error; err == nil {
-		user.UserName = name
-		db.Save(&user)
-		return nil
-	} else {
+	user.UserName = name
+	err := db.Save(&user).Error
+	if err != nil {
 		return err
 	}
+	return nil
 }
 func UpdatePassword(ctx context.Context, ID int64, password string) error {
 	user := new(User)

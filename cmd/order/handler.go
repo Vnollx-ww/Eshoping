@@ -44,20 +44,6 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 		}
 		return res, err
 	}
-	if usr == nil {
-		res := &orderlist.AddOrderResponse{
-			StatusCode: -1,
-			StatusMsg:  "用户不存在",
-		}
-		return res, nil
-	}
-	if usr.Balance < order.Cost {
-		res := &orderlist.AddOrderResponse{
-			StatusCode: -1,
-			StatusMsg:  "余额不足",
-		}
-		return res, nil
-	}
 	pro, er := db.GetProductByName(ctx, ol.ProductName)
 	if er != nil {
 		log.Println(err)
@@ -78,6 +64,20 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 		res := &orderlist.AddOrderResponse{
 			StatusCode: -1,
 			StatusMsg:  "商品库存不足",
+		}
+		return res, nil
+	}
+	if usr == nil {
+		res := &orderlist.AddOrderResponse{
+			StatusCode: -1,
+			StatusMsg:  "用户不存在",
+		}
+		return res, nil
+	}
+	if usr.Balance < order.Cost {
+		res := &orderlist.AddOrderResponse{
+			StatusCode: -1,
+			StatusMsg:  "余额不足",
 		}
 		return res, nil
 	}

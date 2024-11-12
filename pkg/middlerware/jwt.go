@@ -1,4 +1,4 @@
-package jwt
+package middlerware
 
 import (
 	"Eshop/kitex_gen/base"
@@ -20,7 +20,7 @@ type MyClaims struct {
 
 func NewToken(username string) (string, error) {
 	c := MyClaims{
-		"username",
+		username,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -58,7 +58,7 @@ func JWTAuthMiddleware() app.HandlerFunc {
 			Token string `json:"token"` // 假设token在请求体中是 "token" 字段
 		}
 		// 解析请求体
-		if err := c.BindJSON(&requestBody); err != nil {
+		if err := c.Bind(&requestBody); err != nil {
 			c.JSON(http.StatusBadRequest, base.Base{
 				StatusCode: http.StatusBadRequest,
 				StatusMsg:  "请求体格式有误",
