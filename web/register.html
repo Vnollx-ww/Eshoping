@@ -3,27 +3,6 @@
 <head>
     <title>注册</title>
     <script>
-        function clearPlaceholder(id){
-            const Input=document.getElementById(id)
-            if(Input.value!==''){
-                Input.placeholder='';
-            }
-        }
-        function restorePlaceholder(id) {
-            const Input = document.getElementById(id);
-            if (Input.value === '') {
-                if(id==='username')
-                    Input.placeholder = '请输入用户名'; // 恢复 placeholder
-                else if(id==='password')
-                    Input.placeholder = '请输入密码';
-                else if(id==='repassword')
-                    Input.placeholder='请再次输入密码';
-                else if(id==='captcha')
-                    Input.placeholder='请输入验证码'
-            }
-        }
-    </script>
-    <script>
         function check(){
             var username=document.getElementById("username").value;
             var password=document.getElementById("password").value;
@@ -110,13 +89,13 @@
     <form action="register" method="post" id="form">
         <h1 id="title">请进行注册</h1>
         <p id="user">
-            <input type="text" id="username" placeholder="请输入用户名" onfocus="clearPlaceholder(id)" onblur="restorePlaceholder(id)"/>
+            <input type="text" id="username" placeholder="请输入用户名"/>
         </p>
         <p id="pass">
-            <input type="password" id="password" placeholder="请输入密码" onfocus="clearPlaceholder(id)" onblur="restorePlaceholder(id)"/>
+            <input type="password" id="password" placeholder="请输入密码"/>
         </p>
         <p id="repass">
-            <input type="password" id="repassword" placeholder="请再次输入密码" onfocus="clearPlaceholder(id)" onblur="restorePlaceholder(id)"/>
+            <input type="password" id="repassword" placeholder="请再次输入密码"/>
         </p>
         <div id="subdiv">
             <input type="submit" class="button" id="注册">
