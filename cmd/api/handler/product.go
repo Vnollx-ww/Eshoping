@@ -2,11 +2,9 @@ package handler
 
 import (
 	"Eshop/cmd/api/rpc"
-	"Eshop/kitex_gen/base"
 	"Eshop/kitex_gen/product"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
-	"log"
 	"net/http"
 )
 
@@ -15,26 +13,17 @@ func AddProduct(ctx context.Context, c *app.RequestContext) {
 		ProductName string
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "无效的请求格式",
-		})
+		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
-	log.Println(reqbody.ProductName)
 	req := &product.AddProductRequest{
 		Name: reqbody.ProductName,
 	}
 	res, _ := rpc.AddProduct(ctx, req)
 	if res.StatusCode == -1 {
-		log.Println(res)
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: res.StatusCode,
-			StatusMsg:  res.StatusMsg,
-		})
+		BadBaseResponse(c, res.StatusMsg)
 		return
 	}
-	log.Println(res)
 	c.JSON(http.StatusOK, product.AddProductResponse{
 		StatusMsg:  res.StatusMsg,
 		StatusCode: res.StatusCode,
@@ -46,10 +35,7 @@ func DelProduct(ctx context.Context, c *app.RequestContext) {
 		ProductId int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "无效的请求格式",
-		})
+		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
 	req := &product.DelProductRequest{
@@ -57,14 +43,9 @@ func DelProduct(ctx context.Context, c *app.RequestContext) {
 	}
 	res, _ := rpc.DelProduct(ctx, req)
 	if res.StatusCode == -1 {
-		log.Println(res)
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: res.StatusCode,
-			StatusMsg:  res.StatusMsg,
-		})
+		BadBaseResponse(c, res.StatusMsg)
 		return
 	}
-	log.Println(res)
 	c.JSON(http.StatusOK, product.DelProductResponse{
 		StatusMsg:  res.StatusMsg,
 		StatusCode: res.StatusCode,
@@ -76,10 +57,7 @@ func GetProductInfo(ctx context.Context, c *app.RequestContext) {
 		ProductId int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "无效的请求格式",
-		})
+		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
 	req := &product.GetProductInfoRequest{
@@ -87,18 +65,12 @@ func GetProductInfo(ctx context.Context, c *app.RequestContext) {
 	}
 	res, _ := rpc.GetProductInfo(ctx, req)
 	if res == nil {
-		log.Println("不可能")
 		return
 	}
 	if res.StatusCode == -1 {
-		log.Println(res)
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: res.StatusCode,
-			StatusMsg:  res.StatusMsg,
-		})
+		BadBaseResponse(c, res.StatusMsg)
 		return
 	}
-	log.Println(res)
 	c.JSON(http.StatusOK, product.GetProductInfoResponse{
 		StatusMsg:  res.StatusMsg,
 		StatusCode: res.StatusCode,
@@ -111,10 +83,7 @@ func Updatestock(ctx context.Context, c *app.RequestContext) {
 		AddStock  int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "无效的请求格式",
-		})
+		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
 	req := &product.UpdateStockRequest{
@@ -123,14 +92,9 @@ func Updatestock(ctx context.Context, c *app.RequestContext) {
 	}
 	res, _ := rpc.UpdateStock(ctx, req)
 	if res.StatusCode == -1 {
-		log.Println(res)
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: res.StatusCode,
-			StatusMsg:  res.StatusMsg,
-		})
+		BadBaseResponse(c, res.StatusMsg)
 		return
 	}
-	log.Println(res)
 	c.JSON(http.StatusOK, product.UpdateStockResponse{
 		StatusMsg:  res.StatusMsg,
 		StatusCode: res.StatusCode,
@@ -143,27 +107,18 @@ func UpdatePrice(ctx context.Context, c *app.RequestContext) {
 		Price     int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "无效的请求格式",
-		})
+		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
-	log.Println(reqbody)
 	req := &product.UpdatePriceRequest{
 		ProductId: reqbody.ProductId,
 		Newprice_: reqbody.Price,
 	}
 	res, _ := rpc.UpdatePrice(ctx, req)
 	if res.StatusCode == -1 {
-		log.Println(res)
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: res.StatusCode,
-			StatusMsg:  res.StatusMsg,
-		})
+		BadBaseResponse(c, res.StatusMsg)
 		return
 	}
-	log.Println(res)
 	c.JSON(http.StatusOK, product.UpdatePriceResponse{
 		StatusMsg:  res.StatusMsg,
 		StatusCode: res.StatusCode,

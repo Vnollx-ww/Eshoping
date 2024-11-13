@@ -3,8 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        #orderlist {
+            width: 350px;
+            height: 250px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            opacity: 0.8;
+            border-radius: 5px;
+            background-color: lavender;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column; /* 垂直方向排列子元素 */
+            align-items: center;    /* 水平方向居中对齐 */
+        }
+        button {
+            margin: 10px 20px; /* 外边距 */
+            padding: 10px 15px; /* 内边距 */
+            background: linear-gradient(135deg, deepskyblue, dodgerblue); /* 渐变背景 */
+            color: white; /* 字体颜色 */
+            border: none; /* 去掉边框 */
+            border-radius: 8px; /* 圆角 */
+            cursor: pointer; /* 鼠标悬停时显示为可点击 */
+            transition: background 0.3s, transform 0.3s; /* 背景和变换过渡效果 */
+            font-size: 16px; /* 字体大小 */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 阴影 */
+        }
+        button:hover {
+            background: linear-gradient(135deg, dodgerblue, deepskyblue); /* 改变渐变方向 */
+            transform: translateY(-2px); /* 提升效果 */
+        }
+    </style>
 </head>
 <body>
-
+<div id="orderlist">
+    <button id="getorderlist">查询</button>
+    <div id="orderinfo"></div>
+</div>
+<script>
+    document.getElementById("getorderlist").addEventListener("click",async function (){
+        try{
+            const token=localStorage.getItem("token")
+            const response = await fetch("/order/orderlistbyuserid", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({token})
+            });//向后端发起请求以json格式
+            const data=await response.json()
+            var div=document.getElementById("orderinfo")
+            if (response.ok) {
+                div.innerHTML = '';
+                if (Array.isArray(data.orders) && data.orders.length > 0) {
+                    data.orders.forEach(order => {
+                        // 创建一个新的订单容器
+                        var orderDiv = document.createElement("div");
+                        orderDiv.classList.add("order"); // 为每个订单添加类名
+                        var orderSpan = document.createElement("span");
+                        userSpan.textContent = `订单ID: ${order.OrderId}`;
+                        var userSpan = document.createElement("span");
+                        userSpan.textContent = `用户ID: ${order.UserId}`;
+                        var productSpan = document.createElement("span");
+                        productSpan.textContent = `商品: ${order.ProductName}`;
+                        var numberSpan = document.createElement("span");
+                        numberSpan.textContent = `数量: ${order.Number}`;
+                        var costSpan = document.createElement("span");
+                        costSpan.textContent = `价格: ¥${order.Cost}`;
+                        var createtimeSpan = document.createElement("span");
+                        createtimeSpan.textContent = `价格: ¥${order.CreateTime}`;
+                        // 将每个属性按顺序添加到订单容器中
+                        orderDiv.appendChild(orderSpan)
+                        orderDiv.appendChild(userSpan);
+                        orderDiv.appendChild(productSpan);
+                        orderDiv.appendChild(numberSpan);
+                        orderDiv.appendChild(costSpan);
+                        orderDiv.appendChild(createtimeSpan);
+                        // 将这个订单容器添加到#orderinfo中
+                        div.appendChild(orderDiv);
+                    });
+                }else {
+                    div.innerHTML = '<p>没有找到任何订单。</p>'; // 如果没有订单，显示提示
+                }
+            }else{
+                alert(data.statusmsg)
+            }
+        }catch (error){
+            console.error("发生错误:", error);
+            alert("发生错误，请重试");
+        }
+    })
+</script>
 </body>
 </html>

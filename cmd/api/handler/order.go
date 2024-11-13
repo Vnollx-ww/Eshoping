@@ -2,11 +2,9 @@ package handler
 
 import (
 	"Eshop/cmd/api/rpc"
-	"Eshop/kitex_gen/base"
 	"Eshop/kitex_gen/orderlist"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
-	"log"
 	"net/http"
 )
 
@@ -18,10 +16,7 @@ func CreateOrder(ctx context.Context, c *app.RequestContext) {
 		Cost        int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "无效的请求格式",
-		})
+		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
 	ol := &orderlist.Order{
@@ -35,11 +30,7 @@ func CreateOrder(ctx context.Context, c *app.RequestContext) {
 	}
 	res, _ := rpc.CreateOrder(ctx, req)
 	if res.StatusCode == -1 {
-		log.Println(res)
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  res.StatusMsg,
-		})
+		BadBaseResponse(c, res.StatusMsg)
 		return
 	}
 	c.JSON(http.StatusOK, orderlist.AddOrderResponse{
@@ -53,10 +44,7 @@ func DeleteOrder(ctx context.Context, c *app.RequestContext) {
 		OrderId int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "无效的请求格式",
-		})
+		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
 	req := &orderlist.DelOrderRequest{
@@ -64,10 +52,7 @@ func DeleteOrder(ctx context.Context, c *app.RequestContext) {
 	}
 	res, _ := rpc.DeleteOrder(ctx, req)
 	if res.StatusCode == -1 {
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "删除订单失败",
-		})
+		BadBaseResponse(c, res.StatusMsg)
 		return
 	}
 	c.JSON(http.StatusOK, orderlist.DelOrderResponse{
@@ -78,24 +63,18 @@ func DeleteOrder(ctx context.Context, c *app.RequestContext) {
 }
 func GetOrderListByUserID(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
-		UserId int64
+		Token string `json:"token"`
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "无效的请求格式",
-		})
+		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
 	req := &orderlist.GetOrderListByUserIDRequest{
-		UserId: reqbody.UserId,
+		Token: reqbody.Token,
 	}
 	res, _ := rpc.GetOrderListByUserID(ctx, req)
 	if res.StatusCode == -1 {
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "获取用户订单列表失败",
-		})
+		BadBaseResponse(c, res.StatusMsg)
 	}
 	c.JSON(http.StatusOK, orderlist.GetOrderListByUserIDResponse{
 		StatusCode: http.StatusOK,
@@ -108,10 +87,7 @@ func GetOrderListByProductName(ctx context.Context, c *app.RequestContext) {
 		ProductName string
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "无效的请求格式",
-		})
+		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
 	req := &orderlist.GetOrderListByProductNameRequest{
@@ -119,10 +95,7 @@ func GetOrderListByProductName(ctx context.Context, c *app.RequestContext) {
 	}
 	res, _ := rpc.GetOrderListByProductName(ctx, req)
 	if res.StatusCode == -1 {
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "获取商品订单列表失败",
-		})
+		BadBaseResponse(c, res.StatusMsg)
 	}
 	c.JSON(http.StatusOK, orderlist.GetOrderListByProductNameResponse{
 		StatusCode: http.StatusOK,

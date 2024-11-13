@@ -10,23 +10,46 @@ import (
 // ProductServiceImpl implements the last service interface defined in the IDL.
 type ProductServiceImpl struct{}
 
+func BadAddProductResponse(s string) *product.AddProductResponse {
+	return &product.AddProductResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodAddProductResponse(s string, ID int64) *product.AddProductResponse {
+	return &product.AddProductResponse{StatusCode: 200, StatusMsg: s, ProductId: ID}
+}
+func BadGetProductInfoResponse(s string) *product.GetProductInfoResponse {
+	return &product.GetProductInfoResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodGetProductInfoResponse(s string, pro *product.Product) *product.GetProductInfoResponse {
+	return &product.GetProductInfoResponse{StatusCode: 200, StatusMsg: s, Product: pro}
+}
+func BadDelProductResponse(s string) *product.DelProductResponse {
+	return &product.DelProductResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodDelProductResponse(s string, flag bool) *product.DelProductResponse {
+	return &product.DelProductResponse{StatusCode: 200, StatusMsg: s, Succed: flag}
+}
+func BadUpdatePriceResponse(s string) *product.UpdatePriceResponse {
+	return &product.UpdatePriceResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodUpdatePriceResponse(s string, flag bool) *product.UpdatePriceResponse {
+	return &product.UpdatePriceResponse{StatusCode: 200, StatusMsg: s, Succed: flag}
+}
+func BadUpdateStockResponse(s string) *product.UpdateStockResponse {
+	return &product.UpdateStockResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodUpdateStockResponse(s string, flag bool) *product.UpdateStockResponse {
+	return &product.UpdateStockResponse{StatusCode: 200, StatusMsg: s, Succed: flag}
+}
+
 // AddProduct implements the ProductServiceImpl interface.
 func (s *ProductServiceImpl) AddProduct(ctx context.Context, req *product.AddProductRequest) (resp *product.AddProductResponse, err error) {
 	pro, err := db.GetProductByName(ctx, req.Name)
 	if err != nil {
 		log.Println(err)
-		res := &product.AddProductResponse{
-			StatusCode: -1,
-			StatusMsg:  "添加失败，服务器内部错误",
-		}
-		return res, err
+		return BadAddProductResponse("添加失败，服务器内部错误"), err
 	}
 	if pro != nil {
-		res := &product.AddProductResponse{
-			StatusCode: -1,
-			StatusMsg:  "商品已存在",
-		}
-		return res, nil
+		return BadAddProductResponse("商品已存在"), nil
 	}
 	pro = &db.Product{
 		ProductName: req.Name,
@@ -34,38 +57,20 @@ func (s *ProductServiceImpl) AddProduct(ctx context.Context, req *product.AddPro
 	err = db.CreateProduct(ctx, pro)
 	if err != nil {
 		log.Println(err)
-		res := &product.AddProductResponse{
-			StatusCode: -1,
-			StatusMsg:  "添加商品失败",
-		}
-		return res, err
+		return BadAddProductResponse("添加商品失败"), err
 	}
-	res := &product.AddProductResponse{
-		StatusCode: 200,
-		StatusMsg:  "添加商品成功",
-		ProductId:  int64(pro.ID),
-	}
-	return res, nil
+	return GoodAddProductResponse("添加商品成功", int64(pro.ID)), nil
 }
 
 // GetProductInfo implements the ProductServiceImpl interface.
 func (s *ProductServiceImpl) GetProductInfo(ctx context.Context, req *product.GetProductInfoRequest) (resp *product.GetProductInfoResponse, err error) {
-
 	pro, err := db.GetProductByID(ctx, req.Productid)
 	if err != nil {
 		log.Println(err)
-		res := &product.GetProductInfoResponse{
-			StatusCode: -1,
-			StatusMsg:  "获取商品信息失败，服务器内部错误",
-		}
-		return res, err
+		return BadGetProductInfoResponse("获取商品信息失败，服务器内部错误"), err
 	}
 	if pro == nil {
-		res := &product.GetProductInfoResponse{
-			StatusCode: -1,
-			StatusMsg:  "商品不存在",
-		}
-		return res, nil
+		return BadGetProductInfoResponse("商品不存在"), nil
 	}
 	p := &product.Product{
 		Name:  pro.ProductName,
@@ -73,12 +78,7 @@ func (s *ProductServiceImpl) GetProductInfo(ctx context.Context, req *product.Ge
 		Price: pro.Price,
 		Stock: pro.Stock,
 	}
-	res := &product.GetProductInfoResponse{
-		StatusCode: 200,
-		StatusMsg:  "获取商品信息成功",
-		Product:    p,
-	}
-	return res, nil
+	return GoodGetProductInfoResponse("获取商品信息成功", p), nil
 }
 
 // DelProduct implements the ProductServiceImpl interface.
@@ -86,34 +86,17 @@ func (s *ProductServiceImpl) DelProduct(ctx context.Context, req *product.DelPro
 	pro, err := db.GetProductByID(ctx, req.Productid)
 	if err != nil {
 		log.Println(err)
-		res := &product.DelProductResponse{
-			StatusCode: -1,
-			StatusMsg:  "删除商品失败，服务器内部错误",
-		}
-		return res, err
+		return BadDelProductResponse("删除商品失败，服务器内部错误"), err
 	}
 	if pro == nil {
-		res := &product.DelProductResponse{
-			StatusCode: -1,
-			StatusMsg:  "商品不存在",
-		}
-		return res, nil
+		return BadDelProductResponse("商品不存在"), nil
 	}
 	err = db.DeleteProduct(ctx, req.Productid)
 	if err != nil {
 		log.Println(err)
-		res := &product.DelProductResponse{
-			StatusCode: -1,
-			StatusMsg:  "删除商品失败",
-		}
-		return res, nil
+		return BadDelProductResponse("删除商品失败"), nil
 	}
-	res := &product.DelProductResponse{
-		StatusCode: 200,
-		StatusMsg:  "删除商品成功",
-		Succed:     true,
-	}
-	return res, nil
+	return GoodDelProductResponse("删除商品成功", true), nil
 }
 
 // UpdateStock implements the ProductServiceImpl interface.
@@ -121,34 +104,17 @@ func (s *ProductServiceImpl) UpdatePrice(ctx context.Context, req *product.Updat
 	pro, err := db.GetProductByID(ctx, req.ProductId)
 	if err != nil {
 		log.Println(err)
-		res := &product.UpdatePriceResponse{
-			StatusCode: -1,
-			StatusMsg:  "修改商品价格失败，服务器内部错误",
-		}
-		return res, nil
+		return BadUpdatePriceResponse("修改商品价格失败，服务器内部错误"), nil
 	}
 	if pro == nil {
-		res := &product.UpdatePriceResponse{
-			StatusCode: -1,
-			StatusMsg:  "商品不存在",
-		}
-		return res, nil
+		return BadUpdatePriceResponse("商品不存在"), nil
 	}
 	err = db.UpdatePrice(ctx, req.ProductId, req.Newprice_)
 	if err != nil {
 		log.Println(err)
-		res := &product.UpdatePriceResponse{
-			StatusCode: -1,
-			StatusMsg:  "修改商品价格失败",
-		}
-		return res, nil
+		return BadUpdatePriceResponse("修改商品价格失败"), nil
 	}
-	res := &product.UpdatePriceResponse{
-		StatusCode: 200,
-		StatusMsg:  "修改商品价格成功",
-		Succed:     true,
-	}
-	return res, nil
+	return GoodUpdatePriceResponse("修改商品价格成功", true), nil
 }
 
 // UpdateStock implements the ProductServiceImpl interface.
@@ -156,31 +122,15 @@ func (s *ProductServiceImpl) UpdateStock(ctx context.Context, req *product.Updat
 	pro, err := db.GetProductByID(ctx, req.ProductId)
 	if err != nil {
 		log.Println(err)
-		res := &product.UpdateStockResponse{
-			StatusCode: -1,
-			StatusMsg:  "修改商品库存失败，服务器内部错误",
-		}
-		return res, nil
+		return BadUpdateStockResponse("修改商品库存失败，服务器内部错误"), nil
 	}
 	if pro == nil {
-		res := &product.UpdateStockResponse{
-			StatusCode: -1,
-			StatusMsg:  "商品不存在",
-		}
-		return res, nil
+		return BadUpdateStockResponse("商品不存在"), nil
 	}
 	err = db.UpdateStock(ctx, req.ProductId, req.Addstock)
 	if err != nil {
 		log.Println(err)
-		res := &product.UpdateStockResponse{
-			StatusCode: -1,
-			StatusMsg:  "修改商品库存失败",
-		}
-		return res, nil
+		return BadUpdateStockResponse("修改商品库存失败"), nil
 	}
-	res := &product.UpdateStockResponse{
-		StatusCode: 200,
-		StatusMsg:  "修改商品库存成功",
-	}
-	return res, nil
+	return GoodUpdateStockResponse("修改商品库存成功", true), nil
 }

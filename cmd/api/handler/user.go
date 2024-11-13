@@ -2,7 +2,6 @@ package handler
 
 import (
 	"Eshop/cmd/api/rpc"
-	"Eshop/kitex_gen/base"
 	"Eshop/kitex_gen/user"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
@@ -10,12 +9,6 @@ import (
 	"net/http"
 )
 
-func BadBaseResponse(c *app.RequestContext, s string) {
-	c.JSON(http.StatusBadRequest, base.Base{
-		StatusCode: http.StatusBadRequest,
-		StatusMsg:  s,
-	})
-}
 func Login(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
 		Username string
