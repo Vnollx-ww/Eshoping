@@ -11,88 +11,87 @@ import (
 // UserServiceImpl implements the last service interface defined in the IDL.
 type UserServiceImpl struct{}
 
+func BadLoginResponse(s string) *user.UserLoginResponse {
+	return &user.UserLoginResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodLoginResponse(s string, token string, ID int64) *user.UserLoginResponse {
+	return &user.UserLoginResponse{StatusCode: 200, StatusMsg: s, Token: token}
+}
+func BadRegisterResponse(s string) *user.UserRegisterResponse {
+	return &user.UserRegisterResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodRegisterResponse(s string, ID int64) *user.UserRegisterResponse {
+	return &user.UserRegisterResponse{StatusCode: 200, StatusMsg: s, UserId: ID}
+}
+func BadGetUserInfoResponse(s string) *user.GetUserInfoResponse {
+	return &user.GetUserInfoResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodGetUserInfoResponse(s string, usr *user.User) *user.GetUserInfoResponse {
+	return &user.GetUserInfoResponse{StatusCode: 200, StatusMsg: s, User: usr}
+}
+func BadUpdateNameResponse(s string) *user.UpdateNameResponse {
+	return &user.UpdateNameResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodUpdateNameResponse(s string, flag bool) *user.UpdateNameResponse {
+	return &user.UpdateNameResponse{StatusCode: 200, StatusMsg: s, Succed: flag}
+}
+func BadUpdatePasswordResponse(s string) *user.UpdatePasswordResponse {
+	return &user.UpdatePasswordResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodUpdatePasswordResponse(s string, flag bool) *user.UpdatePasswordResponse {
+	return &user.UpdatePasswordResponse{StatusCode: 200, StatusMsg: s, Succed: flag}
+}
+func BadUpdateCostResponse(s string) *user.UpdateCostResponse {
+	return &user.UpdateCostResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodUpdateCostResponse(s string, flag bool) *user.UpdateCostResponse {
+	return &user.UpdateCostResponse{StatusCode: 200, StatusMsg: s, Succed: flag}
+}
+func BadUpdateBalanceResponse(s string) *user.UpdateBalanceResponse {
+	return &user.UpdateBalanceResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodUpdateBalanceResponse(s string, flag bool) *user.UpdateBalanceResponse {
+	return &user.UpdateBalanceResponse{StatusCode: 200, StatusMsg: s, Succed: flag}
+}
+
 // UserLogin implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UserLogin(ctx context.Context, req *user.UserLoginRequest) (resp *user.UserLoginResponse, err error) {
-	log.Println(req)
 	usr, err := db.GetUserByName(ctx, req.Username)
 	if err != nil {
 		log.Println(err.Error())
-		res := &user.UserLoginResponse{
-			StatusCode: -1,
-			StatusMsg:  "登录失败：服务器内部错误",
-		}
-		return res, nil
+		return BadLoginResponse("登录失败；服务器内部错误"), nil
 	}
 	if usr == nil {
-		res := &user.UserLoginResponse{
-			StatusCode: -1,
-			StatusMsg:  "用户不存在",
-		}
-		log.Println(res)
-		return res, nil
+		return BadLoginResponse("用户不存在"), nil
 	}
 	if req.Password != usr.Password {
-		log.Println("用户名或密码错误")
-		res := &user.UserLoginResponse{
-			StatusCode: -1,
-			StatusMsg:  "用户名或密码错误",
-		}
-		return res, nil
+		return BadLoginResponse("密码错误"), nil
 	}
 	token, err := middlerware.NewToken(int64(usr.ID))
 	if err != nil {
 		log.Println(err.Error())
-		res := &user.UserLoginResponse{
-			StatusCode: -1,
-			StatusMsg:  "token生成失败",
-		}
-		return res, nil
+		return BadLoginResponse("Token生成失败"), nil
 	}
-	res := &user.UserLoginResponse{
-		StatusCode: 0,
-		StatusMsg:  "欢迎你! " + req.Username,
-		UserId:     int64(usr.ID),
-		Token:      token,
-	}
-	return res, nil
+	return GoodLoginResponse("欢迎你！ "+req.Username, token, int64(usr.ID)), nil
 }
 
 // UserRegiter implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UserRegiter(ctx context.Context, req *user.UserRegisterRequest) (resp *user.UserRegisterResponse, err error) {
 	usr, err := db.GetUserByName(ctx, req.Username)
-	log.Println(req)
 	if err != nil {
 		log.Println(err.Error())
-		res := &user.UserRegisterResponse{
-			StatusCode: -1,
-			StatusMsg:  "注册失败：服务器内部错误",
-		}
-		return res, nil
+		return BadRegisterResponse("注册失败：服务器内部错误"), nil
 	}
 	if usr != nil {
-		res := &user.UserRegisterResponse{
-			StatusCode: -1,
-			StatusMsg:  "用户已存在",
-		}
-		return res, nil
+		return BadRegisterResponse("用户已存在"), nil
 	}
 	usr = &db.User{UserName: req.Username, Password: req.Password}
-	log.Println(usr)
 	err = db.CreateUser(ctx, usr)
 	if err != nil {
 		log.Println(err.Error())
-		res := &user.UserRegisterResponse{
-			StatusCode: -1,
-			StatusMsg:  "注册失败",
-		}
-		return res, nil
+		return BadRegisterResponse("注册失败"), nil
 	}
-	res := &user.UserRegisterResponse{
-		StatusCode: 0,
-		StatusMsg:  "注册成功",
-		UserId:     int64(usr.ID),
-	}
-	return res, nil
+	return GoodRegisterResponse("注册成功", int64(usr.ID)), nil
 }
 
 // GetUserInfo implements the UserServiceImpl interface.
@@ -100,42 +99,18 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil || mc == nil {
 		log.Println(err.Error())
-		res := &user.GetUserInfoResponse{
-			StatusCode: -1,
-			StatusMsg:  "token解析失败",
-		}
-		return res, nil
+		return BadGetUserInfoResponse("token解析失败"), nil
 	}
-	log.Println(mc)
 	usr, err := db.GetUserByID(ctx, mc.UserId)
-	log.Println(req)
 	if err != nil {
 		log.Println(err.Error())
-		res := &user.GetUserInfoResponse{
-			StatusCode: -1,
-			StatusMsg:  "获取用户信息失败：服务器内部错误",
-		}
-		return res, nil
+		return BadGetUserInfoResponse("获取用户信息失败：服务器内部错误"), nil
 	}
 	if usr == nil {
-		res := &user.GetUserInfoResponse{
-			StatusCode: -1,
-			StatusMsg:  "用户不存在",
-		}
-		return res, nil
+		return BadGetUserInfoResponse("用户不存在"), nil
 	}
-	u := &user.User{
-		Name:    usr.UserName,
-		Id:      int64(usr.ID),
-		Balance: usr.Balance,
-		Cost:    usr.Cost,
-	}
-	res := &user.GetUserInfoResponse{
-		StatusCode: 0,
-		StatusMsg:  "获取用户信息成功",
-		User:       u,
-	}
-	return res, nil
+	u := &user.User{Name: usr.UserName, Id: int64(usr.ID), Balance: usr.Balance, Cost: usr.Cost}
+	return GoodGetUserInfoResponse("获取用户信息成功", u), nil
 }
 
 // UpdateName implements the UserServiceImpl interface.
@@ -143,177 +118,91 @@ func (s *UserServiceImpl) UpdateName(ctx context.Context, req *user.UpdateNameRe
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil || mc == nil {
 		log.Println(err.Error())
-		res := &user.UpdateNameResponse{
-			StatusCode: -1,
-			StatusMsg:  "token解析失败",
-		}
-		return res, nil
+		return BadUpdateNameResponse("token解析失败"), nil
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
-	log.Println(req)
 	if err != nil {
 		log.Println(err.Error())
-		res := &user.UpdateNameResponse{
-			StatusCode: -1,
-			StatusMsg:  "获取用户信息失败：服务器内部错误",
-		}
-		return res, nil
+		return BadUpdateNameResponse("获取用户信息失败：服务器内部错误"), nil
 	}
 	if usr == nil {
-		res := &user.UpdateNameResponse{
-			StatusCode: -1,
-			StatusMsg:  "用户不存在",
-		}
-		return res, nil
+		return BadUpdateNameResponse("用户不存在"), nil
 	}
 	err = db.UpdateName(ctx, usr, req.Newname_)
 	if err != nil {
 		log.Println(err)
-		res := &user.UpdateNameResponse{
-			StatusCode: 0,
-			StatusMsg:  "修改用户名失败",
-			Succed:     false,
-		}
-		return res, nil
+		return BadUpdateNameResponse("修改用户名失败"), nil
 	}
-	res := &user.UpdateNameResponse{
-		StatusCode: 0,
-		StatusMsg:  "欢迎你！" + usr.UserName,
-		Succed:     true,
-	}
-	return res, nil
+	return GoodUpdateNameResponse("欢迎你！"+usr.UserName, true), nil
 }
 
 // UpdatePassword implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UpdatePassword(ctx context.Context, req *user.UpdatePasswordRequest) (resp *user.UpdatePasswordResponse, err error) {
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
-		res := &user.UpdatePasswordResponse{
-			StatusCode: -1,
-			StatusMsg:  "token解析失败",
-		}
-		return res, nil
+		return BadUpdatePasswordResponse("token解析失败"), nil
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
-	//log.Println(req)
 	if err != nil {
 		log.Println(err.Error())
-		res := &user.UpdatePasswordResponse{
-			StatusCode: -1,
-			StatusMsg:  "获取用户信息失败：服务器内部错误",
-		}
-		return res, nil
+		return BadUpdatePasswordResponse("获取用户信息失败：服务器内部错误"), nil
 	}
 	if usr == nil {
-		res := &user.UpdatePasswordResponse{
-			StatusCode: -1,
-			StatusMsg:  "用户不存在",
-		}
-		return res, nil
+		return BadUpdatePasswordResponse("用户不存在"), nil
 	}
 	if usr.Password != req.Oldpassword {
-		res := &user.UpdatePasswordResponse{
-			StatusCode: -1,
-			StatusMsg:  "用户旧密码错误",
-		}
-		return res, nil
+		return BadUpdatePasswordResponse("用户旧密码错误"), nil
 	}
 	err = db.UpdatePassword(ctx, usr, req.Newpassword_)
 	if err != nil {
 		log.Println(err)
-		res := &user.UpdatePasswordResponse{
-			StatusCode: 0,
-			StatusMsg:  "修改密码失败",
-			Succed:     false,
-		}
-		return res, nil
+		return BadUpdatePasswordResponse("修改密码失败"), nil
 	}
-	res := &user.UpdatePasswordResponse{
-		StatusCode: 0,
-		StatusMsg:  "修改密码成功",
-		Succed:     true,
-	}
-	return res, nil
+	return GoodUpdatePasswordResponse("修改密码成功", true), nil
 }
 
 // UpdateCost implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UpdateCost(ctx context.Context, req *user.UpdateCostRequest) (resp *user.UpdateCostResponse, err error) {
-	usr, err := db.GetUserByID(ctx, req.UserId)
-	log.Println(req)
+	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
 		log.Println(err.Error())
-		res := &user.UpdateCostResponse{
-			StatusCode: -1,
-			StatusMsg:  "获取用户信息失败：服务器内部错误",
-		}
-		return res, nil
+		return BadUpdateCostResponse("token解析失败"), nil
+	}
+	usr, err := db.GetUserByID(ctx, mc.UserId)
+	if err != nil {
+		log.Println(err.Error())
+		return BadUpdateCostResponse("获取用户信息失败：服务器内部错误"), nil
 	}
 	if usr == nil {
-		res := &user.UpdateCostResponse{
-			StatusCode: -1,
-			StatusMsg:  "用户不存在",
-		}
-		return res, nil
+		return BadUpdateCostResponse("用户不存在"), nil
 	}
-	err = db.UpdateCost(ctx, req.UserId, req.Addcost)
+	err = db.UpdateCost(ctx, usr, req.Addcost)
 	if err != nil {
-		log.Println(err)
-		res := &user.UpdateCostResponse{
-			StatusCode: 0,
-			StatusMsg:  "修改花费失败",
-			Succed:     false,
-		}
-		return res, nil
+		log.Println(err.Error())
+		return BadUpdateCostResponse("修改花费失败"), nil
 	}
-	res := &user.UpdateCostResponse{
-		StatusCode: 0,
-		StatusMsg:  "修改花费成功",
-		Succed:     true,
-	}
-	return res, nil
+	return GoodUpdateCostResponse("修改花费成功", true), nil
 }
 
 // UpdateBalance implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UpdateBalance(ctx context.Context, req *user.UpdateBalanceRequest) (resp *user.UpdateBalanceResponse, err error) {
 	mc, err := middlerware.ParseToken(req.Token)
+	if err != nil {
+		log.Println(err.Error())
+		return BadUpdateBalanceResponse("token解析失败"), nil
+	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
 		log.Println(err.Error())
-		res := &user.UpdateBalanceResponse{
-			StatusCode: -1,
-			StatusMsg:  "token解析失败",
-		}
-		return res, nil
-	}
-	if err != nil {
-		log.Println(err.Error())
-		res := &user.UpdateBalanceResponse{
-			StatusCode: -1,
-			StatusMsg:  "获取用户信息失败：服务器内部错误",
-		}
-		return res, nil
+		return BadUpdateBalanceResponse("获取用户信息失败：服务器内部错误"), nil
 	}
 	if usr == nil {
-		res := &user.UpdateBalanceResponse{
-			StatusCode: -1,
-			StatusMsg:  "用户不存在",
-		}
-		return res, nil
+		return BadUpdateBalanceResponse("用户不存在"), nil
 	}
 	err = db.UpdateBalance(ctx, usr, req.Addbalance)
 	if err != nil {
-		//log.Println(err)
-		res := &user.UpdateBalanceResponse{
-			StatusCode: -1,
-			StatusMsg:  "修改余额失败",
-			Succed:     false,
-		}
-		return res, nil
+		log.Println(err.Error())
+		return BadUpdateBalanceResponse("修改余额失败"), nil
 	}
-	res := &user.UpdateBalanceResponse{
-		StatusCode: 0,
-		StatusMsg:  "修改余额成功",
-		Succed:     true,
-	}
-	return res, nil
+	return GoodUpdateBalanceResponse("修改余额成功", true), nil
 }

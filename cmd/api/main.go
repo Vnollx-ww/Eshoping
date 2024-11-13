@@ -49,22 +49,31 @@ func LoadHtml(hz *server.Hertz) {
 	})
 }
 func registerGroup(hz *server.Hertz) {
-	hz.POST("/register", handler.Register)
-	hz.POST("/login", handler.Login)
-	hz.POST("/userinfo", handler.GetUserInfo)
-	hz.POST("/updatename", handler.UpdateName)
-	hz.POST("/updatepassword", handler.UpdatePassword)
-	hz.POST("/updatecost", handler.UpdateCost)
-	hz.POST("/updatebalance", handler.UpdateBalance)
-	hz.POST("/addproduct", handler.AddProduct)
-	hz.POST("/delproduct", handler.DelProduct)
-	hz.POST("/productinfo", handler.GetProductInfo)
-	hz.POST("/updatestock", handler.Updatestock)
-	hz.POST("/updateprice", handler.UpdatePrice)
-	hz.POST("/createorder", handler.CreateOrder)
-	hz.POST("/deleteorder", handler.DeleteOrder)
-	hz.POST("/orderlistbyuserid", handler.GetOrderListByUserID)
-	hz.POST("/orderlistbyproductname", handler.GetOrderListByProductName)
+	user := hz.Group("/user")
+	{
+		user.POST("/register", handler.Register)
+		user.POST("/login", handler.Login)
+		user.POST("/getuserinfo", handler.GetUserInfo)
+		user.POST("/updatepassword", handler.UpdatePassword)
+		user.POST("/updatename", handler.UpdateName)
+		user.POST("/updatecost", handler.UpdateCost)
+		user.POST("/updatebalance", handler.UpdateBalance)
+	}
+	product := hz.Group("/product")
+	{
+		product.POST("/addproduct", handler.AddProduct)
+		product.POST("/deleteproduct", handler.DelProduct)
+		product.POST("/getproductinfo", handler.GetProductInfo)
+		product.POST("/updatestock", handler.Updatestock)
+		product.POST("/updateprice", handler.UpdatePrice)
+	}
+	order := hz.Group("/order")
+	{
+		order.POST("/addorder", handler.CreateOrder)
+		order.POST("/deleteorder", handler.DeleteOrder)
+		order.POST("/orderlistbyuserid", handler.GetOrderListByUserID)
+		order.POST("/orderlistbyproductname", handler.GetOrderListByProductName)
+	}
 }
 
 func main() {

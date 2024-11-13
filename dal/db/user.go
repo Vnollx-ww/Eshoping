@@ -66,19 +66,15 @@ func UpdateBalance(ctx context.Context, usr *User, addbalance int64) error {
 	err := db.Save(&usr).Error
 	if err != nil {
 		return err
-
 	}
 	return nil
-
 }
-func UpdateCost(ctx context.Context, ID int64, addcost int64) error {
-	user := new(User)
+func UpdateCost(ctx context.Context, usr *User, addcost int64) error {
 	db := GetDB()
-	if err := db.Where("ID = ?", ID).First(&user).Error; err == nil {
-		user.Cost += addcost
-		db.Save(&user)
-		return nil
-	} else {
+	usr.Cost += addcost
+	err := db.Save(&usr).Error
+	if err != nil {
 		return err
 	}
+	return nil
 }

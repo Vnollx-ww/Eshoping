@@ -67,7 +67,7 @@
 </head>
 <body>
 <div id="recharge">
-    <form action="updatebalance" method="post" id="form">
+    <form action="/user/updatebalance" method="post" id="form">
         <h1>充值</h1>
         <input type="text" id="balance" placeholder="请输入金额"/>
         <div id="subdiv">
@@ -75,9 +75,6 @@
         </div>
     </form>
 </div>
-<script>
-    console.log(localStorage.getItem("token"))
-</script>
 <script>
     document.getElementById("form").addEventListener('submit', async function (e) {//为表单添加监听者
         if(!check()){//先检验是否为空
@@ -88,10 +85,8 @@
         var balance = document.getElementById("balance").value;
         balance = parseInt(balance, 10)
         var token=localStorage.getItem("token")
-        console.log(token)
-        console.log(balance)
         try {
-            const response = await fetch("updatebalance", {
+            const response = await fetch("/user/updatebalance", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

@@ -86,7 +86,7 @@
 </head>
 <body>
 <div id="registerdiv" >
-    <form action="register" method="post" id="form">
+    <form action="/user/register" method="post" id="form">
         <h1 id="title">请进行注册</h1>
         <p id="user">
             <input type="text" id="username" placeholder="请输入用户名"/>
@@ -113,10 +113,8 @@
         e.preventDefault();
         var username = document.getElementById('username').value;
         var password = document.getElementById('password').value;
-        console.log(username)
-        console.log(password)
         try {
-            const response = await fetch("register", {
+            const response = await fetch("/user/register", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -124,7 +122,6 @@
                 body: JSON.stringify({ username, password })
             });
             var data = await response.json();
-            console.log(data)
             alert(data.status_msg);
             if (response.ok) {
                 setTimeout(() => {

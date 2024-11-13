@@ -10,34 +10,30 @@ import (
 	"net/http"
 )
 
+func BadBaseResponse(c *app.RequestContext, s string) {
+	c.JSON(http.StatusBadRequest, base.Base{
+		StatusCode: http.StatusBadRequest,
+		StatusMsg:  s,
+	})
+}
 func Login(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
 		Username string
 		Password string
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		// 如果解析 JSON 失败，返回 400 错误
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "无效的请求格式",
-		})
+		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
-	log.Println(reqbody)
 	req := &user.UserLoginRequest{
 		Username: reqbody.Username,
 		Password: reqbody.Password,
 	}
 	res, _ := rpc.Login(ctx, req)
 	if res.StatusCode == -1 {
-		log.Println(res)
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: res.StatusCode,
-			StatusMsg:  res.StatusMsg,
-		})
+		BadBaseResponse(c, res.StatusMsg)
 		return
 	}
-	log.Println(res)
 	c.JSON(http.StatusOK, user.UserLoginResponse{
 		UserId:     res.UserId,
 		Token:      res.Token,
@@ -51,28 +47,18 @@ func Register(ctx context.Context, c *app.RequestContext) {
 		Password string
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		// 如果解析 JSON 失败，返回 400 错误
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "无效的请求格式",
-		})
+		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
-	log.Println(reqbody)
 	req := &user.UserRegisterRequest{
 		Username: reqbody.Username,
 		Password: reqbody.Password,
 	}
 	res, _ := rpc.Register(ctx, req)
 	if res.StatusCode == -1 {
-		log.Println(res)
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: res.StatusCode,
-			StatusMsg:  res.StatusMsg,
-		})
+		BadBaseResponse(c, res.StatusMsg)
 		return
 	}
-	log.Println(res)
 	c.JSON(http.StatusOK, user.UserLoginResponse{
 		UserId:     res.UserId,
 		Token:      res.Token,
@@ -86,27 +72,17 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 		Token  string `json:"token"`
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		// 如果解析 JSON 失败，返回 400 错误
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "无效的请求格式",
-		})
+		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
-	log.Println(reqbody)
 	req := &user.GetUserInfoRequest{
 		Token: reqbody.Token,
 	}
 	res, _ := rpc.GetUserInfo(ctx, req)
 	if res.StatusCode == -1 {
-		log.Println(res)
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: res.StatusCode,
-			StatusMsg:  res.StatusMsg,
-		})
+		BadBaseResponse(c, res.StatusMsg)
 		return
 	}
-	log.Println(res)
 	c.JSON(http.StatusOK, user.GetUserInfoResponse{
 		StatusMsg:  res.StatusMsg,
 		StatusCode: res.StatusCode,
@@ -119,17 +95,11 @@ func UpdateName(ctx context.Context, c *app.RequestContext) {
 		Token   string `json:"token"`
 		NewName string `json:"newname"`
 	}
-	//log.Println(c.Request.Body())
 	if err := c.Bind(&reqbody); err != nil {
-		// 如果解析 JSON 失败，返回 400 错误
 		log.Println(err)
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "无效的请求格式",
-		})
+		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
-	log.Println(reqbody)
 	req := &user.UpdateNameRequest{
 		UserId:   reqbody.UserId,
 		Token:    reqbody.Token,
@@ -137,14 +107,9 @@ func UpdateName(ctx context.Context, c *app.RequestContext) {
 	}
 	res, _ := rpc.UpdateName(ctx, req)
 	if res.StatusCode == -1 {
-		log.Println(res)
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: res.StatusCode,
-			StatusMsg:  res.StatusMsg,
-		})
+		BadBaseResponse(c, res.StatusMsg)
 		return
 	}
-	log.Println(res)
 	c.JSON(http.StatusOK, user.UpdateNameResponse{
 		StatusMsg:  res.StatusMsg,
 		StatusCode: res.StatusCode,
@@ -159,14 +124,9 @@ func UpdatePassword(ctx context.Context, c *app.RequestContext) {
 		NewPass string `json:"newpassword"`
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		// 如果解析 JSON 失败，返回 400 错误
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "无效的请求格式",
-		})
+		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
-	log.Println(reqbody)
 	req := &user.UpdatePasswordRequest{
 		UserId:       reqbody.UserId,
 		Token:        reqbody.Token,
@@ -175,14 +135,9 @@ func UpdatePassword(ctx context.Context, c *app.RequestContext) {
 	}
 	res, _ := rpc.UpdatePassword(ctx, req)
 	if res.StatusCode == -1 {
-		log.Println(res)
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: res.StatusCode,
-			StatusMsg:  res.StatusMsg,
-		})
+		BadBaseResponse(c, res.StatusMsg)
 		return
 	}
-	log.Println(res)
 	c.JSON(http.StatusOK, user.UpdatePasswordResponse{
 		StatusMsg:  res.StatusMsg,
 		StatusCode: res.StatusCode,
@@ -196,11 +151,7 @@ func UpdateBalance(ctx context.Context, c *app.RequestContext) {
 		AddBalance int64  `json:"balance"`
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		// 如果解析 JSON 失败，返回 400 错误
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "无效的请求格式",
-		})
+		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
 	req := &user.UpdateBalanceRequest{
@@ -208,17 +159,11 @@ func UpdateBalance(ctx context.Context, c *app.RequestContext) {
 		Token:      reqbody.Token,
 		Addbalance: reqbody.AddBalance,
 	}
-	log.Println(reqbody.Token)
 	res, _ := rpc.UpdateBalance(ctx, req)
 	if res.StatusCode == -1 {
-		log.Println(res)
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: res.StatusCode,
-			StatusMsg:  res.StatusMsg,
-		})
+		BadBaseResponse(c, res.StatusMsg)
 		return
 	}
-	log.Println(res)
 	c.JSON(http.StatusOK, user.UpdateBalanceResponse{
 		StatusMsg:  res.StatusMsg,
 		StatusCode: res.StatusCode,
@@ -232,14 +177,9 @@ func UpdateCost(ctx context.Context, c *app.RequestContext) {
 		AddCost int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		// 如果解析 JSON 失败，返回 400 错误
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: http.StatusBadRequest,
-			StatusMsg:  "无效的请求格式",
-		})
+		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
-	log.Println(reqbody)
 	req := &user.UpdateCostRequest{
 		UserId:  reqbody.UserId,
 		Token:   reqbody.Token,
@@ -247,14 +187,9 @@ func UpdateCost(ctx context.Context, c *app.RequestContext) {
 	}
 	res, _ := rpc.UpdateCost(ctx, req)
 	if res.StatusCode == -1 {
-		log.Println(res)
-		c.JSON(http.StatusBadRequest, base.Base{
-			StatusCode: res.StatusCode,
-			StatusMsg:  res.StatusMsg,
-		})
+		BadBaseResponse(c, res.StatusMsg)
 		return
 	}
-	log.Println(res)
 	c.JSON(http.StatusOK, user.UpdateCostResponse{
 		StatusMsg:  res.StatusMsg,
 		StatusCode: res.StatusCode,

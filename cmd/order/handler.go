@@ -8,7 +8,6 @@ import (
 	"Eshop/kitex_gen/user"
 	"Eshop/kitex_gen/user/userservice"
 	"context"
-	"github.com/cloudwego/kitex/client"
 	"log"
 )
 
@@ -16,13 +15,6 @@ import (
 type OrderListServiceImpl struct {
 	usrcli userservice.Client
 	procli productservice.Client
-}
-
-func NewUserClient(addr string) (userservice.Client, error) {
-	return userservice.NewClient("user", client.WithHostPorts(addr))
-}
-func NewProductClient(addr string) (productservice.Client, error) {
-	return productservice.NewClient("product", client.WithHostPorts(addr))
 }
 
 // AddOrder implements the OrderListServiceImpl interface.

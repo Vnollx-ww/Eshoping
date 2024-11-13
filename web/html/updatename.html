@@ -68,7 +68,7 @@
 </head>
 <body>
 <div id="updatename">
-    <form action="updatename" method="post" id="form">
+    <form action="/user/updatename" method="post" id="form">
         <h1>修改用户名</h1>
         <input type="text" id="rename" placeholder="请输入新用户名"/>
         <div id="subdiv">
@@ -76,9 +76,6 @@
         </div>
     </form>
 </div>
-<script>
-    console.log(localStorage.getItem("token"))
-</script>
 <script>
     document.getElementById("form").addEventListener('submit', async function (e) {//为表单添加监听者
         if(!check()){//先检验是否为空
@@ -88,10 +85,8 @@
         e.preventDefault();
         var newname = document.getElementById("rename").value;
         var token=localStorage.getItem("token")
-        console.log(token)
-        console.log(newname)
         try {
-            const response = await fetch("updatename", {
+            const response = await fetch("/user/updatename", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

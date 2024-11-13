@@ -14,13 +14,10 @@ import (
 )
 
 var (
-	config        = viper.Init("order")
-	userconfig    = viper.Init("user")
-	productconfig = viper.Init("product")
-	serviceName   = config.Viper.GetString("server.name")
-	serviceAddr   = fmt.Sprintf("%s:%d", config.Viper.GetString("server.host"), config.Viper.GetInt("server.port"))
-	etcdAddr      = fmt.Sprintf("%s:%d", config.Viper.GetString("etcd.host"), config.Viper.GetInt("etcd.port"))
-	//signingKey  = config.Viper.GetString("JWT.signingKey")
+	config      = viper.Init("order")
+	serviceName = config.Viper.GetString("server.name")
+	serviceAddr = fmt.Sprintf("%s:%d", config.Viper.GetString("server.host"), config.Viper.GetInt("server.port"))
+	etcdAddr    = fmt.Sprintf("%s:%d", config.Viper.GetString("etcd.host"), config.Viper.GetInt("etcd.port"))
 )
 
 func main() {

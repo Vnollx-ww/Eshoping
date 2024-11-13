@@ -109,8 +109,7 @@
     document.getElementById('fetchUserInfo').addEventListener('click', async function() {
         try {
             const token=localStorage.getItem("token")
-            console.log(token)
-            const response = await fetch("userinfo", {
+            const response = await fetch("/user/getuserinfo", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -118,8 +117,6 @@
                 body: JSON.stringify({ token })
             });//向后端发起请求以json格式
             const data=await response.json()
-            t=localStorage.getItem("token")
-            console.log(t); // 输出整个数据对象
             if (response.ok) {
                 const userInfoDiv = document.getElementById('userinfo');
                 userInfoDiv.innerHTML = `用户名: ${data.user.name}<br>用户ID: ${data.user.id}<br>用户余额: ${data.user.balance}<br>用户消费: ${data.user.cost}`;
@@ -132,24 +129,23 @@
             alert("发生错误，请重试");
         }
     });
-    document.getElementById('Shoping').addEventListener('click', async function() {
-        window.location.href = "shop";
+</script>
+<script>
+    document.getElementById('Recharge').addEventListener('click', async function() {
+        window.location.href = "recharge";
     });
     document.getElementById('updatename').addEventListener('click', async function() {
         window.location.href = "updatename";
     });
-    document.getElementById('fetchOrderListInfo').addEventListener('click',async function(){
-        window.location.href = "getorderlist";
-    })
     document.getElementById('updatepassword').addEventListener('click',async function(){
         window.location.href = "updatepassword";
     })
-</script>
-<script>
-    document.getElementById('Recharge').addEventListener('click', async function() {
-        console.log(localStorage.getItem("token"))
-        window.location.href = "recharge";
+    document.getElementById('Shoping').addEventListener('click', async function() {
+        window.location.href = "shop";
     });
+    document.getElementById('fetchOrderListInfo').addEventListener('click',async function(){
+        window.location.href = "getorderlist";
+    })
 </script>
 </body>
 </html>
