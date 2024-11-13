@@ -18,20 +18,37 @@ var (
 	serverTLSCert = apiConfig.Viper.GetString("Hertz.tls.certFile")
 )
 
-func registerGroup(hz *server.Hertz) {
+func LoadHtml(hz *server.Hertz) {
 	hz.GET("/", func(ctx context.Context, c *app.RequestContext) {
 		// 你可以通过 c.File() 返回文件
-		c.File("D:/GolandProgram/Eshoping/web/index.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/index.html")
 	})
 	hz.GET("/login", func(ctx context.Context, c *app.RequestContext) {
-		c.File("D:/GolandProgram/Eshoping/web/login.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/login.html")
 	})
 	hz.GET("/register", func(ctx context.Context, c *app.RequestContext) {
-		c.File("D:/GolandProgram/Eshoping/web/register.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/register.html")
 	})
 	hz.GET("/homepage", func(ctx context.Context, c *app.RequestContext) {
-		c.File("D:/GolandProgram/Eshoping/web/homepage.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/homepage.html")
 	})
+	hz.GET("/shop", func(ctx context.Context, c *app.RequestContext) {
+		c.File("D:/GolandProgram/Eshoping/web/html/shop.html")
+	})
+	hz.GET("/recharge", func(ctx context.Context, c *app.RequestContext) {
+		c.File("D:/GolandProgram/Eshoping/web/html/recharge.html")
+	})
+	hz.GET("/updatename", func(ctx context.Context, c *app.RequestContext) {
+		c.File("D:/GolandProgram/Eshoping/web/html/updatename.html")
+	})
+	hz.GET("/updatepassword", func(ctx context.Context, c *app.RequestContext) {
+		c.File("D:/GolandProgram/Eshoping/web/html/updatepassword.html")
+	})
+	hz.GET("/getorderlist", func(ctx context.Context, c *app.RequestContext) {
+		c.File("D:/GolandProgram/Eshoping/web/html/getorderlist.html")
+	})
+}
+func registerGroup(hz *server.Hertz) {
 	hz.POST("/register", handler.Register)
 	hz.POST("/login", handler.Login)
 	hz.POST("/userinfo", handler.GetUserInfo)
@@ -53,6 +70,7 @@ func registerGroup(hz *server.Hertz) {
 func main() {
 	hz := server.New(server.WithHostPorts("localhost:8889"))
 	hz.Static("/images", "./web/images")
+	LoadHtml(hz)
 	registerGroup(hz)
 	hz.Spin()
 }

@@ -14,13 +14,13 @@ import (
 var Mysecret = []byte("vnollxvnollx")
 
 type MyClaims struct {
-	Username string `json:"username"`
+	UserId int64 `json:"UserId"`
 	jwt.RegisteredClaims
 }
 
-func NewToken(username string) (string, error) {
+func NewToken(userid int64) (string, error) {
 	c := MyClaims{
-		username,
+		userid,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -88,7 +88,7 @@ func JWTAuthMiddleware() app.HandlerFunc {
 			return
 		}
 		// 将用户名保存到上下文中
-		c.Set("username", mc.Username)
+		c.Set("userid", mc.UserId)
 		// 继续处理请求
 		c.Next(ctx)
 	}

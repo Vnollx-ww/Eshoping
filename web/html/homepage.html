@@ -6,6 +6,7 @@
     <style>
         body {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -14,15 +15,25 @@
             background-repeat: no-repeat;
             background-position: center;
         }
+        #container{
+            display: flex;
+            flex-direction: column; /* 垂直方向排列子元素 */
+            align-items: center;    /* 水平方向居中对齐 */
+        }
         #InfoDiv {
             width: 350px;
-            height: 350px;
+            height: 250px;
             padding: 10px;
             border: 1px solid #ccc;
             opacity: 0.8;
             border-radius: 5px;
             background-color: lavender;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column; /* 垂直方向排列子元素 */
+            align-items: center;    /* 水平方向居中对齐 */
+        }
+        #function{
             display: flex;
             flex-direction: column; /* 垂直方向排列子元素 */
             align-items: center;    /* 水平方向居中对齐 */
@@ -36,7 +47,7 @@
             box-sizing: border-box; /* 包括边框和内边距在内的宽度计算 */
         }
         button {
-            margin: 5px 10px; /* 外边距 */
+            margin: 10px 20px; /* 外边距 */
             padding: 10px 15px; /* 内边距 */
             background: linear-gradient(135deg, deepskyblue, dodgerblue); /* 渐变背景 */
             color: white; /* 字体颜色 */
@@ -69,19 +80,27 @@
     </style>
 </head>
 <body>
+<div id="container">
 <div id="InfoDiv">
     <p id="message-container"></p>
     <button id="fetchUserInfo" style="align-items: center">查询用户信息</button>
     <div id="userinfo"></div>
 </div>
+</div>
+<div id="function">
+    <div id="button">
+    <button id="Shoping" >购物</button>
+    <button id="Recharge">充值</button>
+    <button id="updatename">修改用户名</button>
+    <button id="updatepassword">修改密码</button>
+    <button id="fetchOrderListInfo">查看购买记录</button>
+    </div>
+</div>
 <script>
-    // 从 localStorage 获取消息
-    //console.log(localStorage.getItem("token"))
     const message = localStorage.getItem('message');
     const messageContainer = document.getElementById('message-container');
     if (message) {
         messageContainer.textContent = message;
-        localStorage.removeItem('message');
     } else {
         messageContainer.textContent = "没有消息";
     }
@@ -99,7 +118,8 @@
                 body: JSON.stringify({ token })
             });//向后端发起请求以json格式
             const data=await response.json()
-            console.log(data); // 输出整个数据对象
+            t=localStorage.getItem("token")
+            console.log(t); // 输出整个数据对象
             if (response.ok) {
                 const userInfoDiv = document.getElementById('userinfo');
                 userInfoDiv.innerHTML = `用户名: ${data.user.name}<br>用户ID: ${data.user.id}<br>用户余额: ${data.user.balance}<br>用户消费: ${data.user.cost}`;
@@ -111,6 +131,24 @@
             console.error("发生错误:", error);
             alert("发生错误，请重试");
         }
+    });
+    document.getElementById('Shoping').addEventListener('click', async function() {
+        window.location.href = "shop";
+    });
+    document.getElementById('updatename').addEventListener('click', async function() {
+        window.location.href = "updatename";
+    });
+    document.getElementById('fetchOrderListInfo').addEventListener('click',async function(){
+        window.location.href = "getorderlist";
+    })
+    document.getElementById('updatepassword').addEventListener('click',async function(){
+        window.location.href = "updatepassword";
+    })
+</script>
+<script>
+    document.getElementById('Recharge').addEventListener('click', async function() {
+        console.log(localStorage.getItem("token"))
+        window.location.href = "recharge";
     });
 </script>
 </body>

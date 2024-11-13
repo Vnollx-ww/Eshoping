@@ -39,7 +39,7 @@ func (s *UserServiceImpl) UserLogin(ctx context.Context, req *user.UserLoginRequ
 		}
 		return res, nil
 	}
-	token, err := middlerware.NewToken(req.Username)
+	token, err := middlerware.NewToken(int64(usr.ID))
 	if err != nil {
 		log.Println(err.Error())
 		res := &user.UserLoginResponse{
@@ -107,7 +107,7 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 		return res, nil
 	}
 	log.Println(mc)
-	usr, err := db.GetUserByName(ctx, mc.Username)
+	usr, err := db.GetUserByID(ctx, mc.UserId)
 	log.Println(req)
 	if err != nil {
 		log.Println(err.Error())
@@ -149,7 +149,7 @@ func (s *UserServiceImpl) UpdateName(ctx context.Context, req *user.UpdateNameRe
 		}
 		return res, nil
 	}
-	usr, err := db.GetUserByName(ctx, mc.Username)
+	usr, err := db.GetUserByID(ctx, mc.UserId)
 	log.Println(req)
 	if err != nil {
 		log.Println(err.Error())
@@ -178,7 +178,7 @@ func (s *UserServiceImpl) UpdateName(ctx context.Context, req *user.UpdateNameRe
 	}
 	res := &user.UpdateNameResponse{
 		StatusCode: 0,
-		StatusMsg:  "修改用户名成功",
+		StatusMsg:  "欢迎你！" + usr.UserName,
 		Succed:     true,
 	}
 	return res, nil
@@ -186,7 +186,15 @@ func (s *UserServiceImpl) UpdateName(ctx context.Context, req *user.UpdateNameRe
 
 // UpdatePassword implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UpdatePassword(ctx context.Context, req *user.UpdatePasswordRequest) (resp *user.UpdatePasswordResponse, err error) {
-	usr, err := db.GetUserByID(ctx, req.UserId)
+	mc, err := middlerware.ParseToken(req.Token)
+	if err != nil {
+		res := &user.UpdatePasswordResponse{
+			StatusCode: -1,
+			StatusMsg:  "token解析失败",
+		}
+		return res, nil
+	}
+	usr, err := db.GetUserByID(ctx, mc.UserId)
 	//log.Println(req)
 	if err != nil {
 		log.Println(err.Error())
@@ -210,7 +218,7 @@ func (s *UserServiceImpl) UpdatePassword(ctx context.Context, req *user.UpdatePa
 		}
 		return res, nil
 	}
-	err = db.UpdatePassword(ctx, req.UserId, req.Newpassword_)
+	err = db.UpdatePassword(ctx, usr, req.Newpassword_)
 	if err != nil {
 		log.Println(err)
 		res := &user.UpdatePasswordResponse{
@@ -267,8 +275,16 @@ func (s *UserServiceImpl) UpdateCost(ctx context.Context, req *user.UpdateCostRe
 
 // UpdateBalance implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UpdateBalance(ctx context.Context, req *user.UpdateBalanceRequest) (resp *user.UpdateBalanceResponse, err error) {
-	usr, err := db.GetUserByID(ctx, req.UserId)
-	log.Println(req)
+	mc, err := middlerware.ParseToken(req.Token)
+	usr, err := db.GetUserByID(ctx, mc.UserId)
+	if err != nil {
+		log.Println(err.Error())
+		res := &user.UpdateBalanceResponse{
+			StatusCode: -1,
+			StatusMsg:  "token解析失败",
+		}
+		return res, nil
+	}
 	if err != nil {
 		log.Println(err.Error())
 		res := &user.UpdateBalanceResponse{
@@ -284,11 +300,11 @@ func (s *UserServiceImpl) UpdateBalance(ctx context.Context, req *user.UpdateBal
 		}
 		return res, nil
 	}
-	err = db.UpdateBalance(ctx, req.UserId, req.Addbalance)
+	err = db.UpdateBalance(ctx, usr, req.Addbalance)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		res := &user.UpdateBalanceResponse{
-			StatusCode: 0,
+			StatusCode: -1,
 			StatusMsg:  "修改余额失败",
 			Succed:     false,
 		}

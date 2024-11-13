@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>修改用户名</title>
+    <script>
+        function check(){
+            var rename=document.getElementById("rename").value;
+            console.log(rename)
+            if(rename===""){
+                alert("新用户名不能为空!");
+                return false;
+            }
+            return true;
+        }
+    </script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        #updatename {
+            width: 300px;
+            height: 200px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            opacity: 0.8;
+            border-radius: 5px;
+            background-color: lavender;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #subdiv {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .button {
+            margin: 5px 10px; /* 外边距 */
+            padding: 10px 15px; /* 内边距 */
+            background: linear-gradient(135deg, deepskyblue, dodgerblue); /* 渐变背景 */
+            color: white; /* 字体颜色 */
+            border: none; /* 去掉边框 */
+            border-radius: 8px; /* 圆角 */
+            cursor: pointer; /* 鼠标悬停时显示为可点击 */
+            transition: background 0.3s, transform 0.3s; /* 背景和变换过渡效果 */
+            font-size: 16px; /* 字体大小 */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 阴影 */
+        }
+        .button:hover {
+            background: linear-gradient(135deg, dodgerblue, deepskyblue); /* 改变渐变方向 */
+            transform: translateY(-2px); /* 提升效果 */
+        }
+        input[type="text"] {
+            width: 100%; /* 让输入框宽度填满 */
+            padding: 10px; /* 增加内边距 */
+            margin: 5px 0; /* 添加外边距 */
+            border: 1px solid #ccc; /* 边框样式 */
+            border-radius: 4px; /* 边角圆润 */
+            box-sizing: border-box; /* 包括边框和内边距在内的宽度计算 */
+        }
+    </style>
+</head>
+<body>
+<div id="updatename">
+    <form action="updatename" method="post" id="form">
+        <h1>修改用户名</h1>
+        <input type="text" id="rename" placeholder="请输入新用户名"/>
+        <div id="subdiv">
+            <input type="submit" class="button" id="修改">
+        </div>
+    </form>
+</div>
+<script>
+    console.log(localStorage.getItem("token"))
+</script>
+<script>
+    document.getElementById("form").addEventListener('submit', async function (e) {//为表单添加监听者
+        if(!check()){//先检验是否为空
+            e.preventDefault();
+            return ;
+        }
+        e.preventDefault();
+        var newname = document.getElementById("rename").value;
+        var token=localStorage.getItem("token")
+        console.log(token)
+        console.log(newname)
+        try {
+            const response = await fetch("updatename", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({token,newname})
+            });//向后端发起请求以json格式
+            var data=await response.json()
+            if (response.ok) {
+                alert("修改成功！")
+                localStorage.setItem('message', data.status_msg);
+                setTimeout(() => {
+                    window.location.href = "homepage";//如果返回响应正确，则进入主页面
+                }, 1000);
+            }
+            else{
+                alert(data.status_msg)
+            }
+        } catch (error) {
+            console.error("发生错误:", error);
+            alert("发生错误，请重试");
+        }
+    });
+</script>
+</body>
+</html>

@@ -115,10 +115,11 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 }
 func UpdateName(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
-		UserId  int64  `json:"UserId"`
+		UserId  int64
 		Token   string `json:"token"`
-		NewName string `json:"NewName"`
+		NewName string `json:"newname"`
 	}
+	//log.Println(c.Request.Body())
 	if err := c.Bind(&reqbody); err != nil {
 		// 如果解析 JSON 失败，返回 400 错误
 		log.Println(err)
@@ -154,8 +155,8 @@ func UpdatePassword(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
 		UserId  int64
 		Token   string `json:"token"`
-		OldPass string
-		NewPass string
+		OldPass string `json:"oldpassword"`
+		NewPass string `json:"newpassword"`
 	}
 	if err := c.Bind(&reqbody); err != nil {
 		// 如果解析 JSON 失败，返回 400 错误
@@ -192,7 +193,7 @@ func UpdateBalance(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
 		UserId     int64
 		Token      string `json:"token"`
-		AddBalance int64
+		AddBalance int64  `json:"balance"`
 	}
 	if err := c.Bind(&reqbody); err != nil {
 		// 如果解析 JSON 失败，返回 400 错误
@@ -202,12 +203,12 @@ func UpdateBalance(ctx context.Context, c *app.RequestContext) {
 		})
 		return
 	}
-	log.Println(reqbody)
 	req := &user.UpdateBalanceRequest{
 		UserId:     reqbody.UserId,
 		Token:      reqbody.Token,
 		Addbalance: reqbody.AddBalance,
 	}
+	log.Println(reqbody.Token)
 	res, _ := rpc.UpdateBalance(ctx, req)
 	if res.StatusCode == -1 {
 		log.Println(res)

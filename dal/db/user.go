@@ -51,27 +51,25 @@ func UpdateName(ctx context.Context, user *User, name string) error {
 	}
 	return nil
 }
-func UpdatePassword(ctx context.Context, ID int64, password string) error {
-	user := new(User)
+func UpdatePassword(ctx context.Context, usr *User, password string) error {
 	db := GetDB()
-	if err := db.Where("ID = ?", ID).First(&user).Error; err == nil {
-		user.Password = password
-		db.Save(&user)
-		return nil
-	} else {
+	usr.Password = password
+	err := db.Save(&usr).Error
+	if err != nil {
 		return err
 	}
+	return nil
 }
-func UpdateBalance(ctx context.Context, ID int64, addbalance int64) error {
-	user := new(User)
+func UpdateBalance(ctx context.Context, usr *User, addbalance int64) error {
 	db := GetDB()
-	if err := db.Where("ID = ?", ID).First(&user).Error; err == nil {
-		user.Balance += addbalance
-		db.Save(&user)
-		return nil
-	} else {
+	usr.Balance += addbalance
+	err := db.Save(&usr).Error
+	if err != nil {
 		return err
+
 	}
+	return nil
+
 }
 func UpdateCost(ctx context.Context, ID int64, addcost int64) error {
 	user := new(User)
