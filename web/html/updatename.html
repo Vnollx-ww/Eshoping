@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <title>修改用户名</title>
     <script>
-        function check(){
-            var rename=document.getElementById("rename").value;
-            console.log(rename)
-            if(rename===""){
+        function check() {
+            var rename = document.getElementById("rename").value;
+            if (rename === "") {
                 alert("新用户名不能为空!");
                 return false;
             }
@@ -21,48 +20,86 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
+            background: linear-gradient(135deg, #74ebd5, #9face6); /* 背景渐变 */
+            font-family: 'Arial', sans-serif;
+            color: #333;
         }
+
         #updatename {
-            width: 300px;
-            height: 200px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            opacity: 0.8;
-            border-radius: 5px;
-            background-color: lavender;
+            width: 350px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             text-align: center;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            opacity: 0.95;
         }
+
+        h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
         #subdiv {
             text-align: center;
             margin-top: 20px;
         }
-        .button {
-            margin: 5px 10px; /* 外边距 */
-            padding: 10px 15px; /* 内边距 */
-            background: linear-gradient(135deg, deepskyblue, dodgerblue); /* 渐变背景 */
-            color: white; /* 字体颜色 */
-            border: none; /* 去掉边框 */
-            border-radius: 8px; /* 圆角 */
-            cursor: pointer; /* 鼠标悬停时显示为可点击 */
-            transition: background 0.3s, transform 0.3s; /* 背景和变换过渡效果 */
-            font-size: 16px; /* 字体大小 */
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 阴影 */
-        }
-        .button:hover {
-            background: linear-gradient(135deg, dodgerblue, deepskyblue); /* 改变渐变方向 */
-            transform: translateY(-2px); /* 提升效果 */
-        }
+
         input[type="text"] {
-            width: 100%; /* 让输入框宽度填满 */
-            padding: 10px; /* 增加内边距 */
-            margin: 5px 0; /* 添加外边距 */
-            border: 1px solid #ccc; /* 边框样式 */
-            border-radius: 4px; /* 边角圆润 */
-            box-sizing: border-box; /* 包括边框和内边距在内的宽度计算 */
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: #74ebd5;
+            outline: none;
+            box-shadow: 0 0 8px rgba(116, 235, 213, 0.5);
+        }
+
+        .button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #007bff, #00d4ff);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .button:hover {
+            background: linear-gradient(135deg, #00d4ff, #007bff);
+            transform: translateY(-2px);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        /* 添加一个loading效果 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            border-top: 3px solid #007bff;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -70,43 +107,52 @@
 <div id="updatename">
     <form action="/user/updatename" method="post" id="form">
         <h1>修改用户名</h1>
-        <input type="text" id="rename" placeholder="请输入新用户名"/>
+        <input type="text" id="rename" placeholder="请输入新用户名" />
         <div id="subdiv">
-            <input type="submit" class="button" id="修改">
+            <button type="submit" class="button" id="修改">修改用户名</button>
         </div>
     </form>
 </div>
 <script>
-    document.getElementById("form").addEventListener('submit', async function (e) {//为表单添加监听者
-        if(!check()){//先检验是否为空
+    document.getElementById("form").addEventListener('submit', async function (e) {
+        if (!check()) {
             e.preventDefault();
-            return ;
+            return;
         }
         e.preventDefault();
         var newname = document.getElementById("rename").value;
-        var token=localStorage.getItem("token")
+        var token = localStorage.getItem("token");
+
+        // 为了显示 loading 动画，先禁用按钮并添加 loading 状态
+        var button = document.getElementById("修改");
+        button.innerHTML = '修改中... <span class="loading"></span>';
+        button.disabled = true;
+
         try {
             const response = await fetch("/user/updatename", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({token,newname})
-            });//向后端发起请求以json格式
-            var data=await response.json()
+                body: JSON.stringify({ token, newname })
+            });
+            var data = await response.json();
             if (response.ok) {
-                alert("修改成功！")
+                alert("修改成功！");
                 localStorage.setItem('message', data.status_msg);
                 setTimeout(() => {
-                    window.location.href = "homepage";//如果返回响应正确，则进入主页面
+                    window.location.href = "homepage"; // 如果返回响应正确，则进入主页面
                 }, 1000);
-            }
-            else{
-                alert(data.status_msg)
+            } else {
+                alert(data.status_msg);
             }
         } catch (error) {
             console.error("发生错误:", error);
             alert("发生错误，请重试");
+        } finally {
+            // 恢复按钮状态
+            button.innerHTML = '修改用户名';
+            button.disabled = false;
         }
     });
 </script>

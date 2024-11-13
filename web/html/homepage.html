@@ -2,150 +2,240 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>主页</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
+            font-family: 'Arial', sans-serif;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
+            background: linear-gradient(135deg, #a0c4ff, #4e5d94); /* 背景渐变色 */
+            color: #333;
+            overflow: hidden;
         }
-        #container{
+
+        #container {
             display: flex;
-            flex-direction: column; /* 垂直方向排列子元素 */
-            align-items: center;    /* 水平方向居中对齐 */
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* 保证内容从上到下排列 */
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            height: 90vh; /* 确保容器有足够的高度 */
+            overflow-y: auto; /* 允许内容超出时滚动 */
         }
+
         #InfoDiv {
-            width: 350px;
-            height: 250px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            opacity: 0.8;
-            border-radius: 5px;
-            background-color: lavender;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column; /* 垂直方向排列子元素 */
-            align-items: center;    /* 水平方向居中对齐 */
+            width: 100%;
+            padding: 30px 20px; /* 调整内边距增加空间 */
+            background-color: #f7f7f7;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px; /* 增加底部间距 */
         }
-        #function{
-            display: flex;
-            flex-direction: column; /* 垂直方向排列子元素 */
-            align-items: center;    /* 水平方向居中对齐 */
+
+        h1 {
+            margin-top: 20px; /* 给标题增加顶部间距 */
+            margin-bottom: 15px;
+            color: #4e5d94;
+            font-size: 24px; /* 确保标题字体大小合适 */
         }
-        input[type="text"] {
-            width: 100%; /* 让输入框宽度填满 */
-            padding: 10px; /* 增加内边距 */
-            margin: 5px 0; /* 添加外边距 */
-            border: 1px solid #ccc; /* 边框样式 */
-            border-radius: 4px; /* 边角圆润 */
-            box-sizing: border-box; /* 包括边框和内边距在内的宽度计算 */
+
+        p {
+            margin-bottom: 20px;
+            color: #333;
         }
-        button {
-            margin: 10px 20px; /* 外边距 */
-            padding: 10px 15px; /* 内边距 */
-            background: linear-gradient(135deg, deepskyblue, dodgerblue); /* 渐变背景 */
-            color: white; /* 字体颜色 */
-            border: none; /* 去掉边框 */
-            border-radius: 8px; /* 圆角 */
-            cursor: pointer; /* 鼠标悬停时显示为可点击 */
-            transition: background 0.3s, transform 0.3s; /* 背景和变换过渡效果 */
-            font-size: 16px; /* 字体大小 */
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 阴影 */
-        }
-        button:hover {
-            background: linear-gradient(135deg, dodgerblue, deepskyblue); /* 改变渐变方向 */
-            transform: translateY(-2px); /* 提升效果 */
-        }
+
         #userinfo {
-            width: 80%;
-            background-color: #f9f9f9; /* 背景颜色 */
-            border: 1px solid #ccc; /* 边框 */
-            border-radius: 5px; /* 圆角 */
-            padding: 15px; /* 内边距 */
-            margin-top: 10px; /* 顶部外边距 */
-            font-family: Arial, sans-serif; /* 字体 */
-            color: #333; /* 字体颜色 */
+            margin-top: 15px;
+            background-color: #e8f0fe;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        #userinfo p {
-            margin: 0; /* 去掉段落的默认外边距 */
+        #function {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30px;
         }
 
+        button {
+            margin: 10px 0;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #0099ff, #00c2ff);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #00c2ff, #0099ff);
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        button:focus {
+            outline: none;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: #0099ff;
+            box-shadow: 0 0 8px rgba(0, 153, 255, 0.5);
+        }
+
+        #message-container {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #666;
+        }
+
+        .function-buttons {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 收起按钮样式 */
+        #toggleInfoBtn {
+            margin-top: 10px;
+            background-color: #f0f0f0;
+            color: #333;
+            border-radius: 50px;
+            padding: 5px 15px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        #toggleInfoBtn:hover {
+            background-color: #ddd;
+        }
     </style>
 </head>
 <body>
 <div id="container">
-<div id="InfoDiv">
-    <p id="message-container"></p>
-    <button id="fetchUserInfo" style="align-items: center">查询用户信息</button>
-    <div id="userinfo"></div>
-</div>
-</div>
-<div id="function">
-    <div id="button">
-    <button id="Shoping" >购物</button>
-    <button id="Recharge">充值</button>
-    <button id="updatename">修改用户名</button>
-    <button id="updatepassword">修改密码</button>
-    <button id="fetchOrderListInfo">查看购买记录</button>
+    <div id="InfoDiv">
+        <h1>欢迎回来!</h1>
+        <p id="message-container">加载中...</p>
+        <button id="fetchUserInfo">查询用户信息</button>
+        <button id="toggleInfoBtn" style="display: none;">收起</button>
+        <div id="userinfo"></div>
+    </div>
+
+    <div id="function" class="function-buttons">
+        <button id="Shoping">购物</button>
+        <button id="Recharge">充值</button>
+        <button id="updatename">修改用户名</button>
+        <button id="updatepassword">修改密码</button>
+        <button id="fetchOrderListInfo">查看购买记录</button>
     </div>
 </div>
+
 <script>
     const message = localStorage.getItem('message');
     const messageContainer = document.getElementById('message-container');
+    const toggleInfoBtn = document.getElementById('toggleInfoBtn');
+    const userinfoDiv = document.getElementById('userinfo');
+    const fetchUserInfoBtn = document.getElementById('fetchUserInfo');
+
     if (message) {
         messageContainer.textContent = message;
     } else {
         messageContainer.textContent = "没有消息";
     }
-</script>
-<script>
+
     document.getElementById('fetchUserInfo').addEventListener('click', async function() {
         try {
-            const token=localStorage.getItem("token")
+            const token = localStorage.getItem("token");
             const response = await fetch("/user/getuserinfo", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ token })
-            });//向后端发起请求以json格式
-            const data=await response.json()
+            });
+            const data = await response.json();
             if (response.ok) {
-                const userInfoDiv = document.getElementById('userinfo');
-                userInfoDiv.innerHTML = `用户名: ${data.user.name}<br>用户ID: ${data.user.id}<br>用户余额: ${data.user.balance}<br>用户消费: ${data.user.cost}`;
-            }
-            else{
-                alert(data.message)
+                userinfoDiv.innerHTML = `
+                    <p><strong>用户名:</strong> ${data.user.name}</p>
+                    <p><strong>用户ID:</strong> ${data.user.id}</p>
+                    <p><strong>用户余额:</strong> ${data.user.balance}</p>
+                    <p><strong>用户消费:</strong> ${data.user.cost}</p>
+                `;
+                // 显示收起按钮
+                toggleInfoBtn.style.display = 'inline-block';
+            } else {
+                alert(data.message);
             }
         } catch (error) {
             console.error("发生错误:", error);
             alert("发生错误，请重试");
         }
     });
-</script>
-<script>
-    document.getElementById('Recharge').addEventListener('click', async function() {
+
+    // 切换用户信息显示/隐藏
+    toggleInfoBtn.addEventListener('click', function() {
+        if (userinfoDiv.style.display === 'none') {
+            userinfoDiv.style.display = 'block';
+            toggleInfoBtn.textContent = '收起';
+        } else {
+            userinfoDiv.style.display = 'none';
+            toggleInfoBtn.textContent = '展开';
+        }
+    });
+
+    // 页面跳转按钮事件
+    document.getElementById('Recharge').addEventListener('click', function() {
         window.location.href = "recharge";
     });
-    document.getElementById('updatename').addEventListener('click', async function() {
+
+    document.getElementById('updatename').addEventListener('click', function() {
         window.location.href = "updatename";
     });
-    document.getElementById('updatepassword').addEventListener('click',async function(){
+
+    document.getElementById('updatepassword').addEventListener('click', function() {
         window.location.href = "updatepassword";
-    })
-    document.getElementById('Shoping').addEventListener('click', async function() {
+    });
+
+    document.getElementById('Shoping').addEventListener('click', function() {
         window.location.href = "shop";
     });
-    document.getElementById('fetchOrderListInfo').addEventListener('click',async function(){
+
+    document.getElementById('fetchOrderListInfo').addEventListener('click', function() {
         window.location.href = "getorderlist";
-    })
+    });
 </script>
 </body>
 </html>

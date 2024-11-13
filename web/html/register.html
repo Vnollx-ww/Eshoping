@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>注册</title>
     <script>
         function check(){
@@ -29,81 +31,110 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2); /* 背景渐变 */
+            font-family: 'Arial', sans-serif;
         }
         #registerdiv {
-            width: 350px;
-            height: 400px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            opacity: 0.8;
-            border-radius: 5px;
-            background-color: lavender;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 380px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* 阴影效果 */
+            opacity: 0.95;
         }
-        #title{
+        #title {
             text-align: center;
+            font-size: 2rem;
+            color: #4A90E2;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        .input-group input:focus {
+            border-color: #4A90E2;
+            outline: none;
+        }
+        .button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #4A90E2, #1C75D7);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, background 0.3s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #1C75D7, #4A90E2);
+        }
+        .button:active {
+            transform: translateY(2px);
+        }
+        .reset-btn {
+            background-color: #f5f5f5;
+            color: #555;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+        .reset-btn:hover {
+            background-color: #e6e6e6;
         }
         #subdiv {
             text-align: center;
             margin-top: 20px;
         }
-        .button {
-            margin: 5px 10px; /* 外边距 */
-            padding: 10px 15px; /* 内边距 */
-            background: linear-gradient(135deg, deepskyblue, dodgerblue); /* 渐变背景 */
-            color: white; /* 字体颜色 */
-            border: none; /* 去掉边框 */
-            border-radius: 8px; /* 圆角 */
-            cursor: pointer; /* 鼠标悬停时显示为可点击 */
-            transition: background 0.3s, transform 0.3s; /* 背景和变换过渡效果 */
-            font-size: 16px; /* 字体大小 */
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 阴影 */
+        a {
+            color: #4A90E2;
+            text-decoration: none;
+            font-size: 14px;
         }
-        .button:hover {
-            background: linear-gradient(135deg, dodgerblue, deepskyblue); /* 改变渐变方向 */
-            transform: translateY(-2px); /* 提升效果 */
+        a:hover {
+            text-decoration: underline;
         }
-        input[type="text"] {
-            width: 100%; /* 让输入框宽度填满 */
-            padding: 10px; /* 增加内边距 */
-            margin: 5px 0; /* 添加外边距 */
-            border: 1px solid #ccc; /* 边框样式 */
-            border-radius: 4px; /* 边角圆润 */
-            box-sizing: border-box; /* 包括边框和内边距在内的宽度计算 */
-        }
-        input[type="password"] {
-            width: 100%; /* 让输入框宽度填满 */
-            padding: 10px; /* 增加内边距 */
-            margin: 5px 0; /* 添加外边距 */
-            border: 1px solid #ccc; /* 边框样式 */
-            border-radius: 4px; /* 边角圆润 */
-            box-sizing: border-box; /* 包括边框和内边距在内的宽度计算 */
+        @media (max-width: 500px) {
+            #registerdiv {
+                width: 90%;
+                padding: 15px;
+            }
         }
     </style>
 </head>
 <body>
-<div id="registerdiv" >
+<div id="registerdiv">
     <form action="/user/register" method="post" id="form">
-        <h1 id="title">请进行注册</h1>
-        <p id="user">
-            <input type="text" id="username" placeholder="请输入用户名"/>
-        </p>
-        <p id="pass">
-            <input type="password" id="password" placeholder="请输入密码"/>
-        </p>
-        <p id="repass">
-            <input type="password" id="repassword" placeholder="请再次输入密码"/>
-        </p>
+        <h1 id="title">注册</h1>
+        <div class="input-group">
+            <input type="text" id="username" placeholder="请输入用户名" required />
+        </div>
+        <div class="input-group">
+            <input type="password" id="password" placeholder="请输入密码" required />
+        </div>
+        <div class="input-group">
+            <input type="password" id="repassword" placeholder="请再次输入密码" required />
+        </div>
         <div id="subdiv">
-            <input type="submit" class="button" id="注册">
-            <input type="reset" class="button" id="重置">
-            <a href="login">返回登陆</a>
+            <button type="submit" class="button">注册</button>
+            <button type="reset" class="button reset-btn">重置</button>
+            <p>已有账号? <a href="login">登录</a></p>
         </div>
     </form>
 </div>
+
 <script>
     document.getElementById("form").addEventListener('submit', async function (e) {
         if(!check()){
@@ -125,7 +156,7 @@
             alert(data.status_msg);
             if (response.ok) {
                 setTimeout(() => {
-                    window.location.href = "login";
+                    window.location.href = "login"; // 注册成功后跳转到登录页面
                 }, 1000);
             }
         } catch (error) {

@@ -46,13 +46,18 @@ func GoodGetOrderListByProductNameResponse(s string, or []*orderlist.Order) *ord
 // AddOrder implements the OrderListServiceImpl interface.
 func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddOrderRequest) (resp *orderlist.AddOrderResponse, err error) {
 	ol := req.Ol
+	mc, err := middlerware.ParseToken(req.Token)
+	if err != nil {
+		log.Println(err)
+		return BadAddOrderResponse("token解析失败"), nil
+	}
 	order := &db.Order{
 		ProductName: ol.ProductName,
-		UserID:      ol.UserId,
+		UserID:      mc.UserId,
 		Number:      ol.Number,
 		Cost:        ol.Cost,
 	}
-	usr, err := db.GetUserByID(ctx, ol.UserId)
+	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
 		log.Println(err)
 		return BadAddOrderResponse("服务器内部错误"), err
@@ -79,12 +84,12 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 		log.Println(err)
 		return BadAddOrderResponse("订单创建失败"), err
 	}
-	_, err = s.usrcli.UpdateCost(ctx, &user.UpdateCostRequest{UserId: order.UserID, Addcost: order.Cost})
+	_, err = s.usrcli.UpdateCost(ctx, &user.UpdateCostRequest{Token: req.Token, UserId: int64(usr.ID), Addcost: order.Cost})
 	if err != nil {
 		log.Println(err)
 		return BadAddOrderResponse("用户消费总额更改失败"), err
 	}
-	_, err = s.usrcli.UpdateBalance(ctx, &user.UpdateBalanceRequest{UserId: order.UserID, Addbalance: -order.Cost})
+	_, err = s.usrcli.UpdateBalance(ctx, &user.UpdateBalanceRequest{Token: req.Token, UserId: int64(usr.ID), Addbalance: -order.Cost})
 	if err != nil {
 		log.Println(err)
 		return BadAddOrderResponse("用户余额更改失败"), err

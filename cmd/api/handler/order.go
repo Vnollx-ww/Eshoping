@@ -5,12 +5,13 @@ import (
 	"Eshop/kitex_gen/orderlist"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
+	"log"
 	"net/http"
 )
 
 func CreateOrder(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
-		UserId      int64
+		Token       string
 		ProductName string
 		Number      int64
 		Cost        int64
@@ -20,13 +21,13 @@ func CreateOrder(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	ol := &orderlist.Order{
-		UserId:      reqbody.UserId,
 		ProductName: reqbody.ProductName,
 		Number:      reqbody.Number,
 		Cost:        reqbody.Cost,
 	}
 	req := &orderlist.AddOrderRequest{
-		Ol: ol,
+		Ol:    ol,
+		Token: reqbody.Token,
 	}
 	res, _ := rpc.CreateOrder(ctx, req)
 	if res.StatusCode == -1 {
@@ -41,6 +42,7 @@ func CreateOrder(ctx context.Context, c *app.RequestContext) {
 }
 func DeleteOrder(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
+		Token   string `json:"token"`
 		OrderId int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
@@ -63,7 +65,7 @@ func DeleteOrder(ctx context.Context, c *app.RequestContext) {
 }
 func GetOrderListByUserID(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
-		Token string `json:"token"`
+		Token string
 	}
 	if err := c.Bind(&reqbody); err != nil {
 		BadBaseResponse(c, "无效的请求格式")
@@ -76,11 +78,13 @@ func GetOrderListByUserID(ctx context.Context, c *app.RequestContext) {
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
 	}
+	log.Println(res.Orderlist)
 	c.JSON(http.StatusOK, orderlist.GetOrderListByUserIDResponse{
 		StatusCode: http.StatusOK,
 		StatusMsg:  "获取用户订单列表成功",
 		Orderlist:  res.Orderlist,
 	})
+
 }
 func GetOrderListByProductName(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
