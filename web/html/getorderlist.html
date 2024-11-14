@@ -2,36 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>订单列表</title>
     <style>
         body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f4f4f4;
+            background-color: #f9f9f9;
         }
         #orderlist {
-            width: 80%;
-            max-width: 400px;
-            padding: 20px;
+            width: 90%;
+            max-width: 450px;
+            padding: 25px;
             border: 1px solid #ddd;
-            border-radius: 10px;
-            background-color: lavender;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            background-color: #f0f4f8;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: transform 0.3s ease;
+        }
+        #orderlist:hover {
+            transform: scale(1.02);
         }
         button {
-            margin: 15px 0;
-            padding: 12px 18px;
+            margin: 20px 0;
+            padding: 14px 22px;
             background: linear-gradient(135deg, deepskyblue, dodgerblue);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             transition: background 0.3s, transform 0.3s;
             font-size: 16px;
@@ -43,19 +49,29 @@
         }
         #orderinfo {
             width: 100%;
-            margin-top: 20px;
-            max-height: 400px;  /* 设置最大高度 */
-            overflow-y: auto;  /* 启用垂直滚动 */
+            margin-top: 25px;
+            max-height: 450px;
+            overflow-y: auto;
+            padding-right: 10px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px;
         }
         .order {
             background-color: #fff;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 18px;
+            margin: 12px 0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
+            border-left: 4px solid #007BFF;
+            transition: transform 0.2s ease;
+        }
+        .order:hover {
+            transform: scale(1.02);
         }
         .order span {
             font-size: 14px;
@@ -63,26 +79,40 @@
         }
         .order span:first-child {
             font-weight: bold;
+            color: #000;
         }
         .order span:nth-child(odd) {
-            color: #555;
+            color: #666;
         }
         .order span:nth-child(even) {
             color: #007BFF;
         }
         .order span {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
+        .order .order-id {
+            font-weight: bold;
+            color: #333;
+        }
+        .order .order-user,
+        .order .order-product,
+        .order .order-number,
+        .order .order-cost,
+        .order .order-time {
+            color: #555;
+        }
+
         /* For responsiveness */
         @media (max-width: 600px) {
             #orderlist {
                 width: 95%;
-                padding: 15px;
+                padding: 20px;
             }
             button {
                 width: 100%;
                 font-size: 14px;
+                padding: 12px 16px;
             }
         }
     </style>
@@ -118,21 +148,27 @@
 
                         var orderSpan = document.createElement("span");
                         orderSpan.textContent = `订单ID: ${order.order_id}`;
+                        orderSpan.classList.add("order-id");
 
                         var userSpan = document.createElement("span");
                         userSpan.textContent = `用户ID: ${order.user_id}`;
+                        userSpan.classList.add("order-user");
 
                         var productSpan = document.createElement("span");
                         productSpan.textContent = `商品: ${order.product_name}`;
+                        productSpan.classList.add("order-product");
 
                         var numberSpan = document.createElement("span");
                         numberSpan.textContent = `数量: ${order.number}`;
+                        numberSpan.classList.add("order-number");
 
                         var costSpan = document.createElement("span");
                         costSpan.textContent = `价格: ¥${order.cost}`;
+                        costSpan.classList.add("order-cost");
 
                         var createtimeSpan = document.createElement("span");
                         createtimeSpan.textContent = `创建时间: ${order.create_time}`;
+                        createtimeSpan.classList.add("order-time");
 
                         // 将所有信息添加到订单容器中
                         orderDiv.appendChild(orderSpan);
