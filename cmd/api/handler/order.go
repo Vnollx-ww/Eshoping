@@ -20,6 +20,9 @@ func CreateOrder(ctx context.Context, c *app.RequestContext) {
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
+	if reqbody.Number == 0 {
+		BadBaseResponse(c, "购买数量不能为0")
+	}
 	ol := &orderlist.Order{
 		ProductName: reqbody.ProductName,
 		Number:      reqbody.Number,
