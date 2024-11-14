@@ -51,8 +51,10 @@ func DelProduct(ctx context.Context, req *product.DelProductRequest) (*product.D
 	return productClient.DelProduct(ctx, req)
 }
 func GetProductInfo(ctx context.Context, req *product.GetProductInfoRequest) (*product.GetProductInfoResponse, error) {
-	res, _ := productClient.GetProductInfo(ctx, req)
-	return res, nil
+	return productClient.GetProductInfo(ctx, req)
+}
+func GetProductListInfo(ctx context.Context) (*product.GetProductListInfoResponse, error) {
+	return productClient.GetProductListInfo(ctx)
 }
 func UpdatePrice(ctx context.Context, req *product.UpdatePriceRequest) (*product.UpdatePriceResponse, error) {
 	return productClient.UpdatePrice(ctx, req)

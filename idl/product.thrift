@@ -23,6 +23,11 @@ struct GetProductInfoResponse{
 2: string status_msg
 3: Product product
 }
+struct GetProductListInfoResponse{
+1: i32    status_code
+2: string status_msg
+3: list<Product> productlist
+}
 struct DelProductRequest{
 1:i64 productid
 2:string token
@@ -53,8 +58,8 @@ struct UpdateStockResponse{
 service ProductService{
 AddProductResponse AddProduct(1:AddProductRequest req)
 GetProductInfoResponse GetProductInfo(1:GetProductInfoRequest req)
+GetProductListInfoResponse GetProductListInfo()
 DelProductResponse DelProduct(1:DelProductRequest req)
 UpdatePriceResponse UpdatePrice(1:UpdatePriceRequest req)
 UpdateStockResponse UpdateStock(1:UpdateStockRequest req)
 }
-

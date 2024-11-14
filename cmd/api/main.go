@@ -64,6 +64,7 @@ func registerGroup(hz *server.Hertz) {
 		product.POST("/addproduct", handler.AddProduct)
 		product.POST("/deleteproduct", handler.DelProduct)
 		product.POST("/getproductinfo", handler.GetProductInfo)
+		product.GET("/getproductlistinfo", handler.GetProductListInfo)
 		product.POST("/updatestock", handler.Updatestock)
 		product.POST("/updateprice", handler.UpdatePrice)
 	}

@@ -17,7 +17,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: linear-gradient(135deg, #a0c4ff, #4e5d94); /* 背景渐变色 */
+            background: linear-gradient(135deg, #a0c4ff, #4e5d94);
             color: #333;
             overflow: hidden;
         }
@@ -26,31 +26,31 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* 保证内容从上到下排列 */
+            justify-content: flex-start;
             padding: 20px;
             background: rgba(255, 255, 255, 0.8);
             border-radius: 15px;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 400px;
-            height: 90vh; /* 确保容器有足够的高度 */
-            overflow-y: auto; /* 允许内容超出时滚动 */
+            height: 90vh;
+            overflow-y: auto;
         }
 
         #InfoDiv {
             width: 100%;
-            padding: 30px 20px; /* 调整内边距增加空间 */
+            padding: 30px 20px;
             background-color: #f7f7f7;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px; /* 增加底部间距 */
+            margin-bottom: 20px;
         }
 
         h1 {
-            margin-top: 20px; /* 给标题增加顶部间距 */
+            margin-top: 20px;
             margin-bottom: 15px;
             color: #4e5d94;
-            font-size: 24px; /* 确保标题字体大小合适 */
+            font-size: 24px;
         }
 
         p {
@@ -126,7 +126,6 @@
             align-items: center;
         }
 
-        /* 收起按钮样式 */
         #toggleInfoBtn {
             margin-top: 10px;
             background-color: #f0f0f0;
@@ -160,6 +159,7 @@
         <button id="updatename">修改用户名</button>
         <button id="updatepassword">修改密码</button>
         <button id="fetchOrderListInfo">查看购买记录</button>
+        <button id="AdminEntrance">管理员入口</button> <!-- 新增管理员入口按钮 -->
     </div>
 </div>
 
@@ -194,7 +194,6 @@
                     <p><strong>用户余额:</strong> ${data.user.balance}</p>
                     <p><strong>用户消费:</strong> ${data.user.cost}</p>
                 `;
-                // 显示收起按钮
                 toggleInfoBtn.style.display = 'inline-block';
             } else {
                 alert(data.message);
@@ -205,7 +204,6 @@
         }
     });
 
-    // 切换用户信息显示/隐藏
     toggleInfoBtn.addEventListener('click', function() {
         if (userinfoDiv.style.display === 'none') {
             userinfoDiv.style.display = 'block';
@@ -216,7 +214,6 @@
         }
     });
 
-    // 页面跳转按钮事件
     document.getElementById('Recharge').addEventListener('click', function() {
         window.location.href = "recharge";
     });
@@ -235,6 +232,11 @@
 
     document.getElementById('fetchOrderListInfo').addEventListener('click', function() {
         window.location.href = "getorderlist";
+    });
+
+    // 管理员入口按钮事件
+    document.getElementById('AdminEntrance').addEventListener('click', function() {
+        window.location.href = "admin"; // 此处可以更改为管理员页面的URL
     });
 </script>
 </body>

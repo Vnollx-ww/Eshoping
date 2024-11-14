@@ -19,11 +19,12 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "ProductService"
 	handlerType := (*product.ProductService)(nil)
 	methods := map[string]kitex.MethodInfo{
-		"AddProduct":     kitex.NewMethodInfo(addProductHandler, newProductServiceAddProductArgs, newProductServiceAddProductResult, false),
-		"GetProductInfo": kitex.NewMethodInfo(getProductInfoHandler, newProductServiceGetProductInfoArgs, newProductServiceGetProductInfoResult, false),
-		"DelProduct":     kitex.NewMethodInfo(delProductHandler, newProductServiceDelProductArgs, newProductServiceDelProductResult, false),
-		"UpdatePrice":    kitex.NewMethodInfo(updatePriceHandler, newProductServiceUpdatePriceArgs, newProductServiceUpdatePriceResult, false),
-		"UpdateStock":    kitex.NewMethodInfo(updateStockHandler, newProductServiceUpdateStockArgs, newProductServiceUpdateStockResult, false),
+		"AddProduct":         kitex.NewMethodInfo(addProductHandler, newProductServiceAddProductArgs, newProductServiceAddProductResult, false),
+		"GetProductInfo":     kitex.NewMethodInfo(getProductInfoHandler, newProductServiceGetProductInfoArgs, newProductServiceGetProductInfoResult, false),
+		"GetProductListInfo": kitex.NewMethodInfo(getProductListInfoHandler, newProductServiceGetProductListInfoArgs, newProductServiceGetProductListInfoResult, false),
+		"DelProduct":         kitex.NewMethodInfo(delProductHandler, newProductServiceDelProductArgs, newProductServiceDelProductResult, false),
+		"UpdatePrice":        kitex.NewMethodInfo(updatePriceHandler, newProductServiceUpdatePriceArgs, newProductServiceUpdatePriceResult, false),
+		"UpdateStock":        kitex.NewMethodInfo(updateStockHandler, newProductServiceUpdateStockArgs, newProductServiceUpdateStockResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName":     "product",
@@ -74,6 +75,24 @@ func newProductServiceGetProductInfoArgs() interface{} {
 
 func newProductServiceGetProductInfoResult() interface{} {
 	return product.NewProductServiceGetProductInfoResult()
+}
+
+func getProductListInfoHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+
+	realResult := result.(*product.ProductServiceGetProductListInfoResult)
+	success, err := handler.(product.ProductService).GetProductListInfo(ctx)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newProductServiceGetProductListInfoArgs() interface{} {
+	return product.NewProductServiceGetProductListInfoArgs()
+}
+
+func newProductServiceGetProductListInfoResult() interface{} {
+	return product.NewProductServiceGetProductListInfoResult()
 }
 
 func delProductHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
@@ -155,6 +174,15 @@ func (p *kClient) GetProductInfo(ctx context.Context, req *product.GetProductInf
 	_args.Req = req
 	var _result product.ProductServiceGetProductInfoResult
 	if err = p.c.Call(ctx, "GetProductInfo", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetProductListInfo(ctx context.Context) (r *product.GetProductListInfoResponse, err error) {
+	var _args product.ProductServiceGetProductListInfoArgs
+	var _result product.ProductServiceGetProductListInfoResult
+	if err = p.c.Call(ctx, "GetProductListInfo", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

@@ -42,6 +42,14 @@ func GetProductByID(ctx context.Context, ID int64) (*Product, error) {
 		return nil, err
 	}
 }
+func GetProductListInfo(ctx context.Context) ([]*Product, error) {
+	db := GetDB()
+	var products []*Product
+	if err := db.Find(&products).Error; err != nil {
+		return nil, err
+	}
+	return products, nil
+}
 func DeleteProduct(ctx context.Context, ID int64) error {
 	pro := new(Product)
 	db := GetDB()

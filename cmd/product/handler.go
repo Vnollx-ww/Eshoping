@@ -22,6 +22,12 @@ func BadGetProductInfoResponse(s string) *product.GetProductInfoResponse {
 func GoodGetProductInfoResponse(s string, pro *product.Product) *product.GetProductInfoResponse {
 	return &product.GetProductInfoResponse{StatusCode: 200, StatusMsg: s, Product: pro}
 }
+func BadGetProductListInfoResponse(s string) *product.GetProductListInfoResponse {
+	return &product.GetProductListInfoResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodGetProductListInfoResponse(s string, prolist []*product.Product) *product.GetProductListInfoResponse {
+	return &product.GetProductListInfoResponse{StatusCode: 200, StatusMsg: s, Productlist: prolist}
+}
 func BadDelProductResponse(s string) *product.DelProductResponse {
 	return &product.DelProductResponse{StatusCode: -1, StatusMsg: s}
 }
@@ -133,4 +139,23 @@ func (s *ProductServiceImpl) UpdateStock(ctx context.Context, req *product.Updat
 		return BadUpdateStockResponse("修改商品库存失败"), nil
 	}
 	return GoodUpdateStockResponse("修改商品库存成功", true), nil
+}
+
+// GetProductListInfo implements the ProductServiceImpl interface.
+func (s *ProductServiceImpl) GetProductListInfo(ctx context.Context) (resp *product.GetProductListInfoResponse, err error) {
+	prolist, err := db.GetProductListInfo(ctx)
+	if err != nil {
+		log.Println(err)
+		return BadGetProductListInfoResponse("获取商品列表信息失败"), nil
+	}
+	var productlist []*product.Product
+	for _, pro := range prolist {
+		var p product.Product
+		p.Id = int64(pro.ID)
+		p.Name = pro.ProductName
+		p.Price = pro.Price
+		p.Stock = pro.Stock
+		productlist = append(productlist, &p)
+	}
+	return GoodGetProductListInfoResponse("获取商品列表信息成功", productlist), nil
 }

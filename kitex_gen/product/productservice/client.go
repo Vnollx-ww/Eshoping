@@ -13,6 +13,7 @@ import (
 type Client interface {
 	AddProduct(ctx context.Context, req *product.AddProductRequest, callOptions ...callopt.Option) (r *product.AddProductResponse, err error)
 	GetProductInfo(ctx context.Context, req *product.GetProductInfoRequest, callOptions ...callopt.Option) (r *product.GetProductInfoResponse, err error)
+	GetProductListInfo(ctx context.Context, callOptions ...callopt.Option) (r *product.GetProductListInfoResponse, err error)
 	DelProduct(ctx context.Context, req *product.DelProductRequest, callOptions ...callopt.Option) (r *product.DelProductResponse, err error)
 	UpdatePrice(ctx context.Context, req *product.UpdatePriceRequest, callOptions ...callopt.Option) (r *product.UpdatePriceResponse, err error)
 	UpdateStock(ctx context.Context, req *product.UpdateStockRequest, callOptions ...callopt.Option) (r *product.UpdateStockResponse, err error)
@@ -55,6 +56,11 @@ func (p *kProductServiceClient) AddProduct(ctx context.Context, req *product.Add
 func (p *kProductServiceClient) GetProductInfo(ctx context.Context, req *product.GetProductInfoRequest, callOptions ...callopt.Option) (r *product.GetProductInfoResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.GetProductInfo(ctx, req)
+}
+
+func (p *kProductServiceClient) GetProductListInfo(ctx context.Context, callOptions ...callopt.Option) (r *product.GetProductListInfoResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetProductListInfo(ctx)
 }
 
 func (p *kProductServiceClient) DelProduct(ctx context.Context, req *product.DelProductRequest, callOptions ...callopt.Option) (r *product.DelProductResponse, err error) {

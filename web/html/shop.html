@@ -2,9 +2,284 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>购物</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f9f9f9;
+        }
+
+        #productlist {
+            width: 90%;
+            max-width: 500px;
+            padding: 25px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            background-color: #f0f4f8;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        #productlist:hover {
+            transform: scale(1.02);
+        }
+
+        button {
+            margin: 20px 0;
+            padding: 14px 22px;
+            background: linear-gradient(135deg, deepskyblue, dodgerblue);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, dodgerblue, deepskyblue);
+            transform: translateY(-2px);
+        }
+
+        #productinfo {
+            width: 100%;
+            margin-top: 25px;
+            max-height: 450px;
+            overflow-y: auto;
+            padding-right: 10px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+        }
+
+        .product {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 18px;
+            margin: 12px 0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border-left: 4px solid #007BFF;
+            transition: transform 0.2s ease;
+        }
+
+        .product:hover {
+            transform: scale(1.02);
+        }
+
+        .product span {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .product span:first-child {
+            font-weight: bold;
+            color: #000;
+        }
+
+        .product span:nth-child(odd) {
+            color: #666;
+        }
+
+        .product span:nth-child(even) {
+            color: #007BFF;
+        }
+
+        .product span {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .product .product-id {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .product .product-name,
+        .product .product-stock,
+        .product .product-price {
+            color: #555;
+        }
+
+        /* For responsiveness */
+        @media (max-width: 600px) {
+            #productlist {
+                width: 95%;
+                padding: 20px;
+            }
+
+            button {
+                width: 100%;
+                font-size: 14px;
+                padding: 12px 16px;
+            }
+        }
+
+        .quantity-input {
+            width: 60px;
+            padding: 5px;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        .total-price {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #007BFF;
+        }
+
+        .buy-button {
+            margin-top: 15px;
+            padding: 8px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .buy-button:hover {
+            background-color: #218838;
+        }
+
+    </style>
 </head>
 <body>
+
+<div id="productlist">
+    <button id="getproductlist">查询商品</button>
+    <div id="productinfo"></div>
+</div>
+
+<script>
+    document.getElementById("getproductlist").addEventListener("click", async function () {
+        try {
+            const response = await fetch("/product/getproductlistinfo", {
+                method: 'GET',
+            });
+
+            const data = await response.json();
+            var div = document.getElementById("productinfo");
+
+            if (response.ok) {
+                div.innerHTML = '';
+                if (Array.isArray(data.productlist) && data.productlist.length > 0) {
+                    data.productlist.forEach(product => {
+                        // 创建商品容器
+                        var productDiv = document.createElement("div");
+                        productDiv.classList.add("product");
+
+                        var proidSpan = document.createElement("span");
+                        proidSpan.textContent = `商品ID: ${product.id}`;
+                        proidSpan.classList.add("product-id");
+
+                        var proSpan = document.createElement("span");
+                        proSpan.textContent = `商品名: ${product.name}`;
+                        proSpan.classList.add("product-name");
+
+                        var stockSpan = document.createElement("span");
+                        stockSpan.textContent = `库存: ${product.stock}`;
+                        stockSpan.classList.add("product-stock");
+
+                        var priceSpan = document.createElement("span");
+                        priceSpan.textContent = `单价: ${product.price}`;
+                        priceSpan.classList.add("product-price");
+
+                        // 创建购买数量输入框
+                        var quantityInput = document.createElement("input");
+                        quantityInput.type = "number";
+                        quantityInput.classList.add("quantity-input");
+                        quantityInput.min = 1;
+                        quantityInput.max = product.stock;
+                        quantityInput.value = 1;
+
+                        // 创建总价显示区域
+                        var totalPriceSpan = document.createElement("span");
+                        totalPriceSpan.classList.add("total-price");
+                        totalPriceSpan.textContent = `总价: ${product.price}`;
+
+                        // 创建购买按钮
+                        var buyButton = document.createElement("button");
+                        buyButton.classList.add("buy-button");
+                        buyButton.textContent = "购买";
+
+                        // 监听数量变化，更新总价
+                        quantityInput.addEventListener("input", function () {
+                            let quantity = parseInt(quantityInput.value) || 1;
+                            totalPriceSpan.textContent = `总价: ${product.price * quantity}`;
+                        });
+
+                        // 购买按钮的点击事件
+                        buyButton.addEventListener("click", async function () {
+                            try {
+                            var Token=localStorage.getItem("token")
+                            var ProductName=product.name
+                            let quantity = parseInt(quantityInput.value) || 1;
+                            var Number=quantity
+                                if(Number>product.stock){
+                                    alert("商品库存不足")
+                                    return
+                                }
+                            var Cost=Number*product.price
+                            const response = await fetch("/order/addorder", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ Token,ProductName,Number,Cost})
+                            });
+                            // 这里可以调用 API 进行购买操作
+                            const data=response.json()
+                            if(response.ok){
+                                alert(`你购买了 ${quantity} 件 ${product.name}，总价: ${product.price * quantity}`);
+                            }
+                            else {
+                                alert(data.status_msg);
+                            }
+                            } catch (error) {
+                                console.error("发生错误:", error);
+                                alert("发生错误，请重试");
+                            }
+                        });
+
+                        // 将元素添加到商品容器中
+                        productDiv.appendChild(proidSpan);
+                        productDiv.appendChild(proSpan);
+                        productDiv.appendChild(stockSpan);
+                        productDiv.appendChild(priceSpan);
+                        productDiv.appendChild(quantityInput);
+                        productDiv.appendChild(totalPriceSpan);
+                        productDiv.appendChild(buyButton);
+
+                        // 添加商品容器到#productinfo中
+                        div.appendChild(productDiv);
+                    });
+                } else {
+                    div.innerHTML = '<p class="no-products">没有找到任何商品。</p>';
+                }
+            } else {
+                alert(data.statusmsg);
+            }
+        } catch (error) {
+            console.error("发生错误:", error);
+            alert("发生错误，请重试");
+        }
+    });
+</script>
 
 </body>
 </html>

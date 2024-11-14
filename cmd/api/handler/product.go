@@ -77,6 +77,18 @@ func GetProductInfo(ctx context.Context, c *app.RequestContext) {
 		Product:    res.Product,
 	})
 }
+func GetProductListInfo(ctx context.Context, c *app.RequestContext) {
+	res, _ := rpc.GetProductListInfo(ctx)
+	if res.StatusCode == -1 {
+		BadBaseResponse(c, res.StatusMsg)
+		return
+	}
+	c.JSON(http.StatusOK, product.GetProductListInfoResponse{
+		StatusMsg:   res.StatusMsg,
+		StatusCode:  res.StatusCode,
+		Productlist: res.Productlist,
+	})
+}
 func Updatestock(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
 		ProductId int64
