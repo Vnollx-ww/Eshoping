@@ -166,7 +166,8 @@
 </div>
 
 <script>
-    document.getElementById("getproductlist").addEventListener("click", async function () {
+    // 函数用于加载商品列表
+    async function loadProductList() {
         try {
             const response = await fetch("/product/getproductlistinfo", {
                 method: 'GET',
@@ -226,30 +227,29 @@
                         // 购买按钮的点击事件
                         buyButton.addEventListener("click", async function () {
                             try {
-                            var Token=localStorage.getItem("token")
-                            var ProductName=product.name
-                            let quantity = parseInt(quantityInput.value) || 1;
-                            var Number=quantity
-                                if(Number>product.stock){
+                                var Token = localStorage.getItem("token")
+                                var ProductName = product.name
+                                let quantity = parseInt(quantityInput.value) || 1;
+                                var Number = quantity
+                                if (Number > product.stock) {
                                     alert("商品库存不足")
                                     return
                                 }
-                            var Cost=Number*product.price
-                            const response = await fetch("/order/addorder", {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({ Token,ProductName,Number,Cost})
-                            });
-                            // 这里可以调用 API 进行购买操作
-                            const data=response.json()
-                            if(response.ok){
-                                alert(`你购买了 ${quantity} 件 ${product.name}，总价: ${product.price * quantity}`);
-                            }
-                            else {
-                                alert(data.status_msg);
-                            }
+                                var Cost = Number * product.price
+                                const response = await fetch("/order/addorder", {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ Token, ProductName, Number, Cost })
+                                });
+                                const data = await response.json()
+                                if (response.ok) {
+                                    alert(`你购买了 ${quantity} 件 ${product.name}，总价: ${product.price * quantity}`);
+                                    loadProductList();  // 购买成功后刷新商品列表
+                                } else {
+                                    alert(data.status_msg);
+                                }
                             } catch (error) {
                                 console.error("发生错误:", error);
                                 alert("发生错误，请重试");
@@ -272,13 +272,16 @@
                     div.innerHTML = '<p class="no-products">没有找到任何商品。</p>';
                 }
             } else {
-                alert(data.statusmsg);
+                alert(data.status_msg);
             }
         } catch (error) {
             console.error("发生错误:", error);
             alert("发生错误，请重试");
         }
-    });
+    }
+
+    // 初始加载商品列表
+    document.getElementById("getproductlist").addEventListener("click", loadProductList);
 </script>
 
 </body>

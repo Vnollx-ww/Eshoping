@@ -11,13 +11,17 @@ import (
 func AddProduct(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
 		ProductName string
+		Stock       int64
+		Price       int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
 	req := &product.AddProductRequest{
-		Name: reqbody.ProductName,
+		Name:  reqbody.ProductName,
+		Stock: reqbody.Stock,
+		Price: reqbody.Price,
 	}
 	res, _ := rpc.AddProduct(ctx, req)
 	if res.StatusCode == -1 {

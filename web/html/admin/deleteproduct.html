@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>删除商品</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(45deg, #a3c2f7, #ffffff); /* 背景渐变 */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #productlist {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 20px 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            height: 500px; /* 增加高度 */
+            overflow-y: auto; /* 超出内容时显示滚动条 */
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        #getproductlist {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, #007BFF, #6a98e0); /* 按钮渐变 */
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        #getproductlist:hover {
+            background: linear-gradient(45deg, #0056b3, #4f7db6); /* 悬浮状态渐变 */
+        }
+
+        .product {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .product span {
+            display: block;
+            margin: 4px 0;
+            color: #333;
+        }
+
+        .delete-button {
+            padding: 8px 16px;
+            background-color: #ff5c5c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .delete-button:hover {
+            background-color: #e04d4d; /* 悬浮状态的删除按钮 */
+        }
+
+        .no-products {
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+<div id="productlist">
+    <button id="getproductlist">查询商品</button>
+    <div id="productinfo"></div>
+</div>
+
+<script>
+    // 函数用于加载商品列表
+    async function loadProductList() {
+        try {
+            const response = await fetch("/product/getproductlistinfo", {
+                method: 'GET',
+            });
+
+            const data = await response.json();
+            var div = document.getElementById("productinfo");
+
+            if (response.ok) {
+                div.innerHTML = '';
+                if (Array.isArray(data.productlist) && data.productlist.length > 0) {
+                    data.productlist.forEach(product => {
+                        // 创建商品容器
+                        var productDiv = document.createElement("div");
+                        productDiv.classList.add("product");
+
+                        var proidSpan = document.createElement("span");
+                        proidSpan.textContent = `商品ID: ${product.id}`;
+                        proidSpan.classList.add("product-id");
+
+                        var proSpan = document.createElement("span");
+                        proSpan.textContent = `商品名: ${product.name}`;
+                        proSpan.classList.add("product-name");
+
+                        var stockSpan = document.createElement("span");
+                        stockSpan.textContent = `库存: ${product.stock}`;
+                        stockSpan.classList.add("product-stock");
+
+                        var priceSpan = document.createElement("span");
+                        priceSpan.textContent = `单价: ${product.price}`;
+                        priceSpan.classList.add("product-price");
+
+                        // 创建删除按钮
+                        var deleteButton = document.createElement("button");
+                        deleteButton.classList.add("delete-button");
+                        deleteButton.textContent = "删除该商品";
+
+                        // 删除按钮的点击事件
+                        deleteButton.addEventListener("click", async function () {
+                            // 显示确认对话框
+                            const userConfirmed = confirm(`确定删除商品 ${product.name} 吗？`);
+                            if (userConfirmed) {
+                                try {
+                                    var productid = product.id;
+                                    const response = await fetch("/product/deleteproduct", {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({ productid })
+                                    });
+                                    const data = await response.json();
+                                    if (response.ok) {
+                                        alert(`你删除了商品 ${product.name}`);
+                                        loadProductList();  // 删除成功后刷新商品列表
+                                    } else {
+                                        alert(data.status_msg);
+                                    }
+                                } catch (error) {
+                                    console.error("发生错误:", error);
+                                    alert("发生错误，请重试");
+                                }
+                            }
+                        });
+
+                        // 将元素添加到商品容器中
+                        productDiv.appendChild(proidSpan);
+                        productDiv.appendChild(proSpan);
+                        productDiv.appendChild(stockSpan);
+                        productDiv.appendChild(priceSpan);
+                        productDiv.appendChild(deleteButton);
+
+                        // 添加商品容器到#productinfo中
+                        div.appendChild(productDiv);
+                    });
+                } else {
+                    div.innerHTML = '<p class="no-products">没有找到任何商品。</p>';
+                }
+            } else {
+                alert(data.status_msg);
+            }
+        } catch (error) {
+            console.error("发生错误:", error);
+            alert("发生错误，请重试");
+        }
+    }
+
+    // 初始加载商品列表
+    document.getElementById("getproductlist").addEventListener("click", loadProductList);
+</script>
+
+</body>
+</html>

@@ -27,8 +27,7 @@ struct UserRegisterResponse {
     4: string token
 }
 struct GetUserInfoRequest {
-    1: i64    user_id
-    2: string token
+    1: string token
 }
 struct GetUserInfoResponse {
     1: i32    status_code
@@ -36,9 +35,8 @@ struct GetUserInfoResponse {
     3: User user
 }
 struct UpdateNameRequest{
-1:i64 user_id
-2:string token
-3:string newname
+1:string token
+2:string newname
 }
 struct UpdateNameResponse{
 1: i32    status_code
@@ -46,10 +44,9 @@ struct UpdateNameResponse{
 3: bool succed
 }
 struct UpdatePasswordRequest{
-1:i64 user_id
-2:string token
-3:string oldpassword
-4:string newpassword
+1:string token
+2:string oldpassword
+3:string newpassword
 }
 struct UpdatePasswordResponse{
 1: i32    status_code
@@ -57,9 +54,8 @@ struct UpdatePasswordResponse{
 3: bool succed
 }
 struct UpdateCostRequest{
-1:i64 user_id
-2:string token
-3:i64 addcost
+1:string token
+2:i64 addcost
 }
 struct UpdateCostResponse{
 1: i32    status_code
@@ -67,9 +63,8 @@ struct UpdateCostResponse{
 3: bool succed
 }
 struct UpdateBalanceRequest{
-1:i64 user_id
-2:string token
-3:i64 addbalance
+1:string token
+2:i64 addbalance
 }
 struct UpdateBalanceResponse{
 1: i32    status_code

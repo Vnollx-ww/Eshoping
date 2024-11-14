@@ -7,7 +7,8 @@ struct Product{//商品有id,商品名，有单价，库存
 }
 struct AddProductRequest{
 1:string name
-2:string token
+2:i64 stock
+3:i64 price
 }
 struct AddProductResponse{
 1: i32    status_code
@@ -16,7 +17,6 @@ struct AddProductResponse{
 }
 struct GetProductInfoRequest{
 1:i64 productid
-2:string token
 }
 struct GetProductInfoResponse{
 1: i32    status_code
@@ -30,7 +30,6 @@ struct GetProductListInfoResponse{
 }
 struct DelProductRequest{
 1:i64 productid
-2:string token
 }
 struct DelProductResponse{
 1: i32    status_code

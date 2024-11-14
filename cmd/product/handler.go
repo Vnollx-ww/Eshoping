@@ -59,6 +59,8 @@ func (s *ProductServiceImpl) AddProduct(ctx context.Context, req *product.AddPro
 	}
 	pro = &db.Product{
 		ProductName: req.Name,
+		Price:       req.Price,
+		Stock:       req.Stock,
 	}
 	err = db.CreateProduct(ctx, pro)
 	if err != nil {
@@ -97,7 +99,7 @@ func (s *ProductServiceImpl) DelProduct(ctx context.Context, req *product.DelPro
 	if pro == nil {
 		return BadDelProductResponse("商品不存在"), nil
 	}
-	err = db.DeleteProduct(ctx, req.Productid)
+	err = db.DeleteProduct(ctx, pro)
 	if err != nil {
 		log.Println(err)
 		return BadDelProductResponse("删除商品失败"), nil
@@ -115,7 +117,7 @@ func (s *ProductServiceImpl) UpdatePrice(ctx context.Context, req *product.Updat
 	if pro == nil {
 		return BadUpdatePriceResponse("商品不存在"), nil
 	}
-	err = db.UpdatePrice(ctx, req.ProductId, req.Newprice_)
+	err = db.UpdatePrice(ctx, pro, req.Newprice_)
 	if err != nil {
 		log.Println(err)
 		return BadUpdatePriceResponse("修改商品价格失败"), nil
@@ -133,7 +135,7 @@ func (s *ProductServiceImpl) UpdateStock(ctx context.Context, req *product.Updat
 	if pro == nil {
 		return BadUpdateStockResponse("商品不存在"), nil
 	}
-	err = db.UpdateStock(ctx, req.ProductId, req.Addstock)
+	err = db.UpdateStock(ctx, pro, req.Addstock)
 	if err != nil {
 		log.Println(err)
 		return BadUpdateStockResponse("修改商品库存失败"), nil

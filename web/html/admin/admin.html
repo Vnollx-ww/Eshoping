@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员</title>
+    <style>
+        /* 页面背景和字体 */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 管理面板容器样式 */
+        #manager {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* 按钮容器 */
+        #manager button {
+            width: 250px;
+            padding: 15px;
+            margin: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* 按钮的不同状态 */
+        #manager button#addpro {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #manager button#deletepro {
+            background-color: #f44336;
+            color: white;
+        }
+
+        #manager button#updatestock {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        #manager button#updateprice {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        /* 鼠标悬停时的效果 */
+        #manager button:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        /* 按钮点击时的效果 */
+        #manager button:active {
+            transform: scale(1);
+        }
+
+        /* 页面标题样式 */
+        h1 {
+            font-size: 2rem;
+            color: #333;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+<h1>管理员操作面板</h1>
+<div id="manager">
+    <button id="addpro">添加商品</button>
+    <button id="deletepro">删除商品</button>
+    <button id="updatestock">修改商品库存</button>
+    <button id="updateprice">修改商品价格</button>
+</div>
+<script>
+    document.getElementById('addpro').addEventListener('click', function() {
+        window.location.href = "addproduct";
+    });
+    document.getElementById('deletepro').addEventListener('click', function() {
+        window.location.href = "deleteproduct";
+    });
+    document.getElementById('updatestock').addEventListener('click', function() {
+        window.location.href = "updatestock";
+    });
+    document.getElementById('updateprice').addEventListener('click', function() {
+        window.location.href = "updateprice";
+    });
+</script>
+</body>
+</html>

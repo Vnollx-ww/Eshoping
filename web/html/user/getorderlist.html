@@ -102,6 +102,19 @@
         .order .order-time {
             color: #555;
         }
+        .delete-button {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .delete-button:hover {
+            background-color: #e60000;
+        }
 
         /* For responsiveness */
         @media (max-width: 600px) {
@@ -122,9 +135,31 @@
     <button id="getorderlist">查询订单</button>
     <div id="orderinfo"></div>
 </div>
-
 <script>
-    document.getElementById("getorderlist").addEventListener("click", async function () {
+    document.getElementById("getorderlist").addEventListener("click", fetchOrderList);
+    async function deleteOrder(orderId) {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await fetch("/order/deleteorder", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ token, orderId })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                alert("订单删除成功！");
+                fetchOrderList();  // 重新加载订单列表
+            } else {
+                alert("删除失败：" + data.status_msg);
+            }
+        } catch (error) {
+            console.error("删除订单时发生错误:", error);
+            alert("删除订单时发生错误，请重试");
+        }
+    }
+    async function fetchOrderList() {
         try {
             const token = localStorage.getItem("token");
             const response = await fetch("/order/orderlistbyuserid", {
@@ -142,7 +177,6 @@
                 div.innerHTML = '';
                 if (Array.isArray(data.orderlist) && data.orderlist.length > 0) {
                     data.orderlist.forEach(order => {
-                        // 创建订单容器
                         var orderDiv = document.createElement("div");
                         orderDiv.classList.add("order");
 
@@ -170,6 +204,19 @@
                         createtimeSpan.textContent = `创建时间: ${order.create_time}`;
                         createtimeSpan.classList.add("order-time");
 
+                        // 删除按钮
+                        var deleteButton = document.createElement("button");
+                        deleteButton.textContent = "删除订单";
+                        deleteButton.classList.add("delete-button");
+
+                        // 添加监听器到删除按钮
+                        deleteButton.addEventListener("click", function() {
+                            const confirmation = confirm("你确定要删除订单吗？");
+                            if (confirmation) {
+                                deleteOrder(order.order_id);
+                            }
+                        });
+
                         // 将所有信息添加到订单容器中
                         orderDiv.appendChild(orderSpan);
                         orderDiv.appendChild(userSpan);
@@ -177,6 +224,7 @@
                         orderDiv.appendChild(numberSpan);
                         orderDiv.appendChild(costSpan);
                         orderDiv.appendChild(createtimeSpan);
+                        orderDiv.appendChild(deleteButton);
 
                         // 添加订单容器到#orderinfo中
                         div.appendChild(orderDiv);
@@ -191,7 +239,7 @@
             console.error("发生错误:", error);
             alert("发生错误，请重试");
         }
-    });
+    }
 </script>
 </body>
 </html>

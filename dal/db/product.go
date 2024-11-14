@@ -50,35 +50,29 @@ func GetProductListInfo(ctx context.Context) ([]*Product, error) {
 	}
 	return products, nil
 }
-func DeleteProduct(ctx context.Context, ID int64) error {
-	pro := new(Product)
+func DeleteProduct(ctx context.Context, pro *Product) error {
 	db := GetDB()
-	if err := db.Where("ID = ?", ID).First(&pro).Error; err == nil {
-		db.Unscoped().Delete(&pro)
-		return nil
-	} else {
+	err := db.Unscoped().Delete(&pro).Error
+	if err != nil {
 		return err
 	}
+	return nil
 }
-func UpdateStock(ctx context.Context, ID int64, stock int64) error {
-	pro := new(Product)
+func UpdateStock(ctx context.Context, pro *Product, stock int64) error {
 	db := GetDB()
-	if err := db.Where("ID = ?", ID).First(&pro).Error; err == nil {
-		pro.Stock += stock
-		db.Save(&pro)
-		return nil
-	} else {
+	pro.Stock += stock
+	err := db.Save(&pro).Error
+	if err != nil {
 		return err
 	}
+	return nil
 }
-func UpdatePrice(ctx context.Context, ID int64, price int64) error {
-	pro := new(Product)
+func UpdatePrice(ctx context.Context, pro *Product, price int64) error {
 	db := GetDB()
-	if err := db.Where("ID = ?", ID).First(&pro).Error; err == nil {
-		pro.Price = price
-		db.Save(&pro)
-		return nil
-	} else {
+	pro.Price = price
+	err := db.Save(&pro).Error
+	if err != nil {
 		return err
 	}
+	return nil
 }

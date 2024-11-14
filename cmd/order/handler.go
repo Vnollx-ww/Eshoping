@@ -2,7 +2,7 @@ package main
 
 import (
 	"Eshop/dal/db"
-	orderlist "Eshop/kitex_gen/orderlist"
+	"Eshop/kitex_gen/orderlist"
 	"Eshop/kitex_gen/product"
 	"Eshop/kitex_gen/product/productservice"
 	"Eshop/kitex_gen/user"
@@ -84,12 +84,12 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 		log.Println(err)
 		return BadAddOrderResponse("订单创建失败"), err
 	}
-	_, err = s.usrcli.UpdateCost(ctx, &user.UpdateCostRequest{Token: req.Token, UserId: int64(usr.ID), Addcost: order.Cost})
+	_, err = s.usrcli.UpdateCost(ctx, &user.UpdateCostRequest{Token: req.Token, Addcost: order.Cost})
 	if err != nil {
 		log.Println(err)
 		return BadAddOrderResponse("用户消费总额更改失败"), err
 	}
-	_, err = s.usrcli.UpdateBalance(ctx, &user.UpdateBalanceRequest{Token: req.Token, UserId: int64(usr.ID), Addbalance: -order.Cost})
+	_, err = s.usrcli.UpdateBalance(ctx, &user.UpdateBalanceRequest{Token: req.Token, Addbalance: -order.Cost})
 	if err != nil {
 		log.Println(err)
 		return BadAddOrderResponse("用户余额更改失败"), err

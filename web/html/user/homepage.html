@@ -17,9 +17,37 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: linear-gradient(135deg, #a0c4ff, #4e5d94);
+            background: linear-gradient(135deg, #b3d9ff, #80bfff);
+            background-size: 200% 200%; /* 动态渐变效果 */
             color: #333;
             overflow: hidden;
+            position: relative;
+            animation: gradientAnimation 5s ease infinite;
+        }
+
+        /* 增加背景噪点和渐变的纹理 */
+        body::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/asfalt.png'); /* 轻微的纹理 */
+            opacity: 0.2; /* 设置透明度使得纹理效果不太抢眼 */
+            pointer-events: none; /* 让纹理层不会影响用户交互 */
+        }
+        /* 动态渐变动画 */
+        @keyframes gradientAnimation {
+            0% {
+                background-position: 200% 200%;
+            }
+            50% {
+                background-position: 0% 0%;
+            }
+            100% {
+                background-position: 200% 200%;
+            }
         }
 
         #container {
@@ -125,31 +153,13 @@
             flex-direction: column;
             align-items: center;
         }
-
-        #toggleInfoBtn {
-            margin-top: 10px;
-            background-color: #f0f0f0;
-            color: #333;
-            border-radius: 50px;
-            padding: 5px 15px;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s ease;
-        }
-
-        #toggleInfoBtn:hover {
-            background-color: #ddd;
-        }
     </style>
 </head>
 <body>
 <div id="container">
     <div id="InfoDiv">
-        <h1>欢迎回来!</h1>
-        <p id="message-container">加载中...</p>
-        <button id="fetchUserInfo">查询用户信息</button>
-        <button id="toggleInfoBtn" style="display: none;">收起</button>
+        <h1 style="text-align: center">欢迎回来!</h1>
+        <p id="message-container" style="text-align: center">加载中...</p>
         <div id="userinfo"></div>
     </div>
 
@@ -176,7 +186,8 @@
         messageContainer.textContent = "没有消息";
     }
 
-    document.getElementById('fetchUserInfo').addEventListener('click', async function() {
+    // 自动加载用户信息
+    window.onload = async function() {
         try {
             const token = localStorage.getItem("token");
             const response = await fetch("/user/getuserinfo", {
@@ -188,13 +199,14 @@
             });
             const data = await response.json();
             if (response.ok) {
+                // 显示用户信息
+                const userinfoDiv = document.getElementById('userinfo');
                 userinfoDiv.innerHTML = `
                     <p><strong>用户名:</strong> ${data.user.name}</p>
                     <p><strong>用户ID:</strong> ${data.user.id}</p>
                     <p><strong>用户余额:</strong> ${data.user.balance}</p>
                     <p><strong>用户消费:</strong> ${data.user.cost}</p>
                 `;
-                toggleInfoBtn.style.display = 'inline-block';
             } else {
                 alert(data.message);
             }
@@ -202,18 +214,9 @@
             console.error("发生错误:", error);
             alert("发生错误，请重试");
         }
-    });
+    }
 
-    toggleInfoBtn.addEventListener('click', function() {
-        if (userinfoDiv.style.display === 'none') {
-            userinfoDiv.style.display = 'block';
-            toggleInfoBtn.textContent = '收起';
-        } else {
-            userinfoDiv.style.display = 'none';
-            toggleInfoBtn.textContent = '展开';
-        }
-    });
-
+    // 页面中各个按钮的事件处理
     document.getElementById('Recharge').addEventListener('click', function() {
         window.location.href = "recharge";
     });

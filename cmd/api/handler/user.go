@@ -61,10 +61,10 @@ func Register(ctx context.Context, c *app.RequestContext) {
 }
 func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
-		UserId int64
-		Token  string `json:"token"`
+		Token string `json:"token"`
 	}
 	if err := c.Bind(&reqbody); err != nil {
+		log.Println(err)
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
@@ -84,7 +84,6 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 }
 func UpdateName(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
-		UserId  int64
 		Token   string `json:"token"`
 		NewName string `json:"newname"`
 	}
@@ -94,7 +93,6 @@ func UpdateName(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	req := &user.UpdateNameRequest{
-		UserId:   reqbody.UserId,
 		Token:    reqbody.Token,
 		Newname_: reqbody.NewName,
 	}
@@ -111,7 +109,6 @@ func UpdateName(ctx context.Context, c *app.RequestContext) {
 }
 func UpdatePassword(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
-		UserId  int64
 		Token   string `json:"token"`
 		OldPass string `json:"oldpassword"`
 		NewPass string `json:"newpassword"`
@@ -121,7 +118,6 @@ func UpdatePassword(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	req := &user.UpdatePasswordRequest{
-		UserId:       reqbody.UserId,
 		Token:        reqbody.Token,
 		Oldpassword:  reqbody.OldPass,
 		Newpassword_: reqbody.NewPass,
@@ -139,7 +135,6 @@ func UpdatePassword(ctx context.Context, c *app.RequestContext) {
 }
 func UpdateBalance(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
-		UserId     int64
 		Token      string `json:"token"`
 		AddBalance int64  `json:"balance"`
 	}
@@ -148,7 +143,6 @@ func UpdateBalance(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	req := &user.UpdateBalanceRequest{
-		UserId:     reqbody.UserId,
 		Token:      reqbody.Token,
 		Addbalance: reqbody.AddBalance,
 	}
@@ -165,7 +159,6 @@ func UpdateBalance(ctx context.Context, c *app.RequestContext) {
 }
 func UpdateCost(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
-		UserId  int64
 		Token   string `json:"token"`
 		AddCost int64
 	}
@@ -174,7 +167,6 @@ func UpdateCost(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	req := &user.UpdateCostRequest{
-		UserId:  reqbody.UserId,
 		Token:   reqbody.Token,
 		Addcost: reqbody.AddCost,
 	}

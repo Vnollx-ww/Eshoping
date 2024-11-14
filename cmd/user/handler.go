@@ -2,7 +2,7 @@ package main
 
 import (
 	"Eshop/dal/db"
-	user "Eshop/kitex_gen/user"
+	"Eshop/kitex_gen/user"
 	"Eshop/pkg/middlerware"
 	"context"
 	"log"
@@ -14,7 +14,7 @@ type UserServiceImpl struct{}
 func BadLoginResponse(s string) *user.UserLoginResponse {
 	return &user.UserLoginResponse{StatusCode: -1, StatusMsg: s}
 }
-func GoodLoginResponse(s string, token string, ID int64) *user.UserLoginResponse {
+func GoodLoginResponse(s string, token string) *user.UserLoginResponse {
 	return &user.UserLoginResponse{StatusCode: 200, StatusMsg: s, Token: token}
 }
 func BadRegisterResponse(s string) *user.UserRegisterResponse {
@@ -72,14 +72,14 @@ func (s *UserServiceImpl) UserLogin(ctx context.Context, req *user.UserLoginRequ
 		log.Println(err.Error())
 		return BadLoginResponse("Token生成失败"), nil
 	}
-	return GoodLoginResponse("欢迎你！ "+req.Username, token, int64(usr.ID)), nil
+	return GoodLoginResponse("欢迎你！ "+req.Username, token), nil
 }
 
 // UserRegiter implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UserRegiter(ctx context.Context, req *user.UserRegisterRequest) (resp *user.UserRegisterResponse, err error) {
 	usr, err := db.GetUserByName(ctx, req.Username)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 		return BadRegisterResponse("注册失败：服务器内部错误"), nil
 	}
 	if usr != nil {
@@ -88,7 +88,7 @@ func (s *UserServiceImpl) UserRegiter(ctx context.Context, req *user.UserRegiste
 	usr = &db.User{UserName: req.Username, Password: req.Password}
 	err = db.CreateUser(ctx, usr)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 		return BadRegisterResponse("注册失败"), nil
 	}
 	return GoodRegisterResponse("注册成功", int64(usr.ID)), nil
@@ -98,12 +98,12 @@ func (s *UserServiceImpl) UserRegiter(ctx context.Context, req *user.UserRegiste
 func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfoRequest) (resp *user.GetUserInfoResponse, err error) {
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil || mc == nil {
-		log.Println(err.Error())
+		log.Println(err)
 		return BadGetUserInfoResponse("token解析失败"), nil
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 		return BadGetUserInfoResponse("获取用户信息失败：服务器内部错误"), nil
 	}
 	if usr == nil {
@@ -117,12 +117,12 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 func (s *UserServiceImpl) UpdateName(ctx context.Context, req *user.UpdateNameRequest) (resp *user.UpdateNameResponse, err error) {
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil || mc == nil {
-		log.Println(err.Error())
+		log.Println(err)
 		return BadUpdateNameResponse("token解析失败"), nil
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 		return BadUpdateNameResponse("获取用户信息失败：服务器内部错误"), nil
 	}
 	if usr == nil {
@@ -144,7 +144,7 @@ func (s *UserServiceImpl) UpdatePassword(ctx context.Context, req *user.UpdatePa
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 		return BadUpdatePasswordResponse("获取用户信息失败：服务器内部错误"), nil
 	}
 	if usr == nil {
@@ -165,12 +165,12 @@ func (s *UserServiceImpl) UpdatePassword(ctx context.Context, req *user.UpdatePa
 func (s *UserServiceImpl) UpdateCost(ctx context.Context, req *user.UpdateCostRequest) (resp *user.UpdateCostResponse, err error) {
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 		return BadUpdateCostResponse("token解析失败"), nil
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 		return BadUpdateCostResponse("获取用户信息失败：服务器内部错误"), nil
 	}
 	if usr == nil {
@@ -178,7 +178,7 @@ func (s *UserServiceImpl) UpdateCost(ctx context.Context, req *user.UpdateCostRe
 	}
 	err = db.UpdateCost(ctx, usr, req.Addcost)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 		return BadUpdateCostResponse("修改花费失败"), nil
 	}
 	return GoodUpdateCostResponse("修改花费成功", true), nil
@@ -188,12 +188,12 @@ func (s *UserServiceImpl) UpdateCost(ctx context.Context, req *user.UpdateCostRe
 func (s *UserServiceImpl) UpdateBalance(ctx context.Context, req *user.UpdateBalanceRequest) (resp *user.UpdateBalanceResponse, err error) {
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 		return BadUpdateBalanceResponse("token解析失败"), nil
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 		return BadUpdateBalanceResponse("获取用户信息失败：服务器内部错误"), nil
 	}
 	if usr == nil {
@@ -201,7 +201,7 @@ func (s *UserServiceImpl) UpdateBalance(ctx context.Context, req *user.UpdateBal
 	}
 	err = db.UpdateBalance(ctx, usr, req.Addbalance)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 		return BadUpdateBalanceResponse("修改余额失败"), nil
 	}
 	return GoodUpdateBalanceResponse("修改余额成功", true), nil

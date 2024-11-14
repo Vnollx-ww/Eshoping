@@ -24,28 +24,43 @@ func LoadHtml(hz *server.Hertz) {
 		c.File("D:/GolandProgram/Eshoping/web/html/index.html")
 	})
 	hz.GET("/login", func(ctx context.Context, c *app.RequestContext) {
-		c.File("D:/GolandProgram/Eshoping/web/html/login.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/login.html")
 	})
 	hz.GET("/register", func(ctx context.Context, c *app.RequestContext) {
-		c.File("D:/GolandProgram/Eshoping/web/html/register.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/register.html")
 	})
 	hz.GET("/homepage", func(ctx context.Context, c *app.RequestContext) {
-		c.File("D:/GolandProgram/Eshoping/web/html/homepage.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/homepage.html")
 	})
 	hz.GET("/shop", func(ctx context.Context, c *app.RequestContext) {
-		c.File("D:/GolandProgram/Eshoping/web/html/shop.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/shop.html")
 	})
 	hz.GET("/recharge", func(ctx context.Context, c *app.RequestContext) {
-		c.File("D:/GolandProgram/Eshoping/web/html/recharge.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/recharge.html")
 	})
 	hz.GET("/updatename", func(ctx context.Context, c *app.RequestContext) {
-		c.File("D:/GolandProgram/Eshoping/web/html/updatename.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/updatename.html")
 	})
 	hz.GET("/updatepassword", func(ctx context.Context, c *app.RequestContext) {
-		c.File("D:/GolandProgram/Eshoping/web/html/updatepassword.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/updatepassword.html")
 	})
 	hz.GET("/getorderlist", func(ctx context.Context, c *app.RequestContext) {
-		c.File("D:/GolandProgram/Eshoping/web/html/getorderlist.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/getorderlist.html")
+	})
+	hz.GET("/admin", func(ctx context.Context, c *app.RequestContext) {
+		c.File("D:/GolandProgram/Eshoping/web/html/admin/admin.html")
+	})
+	hz.GET("/addproduct", func(ctx context.Context, c *app.RequestContext) {
+		c.File("D:/GolandProgram/Eshoping/web/html/admin/addproduct.html")
+	})
+	hz.GET("/deleteproduct", func(ctx context.Context, c *app.RequestContext) {
+		c.File("D:/GolandProgram/Eshoping/web/html/admin/deleteproduct.html")
+	})
+	hz.GET("/updateprice", func(ctx context.Context, c *app.RequestContext) {
+		c.File("D:/GolandProgram/Eshoping/web/html/admin/updateprice.html")
+	})
+	hz.GET("/updatestock", func(ctx context.Context, c *app.RequestContext) {
+		c.File("D:/GolandProgram/Eshoping/web/html/admin/updatestock.html")
 	})
 }
 func registerGroup(hz *server.Hertz) {
