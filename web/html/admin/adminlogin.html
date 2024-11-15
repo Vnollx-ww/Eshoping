@@ -3,22 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>注册</title>
+    <title>管理员登录</title>
     <script>
         function check(){
             var username=document.getElementById("username").value;
             var password=document.getElementById("password").value;
-            var repassword=document.getElementById("repassword").value;
             if(username===""){
-                alert("用户名不能为空!");
+                alert("管理员用户名不能为空!");
                 return false;
             }
             if(password===""){
                 alert("密码不能为空!");
-                return false;
-            }
-            if(password!==repassword){
-                alert("两次密码不一致!");
                 return false;
             }
             return true;
@@ -34,14 +29,13 @@
             background: linear-gradient(135deg, #ffffff, #a2c8ff); /* 白蓝渐变 */
             font-family: 'Arial', sans-serif;
         }
-        #registerdiv {
-            width: 100%;
-            max-width: 380px;
+        #logindiv {
+            width: 400px;
             padding: 20px;
             border-radius: 10px;
             background-color: #ffffff;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* 阴影效果 */
-            opacity: 0.95;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* 软阴影 */
+            opacity: 0.9;
         }
         #title {
             text-align: center;
@@ -65,6 +59,9 @@
         .input-group input:focus {
             border-color: #4A90E2;
             outline: none;
+        }
+        #subdiv {
+            margin-top: 20px;  /* 增加按钮和输入框之间的间距 */
         }
         .button {
             width: 100%;
@@ -107,7 +104,7 @@
             text-decoration: underline;
         }
         @media (max-width: 500px) {
-            #registerdiv {
+            #logindiv {
                 width: 90%;
                 padding: 15px;
             }
@@ -115,22 +112,18 @@
     </style>
 </head>
 <body>
-<div id="registerdiv">
-    <form action="/user/register" method="post" id="form">
-        <h1 id="title">注册</h1>
+<div id="logindiv">
+    <form action="user/adminlogin" method="post" id="form">
+        <h1 id="title">管理员登录</h1>
         <div class="input-group">
-            <input type="text" id="username" placeholder="请输入用户名" required />
+            <input type="text" id="username" placeholder="请输入管理员用户名" required />
         </div>
         <div class="input-group">
             <input type="password" id="password" placeholder="请输入密码" required />
         </div>
-        <div class="input-group">
-            <input type="password" id="repassword" placeholder="请再次输入密码" required />
-        </div>
         <div id="subdiv">
-            <button type="submit" class="button">注册</button>
+            <button type="submit" class="button">登录</button>
             <button type="reset" class="button reset-btn">重置</button>
-            <p>已有账号? <a href="login">登录</a></p>
         </div>
     </form>
 </div>
@@ -139,13 +132,14 @@
     document.getElementById("form").addEventListener('submit', async function (e) {
         if(!check()){
             e.preventDefault();
-            return ;
+            return;
         }
         e.preventDefault();
-        var username = document.getElementById('username').value;
-        var password = document.getElementById('password').value;
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+
         try {
-            const response = await fetch("/user/register", {
+            const response = await fetch("/user/adminlogin", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -153,11 +147,15 @@
                 body: JSON.stringify({ username, password })
             });
             var data = await response.json();
-            alert(data.status_msg);
+            localStorage.setItem("token", data.token);
             if (response.ok) {
+                alert("管理员登录成功！");
+                localStorage.setItem('message', data.status_msg);
                 setTimeout(() => {
-                    window.location.href = "login"; // 注册成功后跳转到登录页面
+                    window.location.href = "admin";
                 }, 1000);
+            } else {
+                alert(data.status_msg);
             }
         } catch (error) {
             console.error("发生错误:", error);

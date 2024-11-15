@@ -169,7 +169,6 @@
         <button id="updatename">修改用户名</button>
         <button id="updatepassword">修改密码</button>
         <button id="fetchOrderListInfo">查看购买记录</button>
-        <button id="AdminEntrance">管理员入口</button> <!-- 新增管理员入口按钮 -->
     </div>
 </div>
 
@@ -235,11 +234,6 @@
 
     document.getElementById('fetchOrderListInfo').addEventListener('click', function() {
         window.location.href = "getorderlist";
-    });
-
-    // 管理员入口按钮事件
-    document.getElementById('AdminEntrance').addEventListener('click', function() {
-        window.location.href = "admin"; // 此处可以更改为管理员页面的URL
     });
 </script>
 </body>

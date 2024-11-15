@@ -2,6 +2,7 @@ package main
 
 import (
 	"Eshop/dal/db"
+	"Eshop/dal/rs"
 	product "Eshop/kitex_gen/product"
 	"context"
 	"log"
@@ -109,6 +110,16 @@ func (s *ProductServiceImpl) DelProduct(ctx context.Context, req *product.DelPro
 
 // UpdateStock implements the ProductServiceImpl interface.
 func (s *ProductServiceImpl) UpdatePrice(ctx context.Context, req *product.UpdatePriceRequest) (resp *product.UpdatePriceResponse, err error) {
+	lockKey := rs.RedisLockKeyPrefix + string(req.ProductId) + "price"
+	locked, err := rs.AcquireLock(ctx, lockKey) //获取分布式锁
+	if err != nil {
+		log.Println("获取 Redis 锁失败:", err) //锁已存在
+		return BadUpdatePriceResponse("获取价格锁失败，稍后重试"), nil
+	}
+	if !locked {
+		return BadUpdatePriceResponse("价格操作正在进行中，请稍后重试"), nil
+	}
+	defer rs.ReleaseLock(ctx, lockKey) // 确保操作完成后释放锁
 	pro, err := db.GetProductByID(ctx, req.ProductId)
 	if err != nil {
 		log.Println(err)
@@ -127,6 +138,16 @@ func (s *ProductServiceImpl) UpdatePrice(ctx context.Context, req *product.Updat
 
 // UpdateStock implements the ProductServiceImpl interface.
 func (s *ProductServiceImpl) UpdateStock(ctx context.Context, req *product.UpdateStockRequest) (resp *product.UpdateStockResponse, err error) {
+	lockKey := rs.RedisLockKeyPrefix + string(req.ProductId) + "stock"
+	locked, err := rs.AcquireLock(ctx, lockKey) //获取分布式锁
+	if err != nil {
+		log.Println("获取 Redis 锁失败:", err) //锁已存在
+		return BadUpdateStockResponse("获取库存锁失败，稍后重试"), nil
+	}
+	if !locked {
+		return BadUpdateStockResponse("库存操作正在进行中，请稍后重试"), nil
+	}
+	defer rs.ReleaseLock(ctx, lockKey) // 确保操作完成后释放锁
 	pro, err := db.GetProductByID(ctx, req.ProductId)
 	if err != nil {
 		log.Println(err)

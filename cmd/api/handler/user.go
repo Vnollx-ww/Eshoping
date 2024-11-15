@@ -2,6 +2,7 @@ package handler
 
 import (
 	"Eshop/cmd/api/rpc"
+	"Eshop/kitex_gen/base"
 	"Eshop/kitex_gen/user"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
@@ -9,6 +10,24 @@ import (
 	"net/http"
 )
 
+func AdminLogin(ctx context.Context, c *app.RequestContext) {
+	var reqbody struct {
+		Username string
+		Password string
+	}
+	if err := c.Bind(&reqbody); err != nil {
+		BadBaseResponse(c, "无效的请求格式")
+		return
+	}
+	password := "vnollx"
+	username := "root"
+	if username == reqbody.Username && password == reqbody.Password {
+		c.JSON(http.StatusOK, base.Base{
+			StatusCode: 200,
+			StatusMsg:  "管理员登录成功",
+		})
+	}
+}
 func Login(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
 		Username string

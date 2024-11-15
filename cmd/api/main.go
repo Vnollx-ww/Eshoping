@@ -26,6 +26,7 @@ func LoadHtml(hz *server.Hertz) {
 	hz.GET("/login", func(ctx context.Context, c *app.RequestContext) {
 		c.File("D:/GolandProgram/Eshoping/web/html/user/login.html")
 	})
+
 	hz.GET("/register", func(ctx context.Context, c *app.RequestContext) {
 		c.File("D:/GolandProgram/Eshoping/web/html/user/register.html")
 	})
@@ -47,9 +48,13 @@ func LoadHtml(hz *server.Hertz) {
 	hz.GET("/getorderlist", func(ctx context.Context, c *app.RequestContext) {
 		c.File("D:/GolandProgram/Eshoping/web/html/user/getorderlist.html")
 	})
+	hz.GET("/adminlogin", func(ctx context.Context, c *app.RequestContext) {
+		c.File("D:/GolandProgram/Eshoping/web/html/admin/adminlogin.html")
+	})
 	hz.GET("/admin", func(ctx context.Context, c *app.RequestContext) {
 		c.File("D:/GolandProgram/Eshoping/web/html/admin/admin.html")
 	})
+
 	hz.GET("/addproduct", func(ctx context.Context, c *app.RequestContext) {
 		c.File("D:/GolandProgram/Eshoping/web/html/admin/addproduct.html")
 	})
@@ -67,6 +72,7 @@ func registerGroup(hz *server.Hertz) {
 	user := hz.Group("/user")
 	{
 		user.POST("/register", handler.Register)
+		user.POST("/adminlogin", handler.AdminLogin)
 		user.POST("/login", handler.Login)
 		user.POST("/getuserinfo", handler.GetUserInfo)
 		user.POST("/updatepassword", handler.UpdatePassword)

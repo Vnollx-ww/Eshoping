@@ -5,7 +5,6 @@ import (
 	"Eshop/kitex_gen/orderlist"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
-	"log"
 	"net/http"
 )
 
@@ -81,7 +80,6 @@ func GetOrderListByUserID(ctx context.Context, c *app.RequestContext) {
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
 	}
-	log.Println(res.Orderlist)
 	c.JSON(http.StatusOK, orderlist.GetOrderListByUserIDResponse{
 		StatusCode: http.StatusOK,
 		StatusMsg:  "获取用户订单列表成功",
