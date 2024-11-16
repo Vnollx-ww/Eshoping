@@ -129,6 +129,20 @@ func (p *Order) FastRead(buf []byte) (int, error) {
 					goto SkipFieldError
 				}
 			}
+		case 7:
+			if fieldTypeId == thrift.STRING {
+				l, err = p.FastReadField7(buf[offset:])
+				offset += l
+				if err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
+				offset += l
+				if err != nil {
+					goto SkipFieldError
+				}
+			}
 		default:
 			l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
 			offset += l
@@ -242,6 +256,20 @@ func (p *Order) FastReadField6(buf []byte) (int, error) {
 	} else {
 		offset += l
 
+		p.Address = v
+
+	}
+	return offset, nil
+}
+
+func (p *Order) FastReadField7(buf []byte) (int, error) {
+	offset := 0
+
+	if v, l, err := bthrift.Binary.ReadString(buf[offset:]); err != nil {
+		return offset, err
+	} else {
+		offset += l
+
 		p.CreateTime = v
 
 	}
@@ -263,6 +291,7 @@ func (p *Order) FastWriteNocopy(buf []byte, binaryWriter bthrift.BinaryWriter) i
 		offset += p.fastWriteField5(buf[offset:], binaryWriter)
 		offset += p.fastWriteField3(buf[offset:], binaryWriter)
 		offset += p.fastWriteField6(buf[offset:], binaryWriter)
+		offset += p.fastWriteField7(buf[offset:], binaryWriter)
 	}
 	offset += bthrift.Binary.WriteFieldStop(buf[offset:])
 	offset += bthrift.Binary.WriteStructEnd(buf[offset:])
@@ -279,6 +308,7 @@ func (p *Order) BLength() int {
 		l += p.field4Length()
 		l += p.field5Length()
 		l += p.field6Length()
+		l += p.field7Length()
 	}
 	l += bthrift.Binary.FieldStopLength()
 	l += bthrift.Binary.StructEndLength()
@@ -332,7 +362,16 @@ func (p *Order) fastWriteField5(buf []byte, binaryWriter bthrift.BinaryWriter) i
 
 func (p *Order) fastWriteField6(buf []byte, binaryWriter bthrift.BinaryWriter) int {
 	offset := 0
-	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "create_time", thrift.STRING, 6)
+	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "address", thrift.STRING, 6)
+	offset += bthrift.Binary.WriteStringNocopy(buf[offset:], binaryWriter, p.Address)
+
+	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
+	return offset
+}
+
+func (p *Order) fastWriteField7(buf []byte, binaryWriter bthrift.BinaryWriter) int {
+	offset := 0
+	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "create_time", thrift.STRING, 7)
 	offset += bthrift.Binary.WriteStringNocopy(buf[offset:], binaryWriter, p.CreateTime)
 
 	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
@@ -386,7 +425,16 @@ func (p *Order) field5Length() int {
 
 func (p *Order) field6Length() int {
 	l := 0
-	l += bthrift.Binary.FieldBeginLength("create_time", thrift.STRING, 6)
+	l += bthrift.Binary.FieldBeginLength("address", thrift.STRING, 6)
+	l += bthrift.Binary.StringLengthNocopy(p.Address)
+
+	l += bthrift.Binary.FieldEndLength()
+	return l
+}
+
+func (p *Order) field7Length() int {
+	l := 0
+	l += bthrift.Binary.FieldBeginLength("create_time", thrift.STRING, 7)
 	l += bthrift.Binary.StringLengthNocopy(p.CreateTime)
 
 	l += bthrift.Binary.FieldEndLength()

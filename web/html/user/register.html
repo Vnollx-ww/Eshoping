@@ -9,12 +9,17 @@
             var username=document.getElementById("username").value;
             var password=document.getElementById("password").value;
             var repassword=document.getElementById("repassword").value;
+            var address=document.getElementById("address").value;
             if(username===""){
                 alert("用户名不能为空!");
                 return false;
             }
             if(password===""){
                 alert("密码不能为空!");
+                return false;
+            }
+            if(address===""){
+                alert("收货地址不能为空!");
                 return false;
             }
             if(password!==repassword){
@@ -127,6 +132,9 @@
         <div class="input-group">
             <input type="password" id="repassword" placeholder="请再次输入密码" required />
         </div>
+        <div class="input-group">
+            <input type="text" id="address" placeholder="请输入收货地址" required />
+        </div>
         <div id="subdiv">
             <button type="submit" class="button">注册</button>
             <button type="reset" class="button reset-btn">重置</button>
@@ -144,13 +152,14 @@
         e.preventDefault();
         var username = document.getElementById('username').value;
         var password = document.getElementById('password').value;
+        var address=document.getElementById('address').value
         try {
             const response = await fetch("/user/register", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password ,address})
             });
             var data = await response.json();
             alert(data.status_msg);

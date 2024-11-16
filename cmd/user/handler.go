@@ -53,6 +53,12 @@ func BadUpdateBalanceResponse(s string) *user.UpdateBalanceResponse {
 func GoodUpdateBalanceResponse(s string, flag bool) *user.UpdateBalanceResponse {
 	return &user.UpdateBalanceResponse{StatusCode: 200, StatusMsg: s, Succed: flag}
 }
+func BadUpdateAddressResponse(s string) *user.UpdateAddressResponse {
+	return &user.UpdateAddressResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodUpdateAddressResponse(s string, flag bool) *user.UpdateAddressResponse {
+	return &user.UpdateAddressResponse{StatusCode: 200, StatusMsg: s, Succed: flag}
+}
 
 // UserLogin implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UserLogin(ctx context.Context, req *user.UserLoginRequest) (resp *user.UserLoginResponse, err error) {
@@ -85,7 +91,7 @@ func (s *UserServiceImpl) UserRegiter(ctx context.Context, req *user.UserRegiste
 	if usr != nil {
 		return BadRegisterResponse("用户已存在"), nil
 	}
-	usr = &db.User{UserName: req.Username, Password: req.Password}
+	usr = &db.User{UserName: req.Username, Password: req.Password, Address: req.Address}
 	err = db.CreateUser(ctx, usr)
 	if err != nil {
 		log.Println(err)
@@ -109,7 +115,7 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 	if usr == nil {
 		return BadGetUserInfoResponse("用户不存在"), nil
 	}
-	u := &user.User{Name: usr.UserName, Id: int64(usr.ID), Balance: usr.Balance, Cost: usr.Cost}
+	u := &user.User{Name: usr.UserName, Id: int64(usr.ID), Balance: usr.Balance, Cost: usr.Cost, Address: usr.Address}
 	return GoodGetUserInfoResponse("获取用户信息成功", u), nil
 }
 
@@ -205,4 +211,28 @@ func (s *UserServiceImpl) UpdateBalance(ctx context.Context, req *user.UpdateBal
 		return BadUpdateBalanceResponse("修改余额失败"), nil
 	}
 	return GoodUpdateBalanceResponse("修改余额成功", true), nil
+}
+
+// UpdateAddress implements the UserServiceImpl interface.
+func (s *UserServiceImpl) UpdateAddress(ctx context.Context, req *user.UpdateAddressRequest) (resp *user.UpdateAddressResponse, err error) {
+	mc, err := middlerware.ParseToken(req.Token)
+	if err != nil {
+		log.Println(err)
+		return BadUpdateAddressResponse("token解析失败"), nil
+	}
+	usr, err := db.GetUserByID(ctx, mc.UserId)
+	if err != nil {
+		log.Println(err)
+		return BadUpdateAddressResponse("获取用户信息失败：服务器内部错误"), nil
+	}
+	if usr == nil {
+		log.Println(err)
+		return BadUpdateAddressResponse("用户不存在"), nil
+	}
+	err = db.UpdateAddress(ctx, usr, req.Address)
+	if err != nil {
+		log.Println(err)
+		return BadUpdateAddressResponse("用户收货地址修改失败"), nil
+	}
+	return GoodUpdateAddressResponse("用户收获地址修改成功", true), nil
 }

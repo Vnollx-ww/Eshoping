@@ -57,6 +57,7 @@ func Register(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
 		Username string
 		Password string
+		Address  string
 	}
 	if err := c.Bind(&reqbody); err != nil {
 		BadBaseResponse(c, "无效的请求格式")
@@ -65,6 +66,7 @@ func Register(ctx context.Context, c *app.RequestContext) {
 	req := &user.UserRegisterRequest{
 		Username: reqbody.Username,
 		Password: reqbody.Password,
+		Address:  reqbody.Address,
 	}
 	res, _ := rpc.Register(ctx, req)
 	if res.StatusCode == -1 {
@@ -195,6 +197,31 @@ func UpdateCost(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	c.JSON(http.StatusOK, user.UpdateCostResponse{
+		StatusMsg:  res.StatusMsg,
+		StatusCode: res.StatusCode,
+		Succed:     true,
+	})
+}
+func UpdateAddress(ctx context.Context, c *app.RequestContext) {
+	var reqbody struct {
+		Token   string `json:"token"`
+		Address string
+	}
+	if err := c.Bind(&reqbody); err != nil {
+		log.Println(err)
+		BadBaseResponse(c, "无效的请求格式")
+		return
+	}
+	req := &user.UpdateAddressRequest{
+		Token:   reqbody.Token,
+		Address: reqbody.Address,
+	}
+	res, _ := rpc.UpdateAddress(ctx, req)
+	if res.StatusCode == -1 {
+		BadBaseResponse(c, res.StatusMsg)
+		return
+	}
+	c.JSON(http.StatusOK, user.UpdateAddressResponse{
 		StatusMsg:  res.StatusMsg,
 		StatusCode: res.StatusCode,
 		Succed:     true,

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>修改用户名</title>
+    <script>
+        function check() {
+            var address = document.getElementById("address").value;
+            if (address === "") {
+                alert("新收货地址不能为空!");
+                return false;
+            }
+            return true;
+        }
+    </script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #74ebd5, #9face6); /* 背景渐变 */
+            font-family: 'Arial', sans-serif;
+            color: #333;
+        }
+
+        #updatename {
+            width: 350px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            opacity: 0.95;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        #subdiv {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: #74ebd5;
+            outline: none;
+            box-shadow: 0 0 8px rgba(116, 235, 213, 0.5);
+        }
+
+        .button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #007bff, #00d4ff);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .button:hover {
+            background: linear-gradient(135deg, #00d4ff, #007bff);
+            transform: translateY(-2px);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        /* 添加一个loading效果 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            border-top: 3px solid #007bff;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+<div id="updatename">
+    <form action="/user/updateaddress" method="post" id="form">
+        <h1>修改收货地址</h1>
+        <input type="text" id="address" placeholder="请输入新收货地址" />
+        <div id="subdiv">
+            <button type="submit" class="button" id="修改">修改收货地址</button>
+        </div>
+    </form>
+</div>
+<script>
+    document.getElementById("form").addEventListener('submit', async function (e) {
+        if (!check()) {
+            e.preventDefault();
+            return;
+        }
+        e.preventDefault();
+        var address = document.getElementById("address").value;
+        var token = localStorage.getItem("token");
+
+        // 为了显示 loading 动画，先禁用按钮并添加 loading 状态
+        var button = document.getElementById("修改");
+        button.innerHTML = '修改中... <span class="loading"></span>';
+        button.disabled = true;
+
+        try {
+            const response = await fetch("/user/updateaddress", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ token, address })
+            });
+            var data = await response.json();
+            if (response.ok) {
+                alert("修改成功！");
+                localStorage.setItem('message', data.status_msg);
+                setTimeout(() => {
+                    window.location.href = "homepage"; // 如果返回响应正确，则进入主页面
+                }, 1000);
+            } else {
+                alert(data.status_msg);
+            }
+        } catch (error) {
+            console.error("发生错误:", error);
+            alert("发生错误，请重试");
+        } finally {
+            // 恢复按钮状态
+            button.innerHTML = '修改收货地址';
+            button.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>

@@ -27,6 +27,7 @@ func CreateOrder(ctx context.Context, c *app.RequestContext) {
 		Number:      reqbody.Number,
 		Cost:        reqbody.Cost,
 	}
+
 	req := &orderlist.AddOrderRequest{
 		Ol:    ol,
 		Token: reqbody.Token,

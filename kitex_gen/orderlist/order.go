@@ -15,7 +15,8 @@ type Order struct {
 	ProductName string `thrift:"product_name,3" frugal:"3,default,string" json:"product_name"`
 	Number      int64  `thrift:"number,4" frugal:"4,default,i64" json:"number"`
 	Cost        int64  `thrift:"cost,5" frugal:"5,default,i64" json:"cost"`
-	CreateTime  string `thrift:"create_time,6" frugal:"6,default,string" json:"create_time"`
+	Address     string `thrift:"address,6" frugal:"6,default,string" json:"address"`
+	CreateTime  string `thrift:"create_time,7" frugal:"7,default,string" json:"create_time"`
 }
 
 func NewOrder() *Order {
@@ -46,6 +47,10 @@ func (p *Order) GetCost() (v int64) {
 	return p.Cost
 }
 
+func (p *Order) GetAddress() (v string) {
+	return p.Address
+}
+
 func (p *Order) GetCreateTime() (v string) {
 	return p.CreateTime
 }
@@ -64,6 +69,9 @@ func (p *Order) SetNumber(val int64) {
 func (p *Order) SetCost(val int64) {
 	p.Cost = val
 }
+func (p *Order) SetAddress(val string) {
+	p.Address = val
+}
 func (p *Order) SetCreateTime(val string) {
 	p.CreateTime = val
 }
@@ -74,7 +82,8 @@ var fieldIDToName_Order = map[int16]string{
 	3: "product_name",
 	4: "number",
 	5: "cost",
-	6: "create_time",
+	6: "address",
+	7: "create_time",
 }
 
 func (p *Order) Read(iprot thrift.TProtocol) (err error) {
@@ -149,6 +158,16 @@ func (p *Order) Read(iprot thrift.TProtocol) (err error) {
 		case 6:
 			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField6(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		case 7:
+			if fieldTypeId == thrift.STRING {
+				if err = p.ReadField7(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else {
@@ -235,6 +254,15 @@ func (p *Order) ReadField6(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadString(); err != nil {
 		return err
 	} else {
+		p.Address = v
+	}
+	return nil
+}
+
+func (p *Order) ReadField7(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
 		p.CreateTime = v
 	}
 	return nil
@@ -268,6 +296,10 @@ func (p *Order) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField6(oprot); err != nil {
 			fieldId = 6
+			goto WriteFieldError
+		}
+		if err = p.writeField7(oprot); err != nil {
+			fieldId = 7
 			goto WriteFieldError
 		}
 
@@ -375,10 +407,10 @@ WriteFieldEndError:
 }
 
 func (p *Order) writeField6(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("create_time", thrift.STRING, 6); err != nil {
+	if err = oprot.WriteFieldBegin("address", thrift.STRING, 6); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.CreateTime); err != nil {
+	if err := oprot.WriteString(p.Address); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -389,6 +421,23 @@ WriteFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 6 begin error: ", p), err)
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 6 end error: ", p), err)
+}
+
+func (p *Order) writeField7(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("create_time", thrift.STRING, 7); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteString(p.CreateTime); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 7 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 7 end error: ", p), err)
 }
 
 func (p *Order) String() string {
@@ -419,7 +468,10 @@ func (p *Order) DeepEqual(ano *Order) bool {
 	if !p.Field5DeepEqual(ano.Cost) {
 		return false
 	}
-	if !p.Field6DeepEqual(ano.CreateTime) {
+	if !p.Field6DeepEqual(ano.Address) {
+		return false
+	}
+	if !p.Field7DeepEqual(ano.CreateTime) {
 		return false
 	}
 	return true
@@ -461,6 +513,13 @@ func (p *Order) Field5DeepEqual(src int64) bool {
 	return true
 }
 func (p *Order) Field6DeepEqual(src string) bool {
+
+	if strings.Compare(p.Address, src) != 0 {
+		return false
+	}
+	return true
+}
+func (p *Order) Field7DeepEqual(src string) bool {
 
 	if strings.Compare(p.CreateTime, src) != 0 {
 		return false

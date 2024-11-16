@@ -11,6 +11,7 @@ type Order struct {
 	ProductName string `gorm:"varchar(40);not null" json:"productname,omitempty"`
 	Number      int64  `gorm:"not null;default:0" json:"price,omitempty"`
 	Cost        int64  `gorm:"not null;default:0" json:"cost,omitempty"`
+	Address     string `gorm:"varchar(256);not null" json:"address,omitempty"`
 }
 
 func CreateOrder(ctx context.Context, order *Order) error {

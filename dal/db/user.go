@@ -11,6 +11,7 @@ type User struct {
 	Password string `gorm:"type:varchar(256);not null" json:"password,omitempty"`
 	Balance  int64  `gorm:"default:0" json:"balance,omitempty"`
 	Cost     int64  `gorm:"default:0" json:"cost,omitempty"`
+	Address  string `gorm:"varchar(256);not null" json:"address,omitempty"`
 }
 
 func CreateUser(ctx context.Context, usr *User) error {
@@ -72,6 +73,15 @@ func UpdateBalance(ctx context.Context, usr *User, addbalance int64) error {
 func UpdateCost(ctx context.Context, usr *User, addcost int64) error {
 	db := GetDB()
 	usr.Cost += addcost
+	err := db.Save(&usr).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func UpdateAddress(ctx context.Context, usr *User, address string) error {
+	db := GetDB()
+	usr.Address = address
 	err := db.Save(&usr).Error
 	if err != nil {
 		return err

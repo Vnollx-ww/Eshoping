@@ -26,6 +26,7 @@ func NewServiceInfo() *kitex.ServiceInfo {
 		"UpdatePassword": kitex.NewMethodInfo(updatePasswordHandler, newUserServiceUpdatePasswordArgs, newUserServiceUpdatePasswordResult, false),
 		"UpdateCost":     kitex.NewMethodInfo(updateCostHandler, newUserServiceUpdateCostArgs, newUserServiceUpdateCostResult, false),
 		"UpdateBalance":  kitex.NewMethodInfo(updateBalanceHandler, newUserServiceUpdateBalanceArgs, newUserServiceUpdateBalanceResult, false),
+		"UpdateAddress":  kitex.NewMethodInfo(updateAddressHandler, newUserServiceUpdateAddressArgs, newUserServiceUpdateAddressResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName":     "user",
@@ -168,6 +169,24 @@ func newUserServiceUpdateBalanceResult() interface{} {
 	return user.NewUserServiceUpdateBalanceResult()
 }
 
+func updateAddressHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceUpdateAddressArgs)
+	realResult := result.(*user.UserServiceUpdateAddressResult)
+	success, err := handler.(user.UserService).UpdateAddress(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceUpdateAddressArgs() interface{} {
+	return user.NewUserServiceUpdateAddressArgs()
+}
+
+func newUserServiceUpdateAddressResult() interface{} {
+	return user.NewUserServiceUpdateAddressResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -243,6 +262,16 @@ func (p *kClient) UpdateBalance(ctx context.Context, req *user.UpdateBalanceRequ
 	_args.Req = req
 	var _result user.UserServiceUpdateBalanceResult
 	if err = p.c.Call(ctx, "UpdateBalance", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) UpdateAddress(ctx context.Context, req *user.UpdateAddressRequest) (r *user.UpdateAddressResponse, err error) {
+	var _args user.UserServiceUpdateAddressArgs
+	_args.Req = req
+	var _result user.UserServiceUpdateAddressResult
+	if err = p.c.Call(ctx, "UpdateAddress", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

@@ -168,6 +168,7 @@
         <button id="Recharge">充值</button>
         <button id="updatename">修改用户名</button>
         <button id="updatepassword">修改密码</button>
+        <button id="updateaddress">修改收货地址</button>
         <button id="fetchOrderListInfo">查看购买记录</button>
     </div>
 </div>
@@ -205,6 +206,7 @@
                     <p><strong>用户ID:</strong> ${data.user.id}</p>
                     <p><strong>用户余额:</strong> ${data.user.balance}</p>
                     <p><strong>用户消费:</strong> ${data.user.cost}</p>
+                    <p><strong>用户收货地址:</strong> ${data.user.address}</p>
                 `;
             } else {
                 alert(data.message);
@@ -234,6 +236,9 @@
 
     document.getElementById('fetchOrderListInfo').addEventListener('click', function() {
         window.location.href = "getorderlist";
+    });
+    document.getElementById('updateaddress').addEventListener('click', function() {
+        window.location.href = "updateaddress";
     });
 </script>
 </body>

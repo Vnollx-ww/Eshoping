@@ -147,10 +147,8 @@
                 body: JSON.stringify({ username, password })
             });
             var data = await response.json();
-            localStorage.setItem("token", data.token);
             if (response.ok) {
                 alert("管理员登录成功！");
-                localStorage.setItem('message', data.status_msg);
                 setTimeout(() => {
                     window.location.href = "admin";
                 }, 1000);

@@ -61,3 +61,6 @@ func UpdateBalance(ctx context.Context, req *user.UpdateBalanceRequest) (*user.U
 func UpdateCost(ctx context.Context, req *user.UpdateCostRequest) (*user.UpdateCostResponse, error) {
 	return userClient.UpdateCost(ctx, req)
 }
+func UpdateAddress(ctx context.Context, req *user.UpdateAddressRequest) (*user.UpdateAddressResponse, error) {
+	return userClient.UpdateAddress(ctx, req)
+}

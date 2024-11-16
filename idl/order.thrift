@@ -1,11 +1,12 @@
-namespace go order
+namespace go orderlist
 struct order{
 1:i64 order_id
 2:i64 user_id
 3:string product_name
 4:i64 number
 5:i64 cost
-6:string create_time
+6:string address
+7:string create_time
 }
 struct AddOrderRequest{
 1:order ol
@@ -38,6 +39,7 @@ struct GetOrderListByProductNameRequest{
 1:string product_name
 2:string token
 }
+
 struct GetOrderListByProductNameResponse{
 1: i32    status_code
 2: string status_msg

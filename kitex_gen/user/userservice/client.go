@@ -18,6 +18,7 @@ type Client interface {
 	UpdatePassword(ctx context.Context, req *user.UpdatePasswordRequest, callOptions ...callopt.Option) (r *user.UpdatePasswordResponse, err error)
 	UpdateCost(ctx context.Context, req *user.UpdateCostRequest, callOptions ...callopt.Option) (r *user.UpdateCostResponse, err error)
 	UpdateBalance(ctx context.Context, req *user.UpdateBalanceRequest, callOptions ...callopt.Option) (r *user.UpdateBalanceResponse, err error)
+	UpdateAddress(ctx context.Context, req *user.UpdateAddressRequest, callOptions ...callopt.Option) (r *user.UpdateAddressResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -82,4 +83,9 @@ func (p *kUserServiceClient) UpdateCost(ctx context.Context, req *user.UpdateCos
 func (p *kUserServiceClient) UpdateBalance(ctx context.Context, req *user.UpdateBalanceRequest, callOptions ...callopt.Option) (r *user.UpdateBalanceResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.UpdateBalance(ctx, req)
+}
+
+func (p *kUserServiceClient) UpdateAddress(ctx context.Context, req *user.UpdateAddressRequest, callOptions ...callopt.Option) (r *user.UpdateAddressResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.UpdateAddress(ctx, req)
 }

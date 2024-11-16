@@ -5,6 +5,7 @@ struct User{
 2:string name
 3:i64 balance
 4:i64 cost
+5:string address
 }
 struct UserLoginRequest {
     1: string username;
@@ -19,6 +20,7 @@ struct UserLoginResponse {
 struct UserRegisterRequest {
     1: string username;
     2: string password;
+    3:string address;
 }
 struct UserRegisterResponse {
     1: i32    status_code
@@ -71,6 +73,15 @@ struct UpdateBalanceResponse{
 2: string status_msg
 3: bool succed
 }
+struct UpdateAddressRequest{
+1:string token
+2:string address
+}
+struct UpdateAddressResponse{
+1:i32 status_code
+2:string status_msg
+3:bool succed
+}
 service UserService {
     UserLoginResponse UserLogin(1:UserLoginRequest req)
     UserRegisterResponse UserRegiter(1:UserRegisterRequest req)
@@ -79,4 +90,5 @@ service UserService {
     UpdatePasswordResponse UpdatePassword(1:UpdatePasswordRequest req)
     UpdateCostResponse UpdateCost(1:UpdateCostRequest req)
     UpdateBalanceResponse UpdateBalance(1:UpdateBalanceRequest req)
+    UpdateAddressResponse UpdateAddress(1:UpdateAddressRequest req)
 }

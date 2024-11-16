@@ -51,16 +51,17 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 		log.Println(err)
 		return BadAddOrderResponse("token解析失败"), nil
 	}
+	usr, err := db.GetUserByID(ctx, mc.UserId)
+	if err != nil {
+		log.Println(err)
+		return BadAddOrderResponse("服务器内部错误"), err
+	}
 	order := &db.Order{
 		ProductName: ol.ProductName,
 		UserID:      mc.UserId,
 		Number:      ol.Number,
 		Cost:        ol.Cost,
-	}
-	usr, err := db.GetUserByID(ctx, mc.UserId)
-	if err != nil {
-		log.Println(err)
-		return BadAddOrderResponse("服务器内部错误"), err
+		Address:     usr.Address,
 	}
 	pro, er := db.GetProductByName(ctx, ol.ProductName)
 	if er != nil {
@@ -132,7 +133,9 @@ func (s *OrderListServiceImpl) GetOrderListByUserID(ctx context.Context, req *or
 		ord.Number = order.Number
 		ord.Cost = order.Cost
 		ord.ProductName = order.ProductName
+		ord.Address = order.Address
 		ord.CreateTime = order.CreatedAt.Format("2006-01-02 15:04:05")
+		log.Println(order)
 		or = append(or, &ord)
 	}
 	return GoodGetOrderListByUserIDResponse("用户订单列表获取成功", or), nil
@@ -153,6 +156,7 @@ func (s *OrderListServiceImpl) GetOrderListByProductNameID(ctx context.Context, 
 		ord.Number = order.Number
 		ord.Cost = order.Cost
 		ord.ProductName = order.ProductName
+		ord.Address = order.Address
 		ord.CreateTime = order.CreatedAt.Format("2006-01-02 15:04:05")
 		or = append(or, &ord)
 	}

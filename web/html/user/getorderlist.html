@@ -200,6 +200,10 @@
                         costSpan.textContent = `价格: ¥${order.cost}`;
                         costSpan.classList.add("order-cost");
 
+                        var addressSpan = document.createElement("span");
+                        addressSpan.textContent = `收获地址: ${order.address}`;
+                        addressSpan.classList.add("order-address");
+
                         var createtimeSpan = document.createElement("span");
                         createtimeSpan.textContent = `创建时间: ${order.create_time}`;
                         createtimeSpan.classList.add("order-time");
@@ -223,6 +227,7 @@
                         orderDiv.appendChild(productSpan);
                         orderDiv.appendChild(numberSpan);
                         orderDiv.appendChild(costSpan);
+                        orderDiv.appendChild(addressSpan)
                         orderDiv.appendChild(createtimeSpan);
                         orderDiv.appendChild(deleteButton);
 
