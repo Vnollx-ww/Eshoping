@@ -2,10 +2,14 @@ package main
 
 import (
 	"Eshop/dal/db"
+	"Eshop/dal/rs"
 	"Eshop/kitex_gen/user"
 	"Eshop/pkg/middlerware"
 	"context"
+	"fmt"
+	"github.com/cloudwego/hertz/pkg/common/json"
 	"log"
+	"time"
 )
 
 // UserServiceImpl implements the last service interface defined in the IDL.
@@ -107,6 +111,17 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 		log.Println(err)
 		return BadGetUserInfoResponse("token解析失败"), nil
 	}
+	rc := rs.GetRedisClient()
+	cachekey := fmt.Sprintf("userinfo:%d", mc.UserId)
+	cacheuserdata, err := rc.Get(ctx, cachekey).Result()
+	if err == nil && cacheuserdata != "" {
+		var cacheduser user.User
+		err := json.Unmarshal([]byte(cacheuserdata), &cacheduser)
+		if err == nil {
+			return GoodGetUserInfoResponse("从缓存获取用户信息成功", &cacheduser), nil
+		}
+		rc.Del(ctx, cachekey)
+	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
 		log.Println(err)
@@ -116,6 +131,10 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 		return BadGetUserInfoResponse("用户不存在"), nil
 	}
 	u := &user.User{Name: usr.UserName, Id: int64(usr.ID), Balance: usr.Balance, Cost: usr.Cost, Address: usr.Address}
+	userdata, err := json.Marshal(u)
+	if err == nil {
+		rc.Set(ctx, cachekey, userdata, 5*time.Minute)
+	}
 	return GoodGetUserInfoResponse("获取用户信息成功", u), nil
 }
 
@@ -139,6 +158,9 @@ func (s *UserServiceImpl) UpdateName(ctx context.Context, req *user.UpdateNameRe
 		log.Println(err)
 		return BadUpdateNameResponse("修改用户名失败"), nil
 	}
+	rc := rs.GetRedisClient()
+	cacheKey := fmt.Sprintf("userinfo:%d", mc.UserId)
+	rc.Del(ctx, cacheKey) // 删除缓存
 	return GoodUpdateNameResponse("欢迎你！"+usr.UserName, true), nil
 }
 
@@ -187,6 +209,9 @@ func (s *UserServiceImpl) UpdateCost(ctx context.Context, req *user.UpdateCostRe
 		log.Println(err)
 		return BadUpdateCostResponse("修改花费失败"), nil
 	}
+	rc := rs.GetRedisClient()
+	cacheKey := fmt.Sprintf("userinfo:%d", mc.UserId)
+	rc.Del(ctx, cacheKey) // 删除缓存
 	return GoodUpdateCostResponse("修改花费成功", true), nil
 }
 
@@ -210,6 +235,9 @@ func (s *UserServiceImpl) UpdateBalance(ctx context.Context, req *user.UpdateBal
 		log.Println(err)
 		return BadUpdateBalanceResponse("修改余额失败"), nil
 	}
+	rc := rs.GetRedisClient()
+	cacheKey := fmt.Sprintf("userinfo:%d", mc.UserId)
+	rc.Del(ctx, cacheKey) // 删除缓存
 	return GoodUpdateBalanceResponse("修改余额成功", true), nil
 }
 
@@ -234,5 +262,8 @@ func (s *UserServiceImpl) UpdateAddress(ctx context.Context, req *user.UpdateAdd
 		log.Println(err)
 		return BadUpdateAddressResponse("用户收货地址修改失败"), nil
 	}
+	rc := rs.GetRedisClient()
+	cacheKey := fmt.Sprintf("userinfo:%d", mc.UserId)
+	rc.Del(ctx, cacheKey) // 删除缓存
 	return GoodUpdateAddressResponse("用户收获地址修改成功", true), nil
 }

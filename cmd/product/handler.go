@@ -5,7 +5,9 @@ import (
 	"Eshop/dal/rs"
 	product "Eshop/kitex_gen/product"
 	"context"
+	"encoding/json"
 	"log"
+	"time"
 )
 
 // ProductServiceImpl implements the last service interface defined in the IDL.
@@ -68,6 +70,9 @@ func (s *ProductServiceImpl) AddProduct(ctx context.Context, req *product.AddPro
 		log.Println(err)
 		return BadAddProductResponse("添加商品失败"), err
 	}
+	rc := rs.GetRedisClient()
+	cacheKey := "productlistinfo"
+	rc.Del(ctx, cacheKey) // 删除缓存
 	return GoodAddProductResponse("添加商品成功", int64(pro.ID)), nil
 }
 
@@ -105,6 +110,9 @@ func (s *ProductServiceImpl) DelProduct(ctx context.Context, req *product.DelPro
 		log.Println(err)
 		return BadDelProductResponse("删除商品失败"), nil
 	}
+	rc := rs.GetRedisClient()
+	cacheKey := "productlistinfo"
+	rc.Del(ctx, cacheKey) // 删除缓存
 	return GoodDelProductResponse("删除商品成功", true), nil
 }
 
@@ -133,6 +141,9 @@ func (s *ProductServiceImpl) UpdatePrice(ctx context.Context, req *product.Updat
 		log.Println(err)
 		return BadUpdatePriceResponse("修改商品价格失败"), nil
 	}
+	rc := rs.GetRedisClient()
+	cacheKey := "productlistinfo"
+	rc.Del(ctx, cacheKey) // 删除缓存
 	return GoodUpdatePriceResponse("修改商品价格成功", true), nil
 }
 
@@ -161,11 +172,26 @@ func (s *ProductServiceImpl) UpdateStock(ctx context.Context, req *product.Updat
 		log.Println(err)
 		return BadUpdateStockResponse("修改商品库存失败"), nil
 	}
+	rc := rs.GetRedisClient()
+	cacheKey := "productlistinfo"
+	rc.Del(ctx, cacheKey) // 删除缓存
 	return GoodUpdateStockResponse("修改商品库存成功", true), nil
 }
 
 // GetProductListInfo implements the ProductServiceImpl interface.
 func (s *ProductServiceImpl) GetProductListInfo(ctx context.Context) (resp *product.GetProductListInfoResponse, err error) {
+	rc := rs.GetRedisClient()
+	cachekey := "productlistinfo"
+	cacheddata, err := rc.Get(ctx, cachekey).Result()
+	if err == nil && cacheddata != "" {
+		var cachedProductList []*product.Product
+		err := json.Unmarshal([]byte(cacheddata), &cachedProductList)
+		if err != nil {
+			log.Println("缓存反序列化失败:", err)
+			rc.Del(ctx, cachekey)
+		}
+		return GoodGetProductListInfoResponse("获取商品列表信息成功", cachedProductList), nil
+	}
 	prolist, err := db.GetProductListInfo(ctx)
 	if err != nil {
 		log.Println(err)
@@ -179,6 +205,14 @@ func (s *ProductServiceImpl) GetProductListInfo(ctx context.Context) (resp *prod
 		p.Price = pro.Price
 		p.Stock = pro.Stock
 		productlist = append(productlist, &p)
+	}
+	cacheddatabytes, err := json.Marshal(productlist)
+	if err != nil {
+		log.Println("商品列表数据序列化失败:", err)
+	}
+	err = rc.Set(ctx, cachekey, cacheddatabytes, 10*time.Minute).Err()
+	if err != nil {
+		log.Println("缓存设置失败:", err)
 	}
 	return GoodGetProductListInfoResponse("获取商品列表信息成功", productlist), nil
 }
