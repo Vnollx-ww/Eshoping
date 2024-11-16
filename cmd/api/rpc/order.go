@@ -43,9 +43,15 @@ func CreateOrder(ctx context.Context, req *orderlist.AddOrderRequest) (*orderlis
 func DeleteOrder(ctx context.Context, req *orderlist.DelOrderRequest) (*orderlist.DelOrderResponse, error) {
 	return orderClient.DelOrder(ctx, req)
 }
+func UpdateOrderState(ctx context.Context, req *orderlist.UpdateOrderStateRequest) (*orderlist.UpdateOrderStateResponse, error) {
+	return orderClient.UpdateOrderState(ctx, req)
+}
 func GetOrderListByUserID(ctx context.Context, req *orderlist.GetOrderListByUserIDRequest) (*orderlist.GetOrderListByUserIDResponse, error) {
 	return orderClient.GetOrderListByUserID(ctx, req)
 }
 func GetOrderListByProductName(ctx context.Context, req *orderlist.GetOrderListByProductNameRequest) (*orderlist.GetOrderListByProductNameResponse, error) {
 	return orderClient.GetOrderListByProductNameID(ctx, req)
+}
+func GetOrderListByState(ctx context.Context, req *orderlist.GetOrderListByStateRequest) (*orderlist.GetOrderListByStateResponse, error) {
+	return orderClient.GetOrderListByState(ctx, req)
 }

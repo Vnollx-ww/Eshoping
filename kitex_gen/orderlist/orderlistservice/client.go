@@ -13,8 +13,10 @@ import (
 type Client interface {
 	AddOrder(ctx context.Context, req *orderlist.AddOrderRequest, callOptions ...callopt.Option) (r *orderlist.AddOrderResponse, err error)
 	DelOrder(ctx context.Context, req *orderlist.DelOrderRequest, callOptions ...callopt.Option) (r *orderlist.DelOrderResponse, err error)
+	UpdateOrderState(ctx context.Context, req *orderlist.UpdateOrderStateRequest, callOptions ...callopt.Option) (r *orderlist.UpdateOrderStateResponse, err error)
 	GetOrderListByUserID(ctx context.Context, req *orderlist.GetOrderListByUserIDRequest, callOptions ...callopt.Option) (r *orderlist.GetOrderListByUserIDResponse, err error)
 	GetOrderListByProductNameID(ctx context.Context, req *orderlist.GetOrderListByProductNameRequest, callOptions ...callopt.Option) (r *orderlist.GetOrderListByProductNameResponse, err error)
+	GetOrderListByState(ctx context.Context, req *orderlist.GetOrderListByStateRequest, callOptions ...callopt.Option) (r *orderlist.GetOrderListByStateResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -56,6 +58,11 @@ func (p *kOrderListServiceClient) DelOrder(ctx context.Context, req *orderlist.D
 	return p.kClient.DelOrder(ctx, req)
 }
 
+func (p *kOrderListServiceClient) UpdateOrderState(ctx context.Context, req *orderlist.UpdateOrderStateRequest, callOptions ...callopt.Option) (r *orderlist.UpdateOrderStateResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.UpdateOrderState(ctx, req)
+}
+
 func (p *kOrderListServiceClient) GetOrderListByUserID(ctx context.Context, req *orderlist.GetOrderListByUserIDRequest, callOptions ...callopt.Option) (r *orderlist.GetOrderListByUserIDResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.GetOrderListByUserID(ctx, req)
@@ -64,4 +71,9 @@ func (p *kOrderListServiceClient) GetOrderListByUserID(ctx context.Context, req 
 func (p *kOrderListServiceClient) GetOrderListByProductNameID(ctx context.Context, req *orderlist.GetOrderListByProductNameRequest, callOptions ...callopt.Option) (r *orderlist.GetOrderListByProductNameResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.GetOrderListByProductNameID(ctx, req)
+}
+
+func (p *kOrderListServiceClient) GetOrderListByState(ctx context.Context, req *orderlist.GetOrderListByStateRequest, callOptions ...callopt.Option) (r *orderlist.GetOrderListByStateResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetOrderListByState(ctx, req)
 }

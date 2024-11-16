@@ -16,7 +16,8 @@ type Order struct {
 	Number      int64  `thrift:"number,4" frugal:"4,default,i64" json:"number"`
 	Cost        int64  `thrift:"cost,5" frugal:"5,default,i64" json:"cost"`
 	Address     string `thrift:"address,6" frugal:"6,default,string" json:"address"`
-	CreateTime  string `thrift:"create_time,7" frugal:"7,default,string" json:"create_time"`
+	Isdeliver   bool   `thrift:"isdeliver,7" frugal:"7,default,bool" json:"isdeliver"`
+	CreateTime  string `thrift:"create_time,8" frugal:"8,default,string" json:"create_time"`
 }
 
 func NewOrder() *Order {
@@ -51,6 +52,10 @@ func (p *Order) GetAddress() (v string) {
 	return p.Address
 }
 
+func (p *Order) GetIsdeliver() (v bool) {
+	return p.Isdeliver
+}
+
 func (p *Order) GetCreateTime() (v string) {
 	return p.CreateTime
 }
@@ -72,6 +77,9 @@ func (p *Order) SetCost(val int64) {
 func (p *Order) SetAddress(val string) {
 	p.Address = val
 }
+func (p *Order) SetIsdeliver(val bool) {
+	p.Isdeliver = val
+}
 func (p *Order) SetCreateTime(val string) {
 	p.CreateTime = val
 }
@@ -83,7 +91,8 @@ var fieldIDToName_Order = map[int16]string{
 	4: "number",
 	5: "cost",
 	6: "address",
-	7: "create_time",
+	7: "isdeliver",
+	8: "create_time",
 }
 
 func (p *Order) Read(iprot thrift.TProtocol) (err error) {
@@ -166,8 +175,18 @@ func (p *Order) Read(iprot thrift.TProtocol) (err error) {
 				}
 			}
 		case 7:
-			if fieldTypeId == thrift.STRING {
+			if fieldTypeId == thrift.BOOL {
 				if err = p.ReadField7(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		case 8:
+			if fieldTypeId == thrift.STRING {
+				if err = p.ReadField8(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else {
@@ -260,6 +279,15 @@ func (p *Order) ReadField6(iprot thrift.TProtocol) error {
 }
 
 func (p *Order) ReadField7(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadBool(); err != nil {
+		return err
+	} else {
+		p.Isdeliver = v
+	}
+	return nil
+}
+
+func (p *Order) ReadField8(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadString(); err != nil {
 		return err
 	} else {
@@ -300,6 +328,10 @@ func (p *Order) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField7(oprot); err != nil {
 			fieldId = 7
+			goto WriteFieldError
+		}
+		if err = p.writeField8(oprot); err != nil {
+			fieldId = 8
 			goto WriteFieldError
 		}
 
@@ -424,10 +456,10 @@ WriteFieldEndError:
 }
 
 func (p *Order) writeField7(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("create_time", thrift.STRING, 7); err != nil {
+	if err = oprot.WriteFieldBegin("isdeliver", thrift.BOOL, 7); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.CreateTime); err != nil {
+	if err := oprot.WriteBool(p.Isdeliver); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -438,6 +470,23 @@ WriteFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 7 begin error: ", p), err)
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 7 end error: ", p), err)
+}
+
+func (p *Order) writeField8(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("create_time", thrift.STRING, 8); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteString(p.CreateTime); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 8 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 8 end error: ", p), err)
 }
 
 func (p *Order) String() string {
@@ -471,7 +520,10 @@ func (p *Order) DeepEqual(ano *Order) bool {
 	if !p.Field6DeepEqual(ano.Address) {
 		return false
 	}
-	if !p.Field7DeepEqual(ano.CreateTime) {
+	if !p.Field7DeepEqual(ano.Isdeliver) {
+		return false
+	}
+	if !p.Field8DeepEqual(ano.CreateTime) {
 		return false
 	}
 	return true
@@ -519,7 +571,14 @@ func (p *Order) Field6DeepEqual(src string) bool {
 	}
 	return true
 }
-func (p *Order) Field7DeepEqual(src string) bool {
+func (p *Order) Field7DeepEqual(src bool) bool {
+
+	if p.Isdeliver != src {
+		return false
+	}
+	return true
+}
+func (p *Order) Field8DeepEqual(src string) bool {
 
 	if strings.Compare(p.CreateTime, src) != 0 {
 		return false
@@ -1538,6 +1597,452 @@ func (p *DelOrderResponse) Field2DeepEqual(src string) bool {
 	return true
 }
 func (p *DelOrderResponse) Field3DeepEqual(src bool) bool {
+
+	if p.Succed != src {
+		return false
+	}
+	return true
+}
+
+type UpdateOrderStateRequest struct {
+	OrderId int64 `thrift:"order_id,1" frugal:"1,default,i64" json:"order_id"`
+}
+
+func NewUpdateOrderStateRequest() *UpdateOrderStateRequest {
+	return &UpdateOrderStateRequest{}
+}
+
+func (p *UpdateOrderStateRequest) InitDefault() {
+	*p = UpdateOrderStateRequest{}
+}
+
+func (p *UpdateOrderStateRequest) GetOrderId() (v int64) {
+	return p.OrderId
+}
+func (p *UpdateOrderStateRequest) SetOrderId(val int64) {
+	p.OrderId = val
+}
+
+var fieldIDToName_UpdateOrderStateRequest = map[int16]string{
+	1: "order_id",
+}
+
+func (p *UpdateOrderStateRequest) Read(iprot thrift.TProtocol) (err error) {
+
+	var fieldTypeId thrift.TType
+	var fieldId int16
+
+	if _, err = iprot.ReadStructBegin(); err != nil {
+		goto ReadStructBeginError
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err = iprot.ReadFieldBegin()
+		if err != nil {
+			goto ReadFieldBeginError
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.I64 {
+				if err = p.ReadField1(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		default:
+			if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		}
+
+		if err = iprot.ReadFieldEnd(); err != nil {
+			goto ReadFieldEndError
+		}
+	}
+	if err = iprot.ReadStructEnd(); err != nil {
+		goto ReadStructEndError
+	}
+
+	return nil
+ReadStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
+ReadFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
+ReadFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_UpdateOrderStateRequest[fieldId]), err)
+SkipFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
+
+ReadFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
+ReadStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+}
+
+func (p *UpdateOrderStateRequest) ReadField1(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadI64(); err != nil {
+		return err
+	} else {
+		p.OrderId = v
+	}
+	return nil
+}
+
+func (p *UpdateOrderStateRequest) Write(oprot thrift.TProtocol) (err error) {
+	var fieldId int16
+	if err = oprot.WriteStructBegin("UpdateOrderStateRequest"); err != nil {
+		goto WriteStructBeginError
+	}
+	if p != nil {
+		if err = p.writeField1(oprot); err != nil {
+			fieldId = 1
+			goto WriteFieldError
+		}
+
+	}
+	if err = oprot.WriteFieldStop(); err != nil {
+		goto WriteFieldStopError
+	}
+	if err = oprot.WriteStructEnd(); err != nil {
+		goto WriteStructEndError
+	}
+	return nil
+WriteStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+WriteFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T write field %d error: ", p, fieldId), err)
+WriteFieldStopError:
+	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
+WriteStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
+}
+
+func (p *UpdateOrderStateRequest) writeField1(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("order_id", thrift.I64, 1); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteI64(p.OrderId); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
+}
+
+func (p *UpdateOrderStateRequest) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("UpdateOrderStateRequest(%+v)", *p)
+}
+
+func (p *UpdateOrderStateRequest) DeepEqual(ano *UpdateOrderStateRequest) bool {
+	if p == ano {
+		return true
+	} else if p == nil || ano == nil {
+		return false
+	}
+	if !p.Field1DeepEqual(ano.OrderId) {
+		return false
+	}
+	return true
+}
+
+func (p *UpdateOrderStateRequest) Field1DeepEqual(src int64) bool {
+
+	if p.OrderId != src {
+		return false
+	}
+	return true
+}
+
+type UpdateOrderStateResponse struct {
+	StatusCode int32  `thrift:"status_code,1" frugal:"1,default,i32" json:"status_code"`
+	StatusMsg  string `thrift:"status_msg,2" frugal:"2,default,string" json:"status_msg"`
+	Succed     bool   `thrift:"succed,3" frugal:"3,default,bool" json:"succed"`
+}
+
+func NewUpdateOrderStateResponse() *UpdateOrderStateResponse {
+	return &UpdateOrderStateResponse{}
+}
+
+func (p *UpdateOrderStateResponse) InitDefault() {
+	*p = UpdateOrderStateResponse{}
+}
+
+func (p *UpdateOrderStateResponse) GetStatusCode() (v int32) {
+	return p.StatusCode
+}
+
+func (p *UpdateOrderStateResponse) GetStatusMsg() (v string) {
+	return p.StatusMsg
+}
+
+func (p *UpdateOrderStateResponse) GetSucced() (v bool) {
+	return p.Succed
+}
+func (p *UpdateOrderStateResponse) SetStatusCode(val int32) {
+	p.StatusCode = val
+}
+func (p *UpdateOrderStateResponse) SetStatusMsg(val string) {
+	p.StatusMsg = val
+}
+func (p *UpdateOrderStateResponse) SetSucced(val bool) {
+	p.Succed = val
+}
+
+var fieldIDToName_UpdateOrderStateResponse = map[int16]string{
+	1: "status_code",
+	2: "status_msg",
+	3: "succed",
+}
+
+func (p *UpdateOrderStateResponse) Read(iprot thrift.TProtocol) (err error) {
+
+	var fieldTypeId thrift.TType
+	var fieldId int16
+
+	if _, err = iprot.ReadStructBegin(); err != nil {
+		goto ReadStructBeginError
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err = iprot.ReadFieldBegin()
+		if err != nil {
+			goto ReadFieldBeginError
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.I32 {
+				if err = p.ReadField1(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		case 2:
+			if fieldTypeId == thrift.STRING {
+				if err = p.ReadField2(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		case 3:
+			if fieldTypeId == thrift.BOOL {
+				if err = p.ReadField3(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		default:
+			if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		}
+
+		if err = iprot.ReadFieldEnd(); err != nil {
+			goto ReadFieldEndError
+		}
+	}
+	if err = iprot.ReadStructEnd(); err != nil {
+		goto ReadStructEndError
+	}
+
+	return nil
+ReadStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
+ReadFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
+ReadFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_UpdateOrderStateResponse[fieldId]), err)
+SkipFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
+
+ReadFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
+ReadStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+}
+
+func (p *UpdateOrderStateResponse) ReadField1(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadI32(); err != nil {
+		return err
+	} else {
+		p.StatusCode = v
+	}
+	return nil
+}
+
+func (p *UpdateOrderStateResponse) ReadField2(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		p.StatusMsg = v
+	}
+	return nil
+}
+
+func (p *UpdateOrderStateResponse) ReadField3(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadBool(); err != nil {
+		return err
+	} else {
+		p.Succed = v
+	}
+	return nil
+}
+
+func (p *UpdateOrderStateResponse) Write(oprot thrift.TProtocol) (err error) {
+	var fieldId int16
+	if err = oprot.WriteStructBegin("UpdateOrderStateResponse"); err != nil {
+		goto WriteStructBeginError
+	}
+	if p != nil {
+		if err = p.writeField1(oprot); err != nil {
+			fieldId = 1
+			goto WriteFieldError
+		}
+		if err = p.writeField2(oprot); err != nil {
+			fieldId = 2
+			goto WriteFieldError
+		}
+		if err = p.writeField3(oprot); err != nil {
+			fieldId = 3
+			goto WriteFieldError
+		}
+
+	}
+	if err = oprot.WriteFieldStop(); err != nil {
+		goto WriteFieldStopError
+	}
+	if err = oprot.WriteStructEnd(); err != nil {
+		goto WriteStructEndError
+	}
+	return nil
+WriteStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+WriteFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T write field %d error: ", p, fieldId), err)
+WriteFieldStopError:
+	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
+WriteStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
+}
+
+func (p *UpdateOrderStateResponse) writeField1(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("status_code", thrift.I32, 1); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteI32(p.StatusCode); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
+}
+
+func (p *UpdateOrderStateResponse) writeField2(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("status_msg", thrift.STRING, 2); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteString(p.StatusMsg); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
+}
+
+func (p *UpdateOrderStateResponse) writeField3(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("succed", thrift.BOOL, 3); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteBool(p.Succed); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
+}
+
+func (p *UpdateOrderStateResponse) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("UpdateOrderStateResponse(%+v)", *p)
+}
+
+func (p *UpdateOrderStateResponse) DeepEqual(ano *UpdateOrderStateResponse) bool {
+	if p == ano {
+		return true
+	} else if p == nil || ano == nil {
+		return false
+	}
+	if !p.Field1DeepEqual(ano.StatusCode) {
+		return false
+	}
+	if !p.Field2DeepEqual(ano.StatusMsg) {
+		return false
+	}
+	if !p.Field3DeepEqual(ano.Succed) {
+		return false
+	}
+	return true
+}
+
+func (p *UpdateOrderStateResponse) Field1DeepEqual(src int32) bool {
+
+	if p.StatusCode != src {
+		return false
+	}
+	return true
+}
+func (p *UpdateOrderStateResponse) Field2DeepEqual(src string) bool {
+
+	if strings.Compare(p.StatusMsg, src) != 0 {
+		return false
+	}
+	return true
+}
+func (p *UpdateOrderStateResponse) Field3DeepEqual(src bool) bool {
 
 	if p.Succed != src {
 		return false
@@ -2605,14 +3110,489 @@ func (p *GetOrderListByProductNameResponse) Field3DeepEqual(src []*Order) bool {
 	return true
 }
 
+type GetOrderListByStateRequest struct {
+	State bool `thrift:"state,1" frugal:"1,default,bool" json:"state"`
+}
+
+func NewGetOrderListByStateRequest() *GetOrderListByStateRequest {
+	return &GetOrderListByStateRequest{}
+}
+
+func (p *GetOrderListByStateRequest) InitDefault() {
+	*p = GetOrderListByStateRequest{}
+}
+
+func (p *GetOrderListByStateRequest) GetState() (v bool) {
+	return p.State
+}
+func (p *GetOrderListByStateRequest) SetState(val bool) {
+	p.State = val
+}
+
+var fieldIDToName_GetOrderListByStateRequest = map[int16]string{
+	1: "state",
+}
+
+func (p *GetOrderListByStateRequest) Read(iprot thrift.TProtocol) (err error) {
+
+	var fieldTypeId thrift.TType
+	var fieldId int16
+
+	if _, err = iprot.ReadStructBegin(); err != nil {
+		goto ReadStructBeginError
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err = iprot.ReadFieldBegin()
+		if err != nil {
+			goto ReadFieldBeginError
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.BOOL {
+				if err = p.ReadField1(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		default:
+			if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		}
+
+		if err = iprot.ReadFieldEnd(); err != nil {
+			goto ReadFieldEndError
+		}
+	}
+	if err = iprot.ReadStructEnd(); err != nil {
+		goto ReadStructEndError
+	}
+
+	return nil
+ReadStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
+ReadFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
+ReadFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_GetOrderListByStateRequest[fieldId]), err)
+SkipFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
+
+ReadFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
+ReadStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+}
+
+func (p *GetOrderListByStateRequest) ReadField1(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadBool(); err != nil {
+		return err
+	} else {
+		p.State = v
+	}
+	return nil
+}
+
+func (p *GetOrderListByStateRequest) Write(oprot thrift.TProtocol) (err error) {
+	var fieldId int16
+	if err = oprot.WriteStructBegin("GetOrderListByStateRequest"); err != nil {
+		goto WriteStructBeginError
+	}
+	if p != nil {
+		if err = p.writeField1(oprot); err != nil {
+			fieldId = 1
+			goto WriteFieldError
+		}
+
+	}
+	if err = oprot.WriteFieldStop(); err != nil {
+		goto WriteFieldStopError
+	}
+	if err = oprot.WriteStructEnd(); err != nil {
+		goto WriteStructEndError
+	}
+	return nil
+WriteStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+WriteFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T write field %d error: ", p, fieldId), err)
+WriteFieldStopError:
+	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
+WriteStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
+}
+
+func (p *GetOrderListByStateRequest) writeField1(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("state", thrift.BOOL, 1); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteBool(p.State); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
+}
+
+func (p *GetOrderListByStateRequest) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("GetOrderListByStateRequest(%+v)", *p)
+}
+
+func (p *GetOrderListByStateRequest) DeepEqual(ano *GetOrderListByStateRequest) bool {
+	if p == ano {
+		return true
+	} else if p == nil || ano == nil {
+		return false
+	}
+	if !p.Field1DeepEqual(ano.State) {
+		return false
+	}
+	return true
+}
+
+func (p *GetOrderListByStateRequest) Field1DeepEqual(src bool) bool {
+
+	if p.State != src {
+		return false
+	}
+	return true
+}
+
+type GetOrderListByStateResponse struct {
+	StatusCode int32    `thrift:"status_code,1" frugal:"1,default,i32" json:"status_code"`
+	StatusMsg  string   `thrift:"status_msg,2" frugal:"2,default,string" json:"status_msg"`
+	Orderlist  []*Order `thrift:"orderlist,3" frugal:"3,default,list<Order>" json:"orderlist"`
+}
+
+func NewGetOrderListByStateResponse() *GetOrderListByStateResponse {
+	return &GetOrderListByStateResponse{}
+}
+
+func (p *GetOrderListByStateResponse) InitDefault() {
+	*p = GetOrderListByStateResponse{}
+}
+
+func (p *GetOrderListByStateResponse) GetStatusCode() (v int32) {
+	return p.StatusCode
+}
+
+func (p *GetOrderListByStateResponse) GetStatusMsg() (v string) {
+	return p.StatusMsg
+}
+
+func (p *GetOrderListByStateResponse) GetOrderlist() (v []*Order) {
+	return p.Orderlist
+}
+func (p *GetOrderListByStateResponse) SetStatusCode(val int32) {
+	p.StatusCode = val
+}
+func (p *GetOrderListByStateResponse) SetStatusMsg(val string) {
+	p.StatusMsg = val
+}
+func (p *GetOrderListByStateResponse) SetOrderlist(val []*Order) {
+	p.Orderlist = val
+}
+
+var fieldIDToName_GetOrderListByStateResponse = map[int16]string{
+	1: "status_code",
+	2: "status_msg",
+	3: "orderlist",
+}
+
+func (p *GetOrderListByStateResponse) Read(iprot thrift.TProtocol) (err error) {
+
+	var fieldTypeId thrift.TType
+	var fieldId int16
+
+	if _, err = iprot.ReadStructBegin(); err != nil {
+		goto ReadStructBeginError
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err = iprot.ReadFieldBegin()
+		if err != nil {
+			goto ReadFieldBeginError
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.I32 {
+				if err = p.ReadField1(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		case 2:
+			if fieldTypeId == thrift.STRING {
+				if err = p.ReadField2(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		case 3:
+			if fieldTypeId == thrift.LIST {
+				if err = p.ReadField3(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		default:
+			if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		}
+
+		if err = iprot.ReadFieldEnd(); err != nil {
+			goto ReadFieldEndError
+		}
+	}
+	if err = iprot.ReadStructEnd(); err != nil {
+		goto ReadStructEndError
+	}
+
+	return nil
+ReadStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
+ReadFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
+ReadFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_GetOrderListByStateResponse[fieldId]), err)
+SkipFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
+
+ReadFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
+ReadStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+}
+
+func (p *GetOrderListByStateResponse) ReadField1(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadI32(); err != nil {
+		return err
+	} else {
+		p.StatusCode = v
+	}
+	return nil
+}
+
+func (p *GetOrderListByStateResponse) ReadField2(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		p.StatusMsg = v
+	}
+	return nil
+}
+
+func (p *GetOrderListByStateResponse) ReadField3(iprot thrift.TProtocol) error {
+	_, size, err := iprot.ReadListBegin()
+	if err != nil {
+		return err
+	}
+	p.Orderlist = make([]*Order, 0, size)
+	for i := 0; i < size; i++ {
+		_elem := NewOrder()
+		if err := _elem.Read(iprot); err != nil {
+			return err
+		}
+
+		p.Orderlist = append(p.Orderlist, _elem)
+	}
+	if err := iprot.ReadListEnd(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *GetOrderListByStateResponse) Write(oprot thrift.TProtocol) (err error) {
+	var fieldId int16
+	if err = oprot.WriteStructBegin("GetOrderListByStateResponse"); err != nil {
+		goto WriteStructBeginError
+	}
+	if p != nil {
+		if err = p.writeField1(oprot); err != nil {
+			fieldId = 1
+			goto WriteFieldError
+		}
+		if err = p.writeField2(oprot); err != nil {
+			fieldId = 2
+			goto WriteFieldError
+		}
+		if err = p.writeField3(oprot); err != nil {
+			fieldId = 3
+			goto WriteFieldError
+		}
+
+	}
+	if err = oprot.WriteFieldStop(); err != nil {
+		goto WriteFieldStopError
+	}
+	if err = oprot.WriteStructEnd(); err != nil {
+		goto WriteStructEndError
+	}
+	return nil
+WriteStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+WriteFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T write field %d error: ", p, fieldId), err)
+WriteFieldStopError:
+	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
+WriteStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
+}
+
+func (p *GetOrderListByStateResponse) writeField1(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("status_code", thrift.I32, 1); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteI32(p.StatusCode); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
+}
+
+func (p *GetOrderListByStateResponse) writeField2(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("status_msg", thrift.STRING, 2); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteString(p.StatusMsg); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
+}
+
+func (p *GetOrderListByStateResponse) writeField3(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("orderlist", thrift.LIST, 3); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteListBegin(thrift.STRUCT, len(p.Orderlist)); err != nil {
+		return err
+	}
+	for _, v := range p.Orderlist {
+		if err := v.Write(oprot); err != nil {
+			return err
+		}
+	}
+	if err := oprot.WriteListEnd(); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
+}
+
+func (p *GetOrderListByStateResponse) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("GetOrderListByStateResponse(%+v)", *p)
+}
+
+func (p *GetOrderListByStateResponse) DeepEqual(ano *GetOrderListByStateResponse) bool {
+	if p == ano {
+		return true
+	} else if p == nil || ano == nil {
+		return false
+	}
+	if !p.Field1DeepEqual(ano.StatusCode) {
+		return false
+	}
+	if !p.Field2DeepEqual(ano.StatusMsg) {
+		return false
+	}
+	if !p.Field3DeepEqual(ano.Orderlist) {
+		return false
+	}
+	return true
+}
+
+func (p *GetOrderListByStateResponse) Field1DeepEqual(src int32) bool {
+
+	if p.StatusCode != src {
+		return false
+	}
+	return true
+}
+func (p *GetOrderListByStateResponse) Field2DeepEqual(src string) bool {
+
+	if strings.Compare(p.StatusMsg, src) != 0 {
+		return false
+	}
+	return true
+}
+func (p *GetOrderListByStateResponse) Field3DeepEqual(src []*Order) bool {
+
+	if len(p.Orderlist) != len(src) {
+		return false
+	}
+	for i, v := range p.Orderlist {
+		_src := src[i]
+		if !v.DeepEqual(_src) {
+			return false
+		}
+	}
+	return true
+}
+
 type OrderListService interface {
 	AddOrder(ctx context.Context, req *AddOrderRequest) (r *AddOrderResponse, err error)
 
 	DelOrder(ctx context.Context, req *DelOrderRequest) (r *DelOrderResponse, err error)
 
+	UpdateOrderState(ctx context.Context, req *UpdateOrderStateRequest) (r *UpdateOrderStateResponse, err error)
+
 	GetOrderListByUserID(ctx context.Context, req *GetOrderListByUserIDRequest) (r *GetOrderListByUserIDResponse, err error)
 
 	GetOrderListByProductNameID(ctx context.Context, req *GetOrderListByProductNameRequest) (r *GetOrderListByProductNameResponse, err error)
+
+	GetOrderListByState(ctx context.Context, req *GetOrderListByStateRequest) (r *GetOrderListByStateResponse, err error)
 }
 
 type OrderListServiceClient struct {
@@ -2659,6 +3639,15 @@ func (p *OrderListServiceClient) DelOrder(ctx context.Context, req *DelOrderRequ
 	}
 	return _result.GetSuccess(), nil
 }
+func (p *OrderListServiceClient) UpdateOrderState(ctx context.Context, req *UpdateOrderStateRequest) (r *UpdateOrderStateResponse, err error) {
+	var _args OrderListServiceUpdateOrderStateArgs
+	_args.Req = req
+	var _result OrderListServiceUpdateOrderStateResult
+	if err = p.Client_().Call(ctx, "UpdateOrderState", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
 func (p *OrderListServiceClient) GetOrderListByUserID(ctx context.Context, req *GetOrderListByUserIDRequest) (r *GetOrderListByUserIDResponse, err error) {
 	var _args OrderListServiceGetOrderListByUserIDArgs
 	_args.Req = req
@@ -2673,6 +3662,15 @@ func (p *OrderListServiceClient) GetOrderListByProductNameID(ctx context.Context
 	_args.Req = req
 	var _result OrderListServiceGetOrderListByProductNameIDResult
 	if err = p.Client_().Call(ctx, "GetOrderListByProductNameID", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+func (p *OrderListServiceClient) GetOrderListByState(ctx context.Context, req *GetOrderListByStateRequest) (r *GetOrderListByStateResponse, err error) {
+	var _args OrderListServiceGetOrderListByStateArgs
+	_args.Req = req
+	var _result OrderListServiceGetOrderListByStateResult
+	if err = p.Client_().Call(ctx, "GetOrderListByState", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
@@ -2700,8 +3698,10 @@ func NewOrderListServiceProcessor(handler OrderListService) *OrderListServicePro
 	self := &OrderListServiceProcessor{handler: handler, processorMap: make(map[string]thrift.TProcessorFunction)}
 	self.AddToProcessorMap("AddOrder", &orderListServiceProcessorAddOrder{handler: handler})
 	self.AddToProcessorMap("DelOrder", &orderListServiceProcessorDelOrder{handler: handler})
+	self.AddToProcessorMap("UpdateOrderState", &orderListServiceProcessorUpdateOrderState{handler: handler})
 	self.AddToProcessorMap("GetOrderListByUserID", &orderListServiceProcessorGetOrderListByUserID{handler: handler})
 	self.AddToProcessorMap("GetOrderListByProductNameID", &orderListServiceProcessorGetOrderListByProductNameID{handler: handler})
+	self.AddToProcessorMap("GetOrderListByState", &orderListServiceProcessorGetOrderListByState{handler: handler})
 	return self
 }
 func (p *OrderListServiceProcessor) Process(ctx context.Context, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
@@ -2818,6 +3818,54 @@ func (p *orderListServiceProcessorDelOrder) Process(ctx context.Context, seqId i
 	return true, err
 }
 
+type orderListServiceProcessorUpdateOrderState struct {
+	handler OrderListService
+}
+
+func (p *orderListServiceProcessorUpdateOrderState) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+	args := OrderListServiceUpdateOrderStateArgs{}
+	if err = args.Read(iprot); err != nil {
+		iprot.ReadMessageEnd()
+		x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err.Error())
+		oprot.WriteMessageBegin("UpdateOrderState", thrift.EXCEPTION, seqId)
+		x.Write(oprot)
+		oprot.WriteMessageEnd()
+		oprot.Flush(ctx)
+		return false, err
+	}
+
+	iprot.ReadMessageEnd()
+	var err2 error
+	result := OrderListServiceUpdateOrderStateResult{}
+	var retval *UpdateOrderStateResponse
+	if retval, err2 = p.handler.UpdateOrderState(ctx, args.Req); err2 != nil {
+		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing UpdateOrderState: "+err2.Error())
+		oprot.WriteMessageBegin("UpdateOrderState", thrift.EXCEPTION, seqId)
+		x.Write(oprot)
+		oprot.WriteMessageEnd()
+		oprot.Flush(ctx)
+		return true, err2
+	} else {
+		result.Success = retval
+	}
+	if err2 = oprot.WriteMessageBegin("UpdateOrderState", thrift.REPLY, seqId); err2 != nil {
+		err = err2
+	}
+	if err2 = result.Write(oprot); err == nil && err2 != nil {
+		err = err2
+	}
+	if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+		err = err2
+	}
+	if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+		err = err2
+	}
+	if err != nil {
+		return
+	}
+	return true, err
+}
+
 type orderListServiceProcessorGetOrderListByUserID struct {
 	handler OrderListService
 }
@@ -2897,6 +3945,54 @@ func (p *orderListServiceProcessorGetOrderListByProductNameID) Process(ctx conte
 		result.Success = retval
 	}
 	if err2 = oprot.WriteMessageBegin("GetOrderListByProductNameID", thrift.REPLY, seqId); err2 != nil {
+		err = err2
+	}
+	if err2 = result.Write(oprot); err == nil && err2 != nil {
+		err = err2
+	}
+	if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+		err = err2
+	}
+	if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+		err = err2
+	}
+	if err != nil {
+		return
+	}
+	return true, err
+}
+
+type orderListServiceProcessorGetOrderListByState struct {
+	handler OrderListService
+}
+
+func (p *orderListServiceProcessorGetOrderListByState) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+	args := OrderListServiceGetOrderListByStateArgs{}
+	if err = args.Read(iprot); err != nil {
+		iprot.ReadMessageEnd()
+		x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err.Error())
+		oprot.WriteMessageBegin("GetOrderListByState", thrift.EXCEPTION, seqId)
+		x.Write(oprot)
+		oprot.WriteMessageEnd()
+		oprot.Flush(ctx)
+		return false, err
+	}
+
+	iprot.ReadMessageEnd()
+	var err2 error
+	result := OrderListServiceGetOrderListByStateResult{}
+	var retval *GetOrderListByStateResponse
+	if retval, err2 = p.handler.GetOrderListByState(ctx, args.Req); err2 != nil {
+		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing GetOrderListByState: "+err2.Error())
+		oprot.WriteMessageBegin("GetOrderListByState", thrift.EXCEPTION, seqId)
+		x.Write(oprot)
+		oprot.WriteMessageEnd()
+		oprot.Flush(ctx)
+		return true, err2
+	} else {
+		result.Success = retval
+	}
+	if err2 = oprot.WriteMessageBegin("GetOrderListByState", thrift.REPLY, seqId); err2 != nil {
 		err = err2
 	}
 	if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -3606,6 +4702,352 @@ func (p *OrderListServiceDelOrderResult) Field0DeepEqual(src *DelOrderResponse) 
 	return true
 }
 
+type OrderListServiceUpdateOrderStateArgs struct {
+	Req *UpdateOrderStateRequest `thrift:"req,1" frugal:"1,default,UpdateOrderStateRequest" json:"req"`
+}
+
+func NewOrderListServiceUpdateOrderStateArgs() *OrderListServiceUpdateOrderStateArgs {
+	return &OrderListServiceUpdateOrderStateArgs{}
+}
+
+func (p *OrderListServiceUpdateOrderStateArgs) InitDefault() {
+	*p = OrderListServiceUpdateOrderStateArgs{}
+}
+
+var OrderListServiceUpdateOrderStateArgs_Req_DEFAULT *UpdateOrderStateRequest
+
+func (p *OrderListServiceUpdateOrderStateArgs) GetReq() (v *UpdateOrderStateRequest) {
+	if !p.IsSetReq() {
+		return OrderListServiceUpdateOrderStateArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+func (p *OrderListServiceUpdateOrderStateArgs) SetReq(val *UpdateOrderStateRequest) {
+	p.Req = val
+}
+
+var fieldIDToName_OrderListServiceUpdateOrderStateArgs = map[int16]string{
+	1: "req",
+}
+
+func (p *OrderListServiceUpdateOrderStateArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *OrderListServiceUpdateOrderStateArgs) Read(iprot thrift.TProtocol) (err error) {
+
+	var fieldTypeId thrift.TType
+	var fieldId int16
+
+	if _, err = iprot.ReadStructBegin(); err != nil {
+		goto ReadStructBeginError
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err = iprot.ReadFieldBegin()
+		if err != nil {
+			goto ReadFieldBeginError
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.STRUCT {
+				if err = p.ReadField1(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		default:
+			if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		}
+
+		if err = iprot.ReadFieldEnd(); err != nil {
+			goto ReadFieldEndError
+		}
+	}
+	if err = iprot.ReadStructEnd(); err != nil {
+		goto ReadStructEndError
+	}
+
+	return nil
+ReadStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
+ReadFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
+ReadFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_OrderListServiceUpdateOrderStateArgs[fieldId]), err)
+SkipFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
+
+ReadFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
+ReadStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+}
+
+func (p *OrderListServiceUpdateOrderStateArgs) ReadField1(iprot thrift.TProtocol) error {
+	p.Req = NewUpdateOrderStateRequest()
+	if err := p.Req.Read(iprot); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *OrderListServiceUpdateOrderStateArgs) Write(oprot thrift.TProtocol) (err error) {
+	var fieldId int16
+	if err = oprot.WriteStructBegin("UpdateOrderState_args"); err != nil {
+		goto WriteStructBeginError
+	}
+	if p != nil {
+		if err = p.writeField1(oprot); err != nil {
+			fieldId = 1
+			goto WriteFieldError
+		}
+
+	}
+	if err = oprot.WriteFieldStop(); err != nil {
+		goto WriteFieldStopError
+	}
+	if err = oprot.WriteStructEnd(); err != nil {
+		goto WriteStructEndError
+	}
+	return nil
+WriteStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+WriteFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T write field %d error: ", p, fieldId), err)
+WriteFieldStopError:
+	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
+WriteStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
+}
+
+func (p *OrderListServiceUpdateOrderStateArgs) writeField1(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("req", thrift.STRUCT, 1); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := p.Req.Write(oprot); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
+}
+
+func (p *OrderListServiceUpdateOrderStateArgs) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("OrderListServiceUpdateOrderStateArgs(%+v)", *p)
+}
+
+func (p *OrderListServiceUpdateOrderStateArgs) DeepEqual(ano *OrderListServiceUpdateOrderStateArgs) bool {
+	if p == ano {
+		return true
+	} else if p == nil || ano == nil {
+		return false
+	}
+	if !p.Field1DeepEqual(ano.Req) {
+		return false
+	}
+	return true
+}
+
+func (p *OrderListServiceUpdateOrderStateArgs) Field1DeepEqual(src *UpdateOrderStateRequest) bool {
+
+	if !p.Req.DeepEqual(src) {
+		return false
+	}
+	return true
+}
+
+type OrderListServiceUpdateOrderStateResult struct {
+	Success *UpdateOrderStateResponse `thrift:"success,0,optional" frugal:"0,optional,UpdateOrderStateResponse" json:"success,omitempty"`
+}
+
+func NewOrderListServiceUpdateOrderStateResult() *OrderListServiceUpdateOrderStateResult {
+	return &OrderListServiceUpdateOrderStateResult{}
+}
+
+func (p *OrderListServiceUpdateOrderStateResult) InitDefault() {
+	*p = OrderListServiceUpdateOrderStateResult{}
+}
+
+var OrderListServiceUpdateOrderStateResult_Success_DEFAULT *UpdateOrderStateResponse
+
+func (p *OrderListServiceUpdateOrderStateResult) GetSuccess() (v *UpdateOrderStateResponse) {
+	if !p.IsSetSuccess() {
+		return OrderListServiceUpdateOrderStateResult_Success_DEFAULT
+	}
+	return p.Success
+}
+func (p *OrderListServiceUpdateOrderStateResult) SetSuccess(x interface{}) {
+	p.Success = x.(*UpdateOrderStateResponse)
+}
+
+var fieldIDToName_OrderListServiceUpdateOrderStateResult = map[int16]string{
+	0: "success",
+}
+
+func (p *OrderListServiceUpdateOrderStateResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *OrderListServiceUpdateOrderStateResult) Read(iprot thrift.TProtocol) (err error) {
+
+	var fieldTypeId thrift.TType
+	var fieldId int16
+
+	if _, err = iprot.ReadStructBegin(); err != nil {
+		goto ReadStructBeginError
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err = iprot.ReadFieldBegin()
+		if err != nil {
+			goto ReadFieldBeginError
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+
+		switch fieldId {
+		case 0:
+			if fieldTypeId == thrift.STRUCT {
+				if err = p.ReadField0(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		default:
+			if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		}
+
+		if err = iprot.ReadFieldEnd(); err != nil {
+			goto ReadFieldEndError
+		}
+	}
+	if err = iprot.ReadStructEnd(); err != nil {
+		goto ReadStructEndError
+	}
+
+	return nil
+ReadStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
+ReadFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
+ReadFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_OrderListServiceUpdateOrderStateResult[fieldId]), err)
+SkipFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
+
+ReadFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
+ReadStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+}
+
+func (p *OrderListServiceUpdateOrderStateResult) ReadField0(iprot thrift.TProtocol) error {
+	p.Success = NewUpdateOrderStateResponse()
+	if err := p.Success.Read(iprot); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *OrderListServiceUpdateOrderStateResult) Write(oprot thrift.TProtocol) (err error) {
+	var fieldId int16
+	if err = oprot.WriteStructBegin("UpdateOrderState_result"); err != nil {
+		goto WriteStructBeginError
+	}
+	if p != nil {
+		if err = p.writeField0(oprot); err != nil {
+			fieldId = 0
+			goto WriteFieldError
+		}
+
+	}
+	if err = oprot.WriteFieldStop(); err != nil {
+		goto WriteFieldStopError
+	}
+	if err = oprot.WriteStructEnd(); err != nil {
+		goto WriteStructEndError
+	}
+	return nil
+WriteStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+WriteFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T write field %d error: ", p, fieldId), err)
+WriteFieldStopError:
+	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
+WriteStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
+}
+
+func (p *OrderListServiceUpdateOrderStateResult) writeField0(oprot thrift.TProtocol) (err error) {
+	if p.IsSetSuccess() {
+		if err = oprot.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := p.Success.Write(oprot); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 0 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 0 end error: ", p), err)
+}
+
+func (p *OrderListServiceUpdateOrderStateResult) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("OrderListServiceUpdateOrderStateResult(%+v)", *p)
+}
+
+func (p *OrderListServiceUpdateOrderStateResult) DeepEqual(ano *OrderListServiceUpdateOrderStateResult) bool {
+	if p == ano {
+		return true
+	} else if p == nil || ano == nil {
+		return false
+	}
+	if !p.Field0DeepEqual(ano.Success) {
+		return false
+	}
+	return true
+}
+
+func (p *OrderListServiceUpdateOrderStateResult) Field0DeepEqual(src *UpdateOrderStateResponse) bool {
+
+	if !p.Success.DeepEqual(src) {
+		return false
+	}
+	return true
+}
+
 type OrderListServiceGetOrderListByUserIDArgs struct {
 	Req *GetOrderListByUserIDRequest `thrift:"req,1" frugal:"1,default,GetOrderListByUserIDRequest" json:"req"`
 }
@@ -4291,6 +5733,352 @@ func (p *OrderListServiceGetOrderListByProductNameIDResult) DeepEqual(ano *Order
 }
 
 func (p *OrderListServiceGetOrderListByProductNameIDResult) Field0DeepEqual(src *GetOrderListByProductNameResponse) bool {
+
+	if !p.Success.DeepEqual(src) {
+		return false
+	}
+	return true
+}
+
+type OrderListServiceGetOrderListByStateArgs struct {
+	Req *GetOrderListByStateRequest `thrift:"req,1" frugal:"1,default,GetOrderListByStateRequest" json:"req"`
+}
+
+func NewOrderListServiceGetOrderListByStateArgs() *OrderListServiceGetOrderListByStateArgs {
+	return &OrderListServiceGetOrderListByStateArgs{}
+}
+
+func (p *OrderListServiceGetOrderListByStateArgs) InitDefault() {
+	*p = OrderListServiceGetOrderListByStateArgs{}
+}
+
+var OrderListServiceGetOrderListByStateArgs_Req_DEFAULT *GetOrderListByStateRequest
+
+func (p *OrderListServiceGetOrderListByStateArgs) GetReq() (v *GetOrderListByStateRequest) {
+	if !p.IsSetReq() {
+		return OrderListServiceGetOrderListByStateArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+func (p *OrderListServiceGetOrderListByStateArgs) SetReq(val *GetOrderListByStateRequest) {
+	p.Req = val
+}
+
+var fieldIDToName_OrderListServiceGetOrderListByStateArgs = map[int16]string{
+	1: "req",
+}
+
+func (p *OrderListServiceGetOrderListByStateArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *OrderListServiceGetOrderListByStateArgs) Read(iprot thrift.TProtocol) (err error) {
+
+	var fieldTypeId thrift.TType
+	var fieldId int16
+
+	if _, err = iprot.ReadStructBegin(); err != nil {
+		goto ReadStructBeginError
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err = iprot.ReadFieldBegin()
+		if err != nil {
+			goto ReadFieldBeginError
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.STRUCT {
+				if err = p.ReadField1(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		default:
+			if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		}
+
+		if err = iprot.ReadFieldEnd(); err != nil {
+			goto ReadFieldEndError
+		}
+	}
+	if err = iprot.ReadStructEnd(); err != nil {
+		goto ReadStructEndError
+	}
+
+	return nil
+ReadStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
+ReadFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
+ReadFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_OrderListServiceGetOrderListByStateArgs[fieldId]), err)
+SkipFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
+
+ReadFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
+ReadStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+}
+
+func (p *OrderListServiceGetOrderListByStateArgs) ReadField1(iprot thrift.TProtocol) error {
+	p.Req = NewGetOrderListByStateRequest()
+	if err := p.Req.Read(iprot); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *OrderListServiceGetOrderListByStateArgs) Write(oprot thrift.TProtocol) (err error) {
+	var fieldId int16
+	if err = oprot.WriteStructBegin("GetOrderListByState_args"); err != nil {
+		goto WriteStructBeginError
+	}
+	if p != nil {
+		if err = p.writeField1(oprot); err != nil {
+			fieldId = 1
+			goto WriteFieldError
+		}
+
+	}
+	if err = oprot.WriteFieldStop(); err != nil {
+		goto WriteFieldStopError
+	}
+	if err = oprot.WriteStructEnd(); err != nil {
+		goto WriteStructEndError
+	}
+	return nil
+WriteStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+WriteFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T write field %d error: ", p, fieldId), err)
+WriteFieldStopError:
+	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
+WriteStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
+}
+
+func (p *OrderListServiceGetOrderListByStateArgs) writeField1(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("req", thrift.STRUCT, 1); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := p.Req.Write(oprot); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
+}
+
+func (p *OrderListServiceGetOrderListByStateArgs) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("OrderListServiceGetOrderListByStateArgs(%+v)", *p)
+}
+
+func (p *OrderListServiceGetOrderListByStateArgs) DeepEqual(ano *OrderListServiceGetOrderListByStateArgs) bool {
+	if p == ano {
+		return true
+	} else if p == nil || ano == nil {
+		return false
+	}
+	if !p.Field1DeepEqual(ano.Req) {
+		return false
+	}
+	return true
+}
+
+func (p *OrderListServiceGetOrderListByStateArgs) Field1DeepEqual(src *GetOrderListByStateRequest) bool {
+
+	if !p.Req.DeepEqual(src) {
+		return false
+	}
+	return true
+}
+
+type OrderListServiceGetOrderListByStateResult struct {
+	Success *GetOrderListByStateResponse `thrift:"success,0,optional" frugal:"0,optional,GetOrderListByStateResponse" json:"success,omitempty"`
+}
+
+func NewOrderListServiceGetOrderListByStateResult() *OrderListServiceGetOrderListByStateResult {
+	return &OrderListServiceGetOrderListByStateResult{}
+}
+
+func (p *OrderListServiceGetOrderListByStateResult) InitDefault() {
+	*p = OrderListServiceGetOrderListByStateResult{}
+}
+
+var OrderListServiceGetOrderListByStateResult_Success_DEFAULT *GetOrderListByStateResponse
+
+func (p *OrderListServiceGetOrderListByStateResult) GetSuccess() (v *GetOrderListByStateResponse) {
+	if !p.IsSetSuccess() {
+		return OrderListServiceGetOrderListByStateResult_Success_DEFAULT
+	}
+	return p.Success
+}
+func (p *OrderListServiceGetOrderListByStateResult) SetSuccess(x interface{}) {
+	p.Success = x.(*GetOrderListByStateResponse)
+}
+
+var fieldIDToName_OrderListServiceGetOrderListByStateResult = map[int16]string{
+	0: "success",
+}
+
+func (p *OrderListServiceGetOrderListByStateResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *OrderListServiceGetOrderListByStateResult) Read(iprot thrift.TProtocol) (err error) {
+
+	var fieldTypeId thrift.TType
+	var fieldId int16
+
+	if _, err = iprot.ReadStructBegin(); err != nil {
+		goto ReadStructBeginError
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err = iprot.ReadFieldBegin()
+		if err != nil {
+			goto ReadFieldBeginError
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+
+		switch fieldId {
+		case 0:
+			if fieldTypeId == thrift.STRUCT {
+				if err = p.ReadField0(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		default:
+			if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		}
+
+		if err = iprot.ReadFieldEnd(); err != nil {
+			goto ReadFieldEndError
+		}
+	}
+	if err = iprot.ReadStructEnd(); err != nil {
+		goto ReadStructEndError
+	}
+
+	return nil
+ReadStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
+ReadFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
+ReadFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_OrderListServiceGetOrderListByStateResult[fieldId]), err)
+SkipFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
+
+ReadFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
+ReadStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+}
+
+func (p *OrderListServiceGetOrderListByStateResult) ReadField0(iprot thrift.TProtocol) error {
+	p.Success = NewGetOrderListByStateResponse()
+	if err := p.Success.Read(iprot); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *OrderListServiceGetOrderListByStateResult) Write(oprot thrift.TProtocol) (err error) {
+	var fieldId int16
+	if err = oprot.WriteStructBegin("GetOrderListByState_result"); err != nil {
+		goto WriteStructBeginError
+	}
+	if p != nil {
+		if err = p.writeField0(oprot); err != nil {
+			fieldId = 0
+			goto WriteFieldError
+		}
+
+	}
+	if err = oprot.WriteFieldStop(); err != nil {
+		goto WriteFieldStopError
+	}
+	if err = oprot.WriteStructEnd(); err != nil {
+		goto WriteStructEndError
+	}
+	return nil
+WriteStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+WriteFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T write field %d error: ", p, fieldId), err)
+WriteFieldStopError:
+	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
+WriteStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
+}
+
+func (p *OrderListServiceGetOrderListByStateResult) writeField0(oprot thrift.TProtocol) (err error) {
+	if p.IsSetSuccess() {
+		if err = oprot.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+			goto WriteFieldBeginError
+		}
+		if err := p.Success.Write(oprot); err != nil {
+			return err
+		}
+		if err = oprot.WriteFieldEnd(); err != nil {
+			goto WriteFieldEndError
+		}
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 0 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 0 end error: ", p), err)
+}
+
+func (p *OrderListServiceGetOrderListByStateResult) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("OrderListServiceGetOrderListByStateResult(%+v)", *p)
+}
+
+func (p *OrderListServiceGetOrderListByStateResult) DeepEqual(ano *OrderListServiceGetOrderListByStateResult) bool {
+	if p == ano {
+		return true
+	} else if p == nil || ano == nil {
+		return false
+	}
+	if !p.Field0DeepEqual(ano.Success) {
+		return false
+	}
+	return true
+}
+
+func (p *OrderListServiceGetOrderListByStateResult) Field0DeepEqual(src *GetOrderListByStateResponse) bool {
 
 	if !p.Success.DeepEqual(src) {
 		return false

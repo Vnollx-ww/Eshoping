@@ -56,6 +56,12 @@
             color: white;
         }
 
+        /* 新增查看订单按钮的样式 */
+        #manager button#vieworders {
+            background-color: #673ab7;
+            color: white;
+        }
+
         /* 鼠标悬停时的效果 */
         #manager button:hover {
             opacity: 0.9;
@@ -83,6 +89,8 @@
     <button id="deletepro">删除商品</button>
     <button id="updatestock">修改商品库存</button>
     <button id="updateprice">修改商品价格</button>
+    <!-- 新增查看订单按钮 -->
+    <button id="orderlistbystate">查看需处理的订单</button>
 </div>
 <script>
     document.getElementById('addpro').addEventListener('click', function() {
@@ -96,6 +104,10 @@
     });
     document.getElementById('updateprice').addEventListener('click', function() {
         window.location.href = "updateprice";
+    });
+    // 新增查看订单按钮的事件监听
+    document.getElementById('orderlistbystate').addEventListener('click', function() {
+        window.location.href = "getorderlistbystate"; // 假设查看订单的页面路径是 "vieworders"
     });
 </script>
 </body>

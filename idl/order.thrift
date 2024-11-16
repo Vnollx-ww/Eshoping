@@ -6,7 +6,8 @@ struct order{
 4:i64 number
 5:i64 cost
 6:string address
-7:string create_time
+7:bool isdeliver
+8:string create_time
 }
 struct AddOrderRequest{
 1:order ol
@@ -25,6 +26,14 @@ struct DelOrderResponse{
 1: i32    status_code
 2: string status_msg
 3: bool succed
+}
+struct UpdateOrderStateRequest{
+1:i64 order_id
+}
+struct UpdateOrderStateResponse{
+1:i32 status_code
+2:string status_msg
+3:bool succed
 }
 struct GetOrderListByUserIDRequest{
 1:i64 user_id
@@ -45,9 +54,20 @@ struct GetOrderListByProductNameResponse{
 2: string status_msg
 3:list<order> orderlist
 }
+struct GetOrderListByStateRequest{
+1:bool state
+}
+struct GetOrderListByStateResponse{
+1:i32 status_code
+2:string status_msg
+3:list<order> orderlist
+}
 service OrderListService{
 AddOrderResponse AddOrder(1:AddOrderRequest req)
 DelOrderResponse DelOrder(1:DelOrderRequest req)
+UpdateOrderStateResponse UpdateOrderState(1:UpdateOrderStateRequest req)
 GetOrderListByUserIDResponse GetOrderListByUserID(1:GetOrderListByUserIDRequest req)
 GetOrderListByProductNameResponse GetOrderListByProductNameID(1:GetOrderListByProductNameRequest req)
+GetOrderListByStateResponse GetOrderListByState(1:GetOrderListByStateRequest req)
 }
+

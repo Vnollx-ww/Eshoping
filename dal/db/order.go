@@ -12,6 +12,7 @@ type Order struct {
 	Number      int64  `gorm:"not null;default:0" json:"price,omitempty"`
 	Cost        int64  `gorm:"not null;default:0" json:"cost,omitempty"`
 	Address     string `gorm:"varchar(256);not null" json:"address,omitempty"`
+	State       bool   `gorm:"default:false" json:"state,omitempty"`
 }
 
 func CreateOrder(ctx context.Context, order *Order) error {
@@ -29,6 +30,24 @@ func DeleteOrder(ctx context.Context, ID int64) error {
 		return err
 	}
 }
+func GetOrderByID(ctx context.Context, ID int64) (*Order, error) {
+	order := new(Order)
+	db := GetDB()
+	if err := db.Where("ID = ?", ID).First(&order).Error; err == nil {
+		return order, nil
+	} else {
+		return nil, err
+	}
+}
+func UpdateOrderState(ctx context.Context, order *Order) error {
+	db := GetDB()
+	order.State = true
+	err := db.Save(&order).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
 func GetOrderListByUserID(ctx context.Context, userID int64) ([]*Order, error) {
 	db := GetDB()
 	var orders []*Order
@@ -42,6 +61,15 @@ func GetOrderListByProductName(ctx context.Context, productName string) ([]*Orde
 	db := GetDB()
 	var orders []*Order
 	result := db.Where("product_name = ?", productName).Find(&orders)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return orders, nil
+}
+func GetOrderListByState(ctx context.Context, state bool) ([]*Order, error) {
+	db := GetDB()
+	var orders []*Order
+	result := db.Where("state = ?", state).Find(&orders)
 	if result.Error != nil {
 		return nil, result.Error
 	}

@@ -21,8 +21,10 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	methods := map[string]kitex.MethodInfo{
 		"AddOrder":                    kitex.NewMethodInfo(addOrderHandler, newOrderListServiceAddOrderArgs, newOrderListServiceAddOrderResult, false),
 		"DelOrder":                    kitex.NewMethodInfo(delOrderHandler, newOrderListServiceDelOrderArgs, newOrderListServiceDelOrderResult, false),
+		"UpdateOrderState":            kitex.NewMethodInfo(updateOrderStateHandler, newOrderListServiceUpdateOrderStateArgs, newOrderListServiceUpdateOrderStateResult, false),
 		"GetOrderListByUserID":        kitex.NewMethodInfo(getOrderListByUserIDHandler, newOrderListServiceGetOrderListByUserIDArgs, newOrderListServiceGetOrderListByUserIDResult, false),
 		"GetOrderListByProductNameID": kitex.NewMethodInfo(getOrderListByProductNameIDHandler, newOrderListServiceGetOrderListByProductNameIDArgs, newOrderListServiceGetOrderListByProductNameIDResult, false),
+		"GetOrderListByState":         kitex.NewMethodInfo(getOrderListByStateHandler, newOrderListServiceGetOrderListByStateArgs, newOrderListServiceGetOrderListByStateResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName":     "orderlist",
@@ -75,6 +77,24 @@ func newOrderListServiceDelOrderResult() interface{} {
 	return orderlist.NewOrderListServiceDelOrderResult()
 }
 
+func updateOrderStateHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*orderlist.OrderListServiceUpdateOrderStateArgs)
+	realResult := result.(*orderlist.OrderListServiceUpdateOrderStateResult)
+	success, err := handler.(orderlist.OrderListService).UpdateOrderState(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newOrderListServiceUpdateOrderStateArgs() interface{} {
+	return orderlist.NewOrderListServiceUpdateOrderStateArgs()
+}
+
+func newOrderListServiceUpdateOrderStateResult() interface{} {
+	return orderlist.NewOrderListServiceUpdateOrderStateResult()
+}
+
 func getOrderListByUserIDHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
 	realArg := arg.(*orderlist.OrderListServiceGetOrderListByUserIDArgs)
 	realResult := result.(*orderlist.OrderListServiceGetOrderListByUserIDResult)
@@ -111,6 +131,24 @@ func newOrderListServiceGetOrderListByProductNameIDResult() interface{} {
 	return orderlist.NewOrderListServiceGetOrderListByProductNameIDResult()
 }
 
+func getOrderListByStateHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*orderlist.OrderListServiceGetOrderListByStateArgs)
+	realResult := result.(*orderlist.OrderListServiceGetOrderListByStateResult)
+	success, err := handler.(orderlist.OrderListService).GetOrderListByState(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newOrderListServiceGetOrderListByStateArgs() interface{} {
+	return orderlist.NewOrderListServiceGetOrderListByStateArgs()
+}
+
+func newOrderListServiceGetOrderListByStateResult() interface{} {
+	return orderlist.NewOrderListServiceGetOrderListByStateResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -141,6 +179,16 @@ func (p *kClient) DelOrder(ctx context.Context, req *orderlist.DelOrderRequest) 
 	return _result.GetSuccess(), nil
 }
 
+func (p *kClient) UpdateOrderState(ctx context.Context, req *orderlist.UpdateOrderStateRequest) (r *orderlist.UpdateOrderStateResponse, err error) {
+	var _args orderlist.OrderListServiceUpdateOrderStateArgs
+	_args.Req = req
+	var _result orderlist.OrderListServiceUpdateOrderStateResult
+	if err = p.c.Call(ctx, "UpdateOrderState", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
 func (p *kClient) GetOrderListByUserID(ctx context.Context, req *orderlist.GetOrderListByUserIDRequest) (r *orderlist.GetOrderListByUserIDResponse, err error) {
 	var _args orderlist.OrderListServiceGetOrderListByUserIDArgs
 	_args.Req = req
@@ -156,6 +204,16 @@ func (p *kClient) GetOrderListByProductNameID(ctx context.Context, req *orderlis
 	_args.Req = req
 	var _result orderlist.OrderListServiceGetOrderListByProductNameIDResult
 	if err = p.c.Call(ctx, "GetOrderListByProductNameID", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetOrderListByState(ctx context.Context, req *orderlist.GetOrderListByStateRequest) (r *orderlist.GetOrderListByStateResponse, err error) {
+	var _args orderlist.OrderListServiceGetOrderListByStateArgs
+	_args.Req = req
+	var _result orderlist.OrderListServiceGetOrderListByStateResult
+	if err = p.c.Call(ctx, "GetOrderListByState", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>订单列表</title>
+    <title>待处理订单列表</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -103,28 +103,6 @@
         .order .order-time {
             color: #555;
         }
-        .delete-button {
-            background-color: #ff4d4d;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 6px 12px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
-        }
-        .delete-button:hover {
-            background-color: #e60000;
-        }
-
-        /* 状态标签样式 */
-        .order-state {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 12px;
-            font-weight: bold;
-        }
 
         @media (max-width: 600px) {
             #orderlist {
@@ -141,47 +119,22 @@
 </head>
 <body>
 <div id="orderlist">
-    <button id="getorderlist">查询订单</button>
+    <button id="getorderlistbystate">查询待处理订单</button>
     <div id="orderinfo"></div>
 </div>
+</body>
 <script>
-    document.getElementById("getorderlist").addEventListener("click", fetchOrderList);
-
-    async function deleteOrder(orderId) {
-        try {
-            const token = localStorage.getItem("token");
-            const response = await fetch("/order/deleteorder", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ token, orderId })
-            });
-            const data = await response.json();
-            if (response.ok) {
-                alert("订单删除成功！");
-                fetchOrderList();  // 重新加载订单列表
-            } else {
-                alert("删除失败：" + data.status_msg);
-            }
-        } catch (error) {
-            console.error("删除订单时发生错误:", error);
-            alert("删除订单时发生错误，请重试");
-        }
-    }
-
     async function fetchOrderList() {
+        var state = false;
         try {
-            const token = localStorage.getItem("token");
-            const response = await fetch("/order/orderlistbyuserid", {
+            const response = await fetch("/order/orderlistbystate", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ token })
+                body: JSON.stringify({ state })
             });
-
-            const data = await response.json();
+            var data = await response.json();
             var div = document.getElementById("orderinfo");
 
             if (response.ok) {
@@ -219,10 +172,32 @@
                         createtimeSpan.textContent = `创建时间: ${order.create_time}`;
                         createtimeSpan.classList.add("order-time");
 
-                        // 状态标签
-                        var stateSpan = document.createElement("span");
-                        stateSpan.classList.add("order-state");
-                        stateSpan.textContent = order.isdeliver ? "已发货" : "未发货";
+                        // 发货按钮
+                        var shipButton = document.createElement("button");
+                        shipButton.textContent = "发货";
+                        shipButton.style.marginTop = '10px';
+                        shipButton.addEventListener("click", async function () {
+                            var orderid = order.order_id;
+                            try {
+                                const response = await fetch("/order/updatestate", {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ orderid })
+                                });
+                                const data = await response.json();
+                                if (response.ok) {
+                                    alert("发货成功");
+                                    fetchOrderList(); // 刷新订单列表
+                                } else {
+                                    alert(data.status_msg);
+                                }
+                            } catch (error) {
+                                console.error("发生错误:", error);
+                                showError("发生错误，请重试");
+                            }
+                        });
 
                         orderDiv.appendChild(orderSpan);
                         orderDiv.appendChild(userSpan);
@@ -231,21 +206,27 @@
                         orderDiv.appendChild(costSpan);
                         orderDiv.appendChild(addressSpan);
                         orderDiv.appendChild(createtimeSpan);
-                        orderDiv.appendChild(stateSpan);
+                        orderDiv.appendChild(shipButton); // 添加发货按钮
 
                         div.appendChild(orderDiv);
                     });
                 } else {
-                    div.innerHTML = "<p>暂无订单</p>";
+                    div.innerHTML = "<p>暂无需要处理的订单</p>";
                 }
             } else {
                 div.innerHTML = "<p>获取订单失败</p>";
             }
         } catch (error) {
-            console.error("获取订单时发生错误:", error);
-            alert("获取订单时发生错误，请重试");
+            console.error("发生错误:", error);
+            showError("发生错误，请重试");
         }
     }
+
+    document.getElementById("getorderlistbystate").addEventListener("click", fetchOrderList);
+
+    function showError(message) {
+        alert(message);
+    }
 </script>
-</body>
+
 </html>

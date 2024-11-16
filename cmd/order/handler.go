@@ -36,11 +36,23 @@ func BadGetOrderListByUserIDResponse(s string) *orderlist.GetOrderListByUserIDRe
 func GoodGetOrderListByUserIDResponse(s string, or []*orderlist.Order) *orderlist.GetOrderListByUserIDResponse {
 	return &orderlist.GetOrderListByUserIDResponse{StatusCode: 200, StatusMsg: s, Orderlist: or}
 }
-func BadGetOrderListByProductName(s string) *orderlist.GetOrderListByProductNameResponse {
+func BadGetOrderListByProductNameResponse(s string) *orderlist.GetOrderListByProductNameResponse {
 	return &orderlist.GetOrderListByProductNameResponse{StatusCode: -1, StatusMsg: s}
 }
 func GoodGetOrderListByProductNameResponse(s string, or []*orderlist.Order) *orderlist.GetOrderListByProductNameResponse {
 	return &orderlist.GetOrderListByProductNameResponse{StatusCode: 200, StatusMsg: s, Orderlist: or}
+}
+func BadGetOrderListByStateResponse(s string) *orderlist.GetOrderListByStateResponse {
+	return &orderlist.GetOrderListByStateResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodGetOrderListByStateResponse(s string, or []*orderlist.Order) *orderlist.GetOrderListByStateResponse {
+	return &orderlist.GetOrderListByStateResponse{StatusCode: 200, StatusMsg: s, Orderlist: or}
+}
+func BadUpdateOrderStateResponse(s string) *orderlist.UpdateOrderStateResponse {
+	return &orderlist.UpdateOrderStateResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodUpdateOrderStateResponse(s string) *orderlist.UpdateOrderStateResponse {
+	return &orderlist.UpdateOrderStateResponse{StatusCode: 200, StatusMsg: s, Succed: true}
 }
 
 // AddOrder implements the OrderListServiceImpl interface.
@@ -134,8 +146,8 @@ func (s *OrderListServiceImpl) GetOrderListByUserID(ctx context.Context, req *or
 		ord.Cost = order.Cost
 		ord.ProductName = order.ProductName
 		ord.Address = order.Address
+		ord.Isdeliver = order.State
 		ord.CreateTime = order.CreatedAt.Format("2006-01-02 15:04:05")
-		log.Println(order)
 		or = append(or, &ord)
 	}
 	return GoodGetOrderListByUserIDResponse("用户订单列表获取成功", or), nil
@@ -146,7 +158,7 @@ func (s *OrderListServiceImpl) GetOrderListByProductNameID(ctx context.Context, 
 	orders, er := db.GetOrderListByProductName(ctx, req.ProductName)
 	if er != nil {
 		log.Println(err)
-		return BadGetOrderListByProductName("商品订单列表获取失败"), nil
+		return BadGetOrderListByProductNameResponse("商品订单列表获取失败"), nil
 	}
 	var or []*orderlist.Order
 	for _, order := range orders {
@@ -157,8 +169,48 @@ func (s *OrderListServiceImpl) GetOrderListByProductNameID(ctx context.Context, 
 		ord.Cost = order.Cost
 		ord.ProductName = order.ProductName
 		ord.Address = order.Address
+		ord.Isdeliver = order.State
 		ord.CreateTime = order.CreatedAt.Format("2006-01-02 15:04:05")
 		or = append(or, &ord)
 	}
 	return GoodGetOrderListByProductNameResponse("商品订单列表获取成功", or), nil
+}
+
+// GetOrderListByState implements the OrderListServiceImpl interface.
+func (s *OrderListServiceImpl) GetOrderListByState(ctx context.Context, req *orderlist.GetOrderListByStateRequest) (resp *orderlist.GetOrderListByStateResponse, err error) {
+	orders, err := db.GetOrderListByState(ctx, req.State)
+	if err != nil {
+		log.Println(err)
+		return BadGetOrderListByStateResponse("未发货订单列表获取失败"), nil
+	}
+	var or []*orderlist.Order
+	for _, order := range orders {
+		var ord orderlist.Order
+		ord.OrderId = int64(order.ID)
+		ord.UserId = order.UserID
+		ord.Number = order.Number
+		ord.Cost = order.Cost
+		ord.ProductName = order.ProductName
+		ord.Address = order.Address
+		ord.Isdeliver = order.State
+		ord.CreateTime = order.CreatedAt.Format("2006-01-02 15:04:05")
+		or = append(or, &ord)
+	}
+	return GoodGetOrderListByStateResponse("订单未发货列表获取成功", or), nil
+}
+
+// UpdateOrderState implements the OrderListServiceImpl interface.
+func (s *OrderListServiceImpl) UpdateOrderState(ctx context.Context, req *orderlist.UpdateOrderStateRequest) (resp *orderlist.UpdateOrderStateResponse, err error) {
+	order, err := db.GetOrderByID(ctx, req.OrderId)
+	if err != nil {
+		log.Println(err)
+		return BadUpdateOrderStateResponse("修改订单状态失败，服务器内部错误"), nil
+	}
+	err = db.UpdateOrderState(ctx, order)
+	if err != nil {
+		log.Println(err)
+		return BadUpdateOrderStateResponse("订单状态修改失败"), nil
+		return
+	}
+	return GoodUpdateOrderStateResponse("订单状态修改成功"), nil
 }

@@ -70,7 +70,9 @@ func LoadHtml(hz *server.Hertz) {
 	hz.GET("/updatestock", func(ctx context.Context, c *app.RequestContext) {
 		c.File("D:/GolandProgram/Eshoping/web/html/admin/updatestock.html")
 	})
-
+	hz.GET("getorderlistbystate", func(ctx context.Context, c *app.RequestContext) {
+		c.File("D:/GolandProgram/Eshoping/web/html/admin/getorderlistbystate.html")
+	})
 }
 func registerGroup(hz *server.Hertz) {
 	user := hz.Group("/user")
@@ -98,8 +100,10 @@ func registerGroup(hz *server.Hertz) {
 	{
 		order.POST("/addorder", handler.CreateOrder)
 		order.POST("/deleteorder", handler.DeleteOrder)
+		order.POST("/updatestate", handler.UpdateOrderState)
 		order.POST("/orderlistbyuserid", handler.GetOrderListByUserID)
 		order.POST("/orderlistbyproductname", handler.GetOrderListByProductName)
+		order.POST("/orderlistbystate", handler.GetOrderListByState)
 	}
 }
 
