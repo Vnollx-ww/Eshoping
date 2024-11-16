@@ -10,11 +10,15 @@ DAL 层为数据访问层，包含 Redis 和 MySQL 两部份。
 
 技术栈
 
-Hertz：提供 HTTP 服务；Kitex：提供 RPC 服务；ETCD：服务注册与发现；
+Hertz：提供 HTTP 服务；
+
+Kitex：提供 RPC 服务；
+
+ETCD：服务注册与发现；
 
 JWT：token 的生成与校验；
 
-Gorm：对 MySQL 进行 ORM 操作，Go-Redis：操作 Redis 对频繁访问的数据进行缓存，使用 Gorm 的 db-resolver 插件进行读写分离操作；
+Gorm：对 MySQL 进行 ORM 操作，Go-Redis：操作 Redis 对频繁访问的数据进行缓存；
 
 Redis：对数据进行缓存，按照一定策略使键过期，并定时同步数据到数据库，并使用分布式锁；
 
