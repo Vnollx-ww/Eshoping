@@ -16,15 +16,13 @@ type Order struct {
 }
 
 func CreateOrder(ctx context.Context, order *Order) error {
-	db := GetDB()
-	err := db.Create(order).Error
+	err := DB.Create(order).Error
 	return err
 }
 func DeleteOrder(ctx context.Context, ID int64) error {
 	order := new(Order)
-	db := GetDB()
-	if err := db.Where("ID = ?", ID).First(&order).Error; err == nil {
-		db.Unscoped().Delete(&order)
+	if err := DB.Where("ID = ?", ID).First(&order).Error; err == nil {
+		DB.Unscoped().Delete(&order)
 		return nil
 	} else {
 		return err
@@ -32,44 +30,39 @@ func DeleteOrder(ctx context.Context, ID int64) error {
 }
 func GetOrderByID(ctx context.Context, ID int64) (*Order, error) {
 	order := new(Order)
-	db := GetDB()
-	if err := db.Where("ID = ?", ID).First(&order).Error; err == nil {
+	if err := DB.Where("ID = ?", ID).First(&order).Error; err == nil {
 		return order, nil
 	} else {
 		return nil, err
 	}
 }
 func UpdateOrderState(ctx context.Context, order *Order) error {
-	db := GetDB()
 	order.State = true
-	err := db.Save(&order).Error
+	err := DB.Save(&order).Error
 	if err != nil {
 		return err
 	}
 	return nil
 }
 func GetOrderListByUserID(ctx context.Context, userID int64) ([]*Order, error) {
-	db := GetDB()
 	var orders []*Order
-	result := db.Where("user_id = ?", userID).Find(&orders)
+	result := DB.Where("user_id = ?", userID).Find(&orders)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 	return orders, nil
 }
 func GetOrderListByProductName(ctx context.Context, productName string) ([]*Order, error) {
-	db := GetDB()
 	var orders []*Order
-	result := db.Where("product_name = ?", productName).Find(&orders)
+	result := DB.Where("product_name = ?", productName).Find(&orders)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 	return orders, nil
 }
 func GetOrderListByState(ctx context.Context, state bool) ([]*Order, error) {
-	db := GetDB()
 	var orders []*Order
-	result := db.Where("state = ?", state).Find(&orders)
+	result := DB.Where("state = ?", state).Find(&orders)
 	if result.Error != nil {
 		return nil, result.Error
 	}

@@ -73,6 +73,15 @@ struct UpdateBalanceResponse{
 2: string status_msg
 3: bool succed
 }
+struct UpdateBalanceAndCostRequest{
+1:string token
+2:i64 number
+}
+struct UpdateBalanceAndCostResponse{
+1: i32    status_code
+2: string status_msg
+3: bool succed
+}
 struct UpdateAddressRequest{
 1:string token
 2:string address
@@ -90,5 +99,6 @@ service UserService {
     UpdatePasswordResponse UpdatePassword(1:UpdatePasswordRequest req)
     UpdateCostResponse UpdateCost(1:UpdateCostRequest req)
     UpdateBalanceResponse UpdateBalance(1:UpdateBalanceRequest req)
+    UpdateBalanceAndCostResponse UpdateBalanceAndCost(1:UpdateBalanceAndCostRequest req)
     UpdateAddressResponse UpdateAddress(1:UpdateAddressRequest req)
 }

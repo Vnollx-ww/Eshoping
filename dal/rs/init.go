@@ -20,9 +20,6 @@ func init() {
 		DB:       0,                // 使用默认数据库
 	})
 }
-func GetRedisClient() *redis.Client {
-	return client
-}
 func AcquireLock(ctx context.Context, lockKey string) (bool, error) {
 	// 使用 SETNX 命令来设置锁，锁的超时时间为 LockTimeout
 	status := client.SetNX(ctx, lockKey, "locked", LockTimeout)
@@ -32,4 +29,10 @@ func ReleaseLock(ctx context.Context, lockKey string) error {
 	// 删除 Redis 锁
 	_, err := client.Del(ctx, lockKey).Result()
 	return err
+}
+func SetKey(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
+	return client.Set(ctx, key, value, expiration).Err()
+}
+func DelKey(ctx context.Context, key string) error {
+	return client.Del(ctx, key).Err()
 }

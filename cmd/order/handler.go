@@ -3,10 +3,9 @@ package main
 import (
 	"Eshop/dal/db"
 	"Eshop/kitex_gen/orderlist"
-	"Eshop/kitex_gen/product"
 	"Eshop/kitex_gen/product/productservice"
-	"Eshop/kitex_gen/user"
 	"Eshop/kitex_gen/user/userservice"
+	"Eshop/pkg/kafka"
 	"Eshop/pkg/middlerware"
 	"context"
 	"log"
@@ -97,20 +96,15 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 		log.Println(err)
 		return BadAddOrderResponse("订单创建失败"), err
 	}
-	_, err = s.usrcli.UpdateCost(ctx, &user.UpdateCostRequest{Token: req.Token, Addcost: order.Cost})
+	kafkaProducer, err := kafka.NewKafkaProducer([]string{"localhost:9092"})
 	if err != nil {
-		log.Println(err)
-		return BadAddOrderResponse("用户消费总额更改失败"), err
+		log.Println("无法发送消息到 Kafka:", err)
+		return BadAddOrderResponse("无法发送消息到 Kafka"), err
 	}
-	_, err = s.usrcli.UpdateBalance(ctx, &user.UpdateBalanceRequest{Token: req.Token, Addbalance: -order.Cost})
+	err = kafkaProducer.SendCreateOrderEvent(req.Token, order.Cost, order.Number, int64(pro.ID))
 	if err != nil {
-		log.Println(err)
-		return BadAddOrderResponse("用户余额更改失败"), err
-	}
-	_, err = s.procli.UpdateStock(ctx, &product.UpdateStockRequest{ProductId: int64(pro.ID), Addstock: -order.Number})
-	if err != nil {
-		log.Println(err)
-		return BadAddOrderResponse("商品库存更改失败"), err
+		log.Println("订单创建成功，但更新消息发送失败:", err)
+		return BadAddOrderResponse("订单创建成功，但更新消息发送失败"), err
 	}
 	return GoodAddOrderResponse("订单创建成功"), nil
 }

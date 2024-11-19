@@ -19,14 +19,15 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "UserService"
 	handlerType := (*user.UserService)(nil)
 	methods := map[string]kitex.MethodInfo{
-		"UserLogin":      kitex.NewMethodInfo(userLoginHandler, newUserServiceUserLoginArgs, newUserServiceUserLoginResult, false),
-		"UserRegiter":    kitex.NewMethodInfo(userRegiterHandler, newUserServiceUserRegiterArgs, newUserServiceUserRegiterResult, false),
-		"GetUserInfo":    kitex.NewMethodInfo(getUserInfoHandler, newUserServiceGetUserInfoArgs, newUserServiceGetUserInfoResult, false),
-		"UpdateName":     kitex.NewMethodInfo(updateNameHandler, newUserServiceUpdateNameArgs, newUserServiceUpdateNameResult, false),
-		"UpdatePassword": kitex.NewMethodInfo(updatePasswordHandler, newUserServiceUpdatePasswordArgs, newUserServiceUpdatePasswordResult, false),
-		"UpdateCost":     kitex.NewMethodInfo(updateCostHandler, newUserServiceUpdateCostArgs, newUserServiceUpdateCostResult, false),
-		"UpdateBalance":  kitex.NewMethodInfo(updateBalanceHandler, newUserServiceUpdateBalanceArgs, newUserServiceUpdateBalanceResult, false),
-		"UpdateAddress":  kitex.NewMethodInfo(updateAddressHandler, newUserServiceUpdateAddressArgs, newUserServiceUpdateAddressResult, false),
+		"UserLogin":            kitex.NewMethodInfo(userLoginHandler, newUserServiceUserLoginArgs, newUserServiceUserLoginResult, false),
+		"UserRegiter":          kitex.NewMethodInfo(userRegiterHandler, newUserServiceUserRegiterArgs, newUserServiceUserRegiterResult, false),
+		"GetUserInfo":          kitex.NewMethodInfo(getUserInfoHandler, newUserServiceGetUserInfoArgs, newUserServiceGetUserInfoResult, false),
+		"UpdateName":           kitex.NewMethodInfo(updateNameHandler, newUserServiceUpdateNameArgs, newUserServiceUpdateNameResult, false),
+		"UpdatePassword":       kitex.NewMethodInfo(updatePasswordHandler, newUserServiceUpdatePasswordArgs, newUserServiceUpdatePasswordResult, false),
+		"UpdateCost":           kitex.NewMethodInfo(updateCostHandler, newUserServiceUpdateCostArgs, newUserServiceUpdateCostResult, false),
+		"UpdateBalance":        kitex.NewMethodInfo(updateBalanceHandler, newUserServiceUpdateBalanceArgs, newUserServiceUpdateBalanceResult, false),
+		"UpdateBalanceAndCost": kitex.NewMethodInfo(updateBalanceAndCostHandler, newUserServiceUpdateBalanceAndCostArgs, newUserServiceUpdateBalanceAndCostResult, false),
+		"UpdateAddress":        kitex.NewMethodInfo(updateAddressHandler, newUserServiceUpdateAddressArgs, newUserServiceUpdateAddressResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName":     "user",
@@ -169,6 +170,24 @@ func newUserServiceUpdateBalanceResult() interface{} {
 	return user.NewUserServiceUpdateBalanceResult()
 }
 
+func updateBalanceAndCostHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceUpdateBalanceAndCostArgs)
+	realResult := result.(*user.UserServiceUpdateBalanceAndCostResult)
+	success, err := handler.(user.UserService).UpdateBalanceAndCost(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceUpdateBalanceAndCostArgs() interface{} {
+	return user.NewUserServiceUpdateBalanceAndCostArgs()
+}
+
+func newUserServiceUpdateBalanceAndCostResult() interface{} {
+	return user.NewUserServiceUpdateBalanceAndCostResult()
+}
+
 func updateAddressHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
 	realArg := arg.(*user.UserServiceUpdateAddressArgs)
 	realResult := result.(*user.UserServiceUpdateAddressResult)
@@ -262,6 +281,16 @@ func (p *kClient) UpdateBalance(ctx context.Context, req *user.UpdateBalanceRequ
 	_args.Req = req
 	var _result user.UserServiceUpdateBalanceResult
 	if err = p.c.Call(ctx, "UpdateBalance", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) UpdateBalanceAndCost(ctx context.Context, req *user.UpdateBalanceAndCostRequest) (r *user.UpdateBalanceAndCostResponse, err error) {
+	var _args user.UserServiceUpdateBalanceAndCostArgs
+	_args.Req = req
+	var _result user.UserServiceUpdateBalanceAndCostResult
+	if err = p.c.Call(ctx, "UpdateBalanceAndCost", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

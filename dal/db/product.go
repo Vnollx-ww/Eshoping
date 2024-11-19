@@ -13,17 +13,15 @@ type Product struct {
 }
 
 func CreateProduct(ctx context.Context, pro *Product) error {
-	db := GetDB()
-	err := db.Create(pro).Error
+	err := DB.Create(pro).Error
 	if err != nil {
 		return err
 	}
 	return nil
 }
 func GetProductByName(ctx context.Context, productName string) (*Product, error) {
-	db := GetDB()
 	product := new(Product)
-	if err := db.Where("product_name = ?", productName).First(&product).Error; err == nil {
+	if err := DB.Where("product_name = ?", productName).First(&product).Error; err == nil {
 		return product, nil
 	} else if err == gorm.ErrRecordNotFound {
 		return nil, nil
@@ -32,9 +30,8 @@ func GetProductByName(ctx context.Context, productName string) (*Product, error)
 	}
 }
 func GetProductByID(ctx context.Context, ID int64) (*Product, error) {
-	db := GetDB()
 	product := new(Product)
-	if err := db.Where("ID = ?", ID).First(&product).Error; err == nil {
+	if err := DB.Where("ID = ?", ID).First(&product).Error; err == nil {
 		return product, nil
 	} else if err == gorm.ErrRecordNotFound {
 		return nil, nil
@@ -43,34 +40,30 @@ func GetProductByID(ctx context.Context, ID int64) (*Product, error) {
 	}
 }
 func GetProductListInfo(ctx context.Context) ([]*Product, error) {
-	db := GetDB()
 	var products []*Product
-	if err := db.Find(&products).Error; err != nil {
+	if err := DB.Find(&products).Error; err != nil {
 		return nil, err
 	}
 	return products, nil
 }
 func DeleteProduct(ctx context.Context, pro *Product) error {
-	db := GetDB()
-	err := db.Unscoped().Delete(&pro).Error
+	err := DB.Unscoped().Delete(&pro).Error
 	if err != nil {
 		return err
 	}
 	return nil
 }
 func UpdateStock(ctx context.Context, pro *Product, stock int64) error {
-	db := GetDB()
 	pro.Stock += stock
-	err := db.Save(&pro).Error
+	err := DB.Save(&pro).Error
 	if err != nil {
 		return err
 	}
 	return nil
 }
 func UpdatePrice(ctx context.Context, pro *Product, price int64) error {
-	db := GetDB()
 	pro.Price = price
-	err := db.Save(&pro).Error
+	err := DB.Save(&pro).Error
 	if err != nil {
 		return err
 	}

@@ -17,7 +17,6 @@ var (
 	serviceName = config.Viper.GetString("server.name")
 	serviceAddr = fmt.Sprintf("%s:%d", config.Viper.GetString("server.host"), config.Viper.GetInt("server.port"))
 	etcdAddr    = fmt.Sprintf("%s:%d", config.Viper.GetString("etcd.host"), config.Viper.GetInt("etcd.port"))
-	//signingKey  = config.Viper.GetString("JWT.signingKey")
 )
 
 func main() {

@@ -8,9 +8,6 @@ import (
 
 var DB *gorm.DB
 
-func GetDB() *gorm.DB {
-	return DB
-}
 func init() {
 	driverName := "mysql"
 	host := "127.0.0.1"
