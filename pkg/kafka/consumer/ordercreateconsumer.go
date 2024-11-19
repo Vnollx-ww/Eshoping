@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"github.com/IBM/sarama"
 	"log"
+	"time"
 )
 
 type UserBalanceAndCostConsumer struct {
@@ -80,8 +81,10 @@ func (c *UserBalanceAndCostConsumer) ListenBalanceAndCost() {
 		log.Fatalf("Error consuming partition: %v", err)
 	}
 	defer partitionConsumer.Close()
-
+	ticker := time.NewTicker(time.Second / 20)
+	defer ticker.Stop()
 	for msg := range partitionConsumer.Messages() {
+		<-ticker.C
 		var event CreateOrderMessage
 		err := json.Unmarshal(msg.Value, &event)
 		if err != nil {
@@ -101,8 +104,10 @@ func (c *ProductStockConsumer) ListenStock() {
 		log.Fatalf("Error consuming partition: %v", err)
 	}
 	defer partitionConsumer.Close()
-
+	ticker := time.NewTicker(time.Second / 20) // 每秒钟最多处理 20 条消息
+	defer ticker.Stop()
 	for msg := range partitionConsumer.Messages() {
+		<-ticker.C
 		var event CreateOrderMessage
 		err := json.Unmarshal(msg.Value, &event)
 		if err != nil {
