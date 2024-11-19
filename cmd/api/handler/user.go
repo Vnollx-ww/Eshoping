@@ -6,7 +6,7 @@ import (
 	"Eshop/kitex_gen/user"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
-	"log"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -16,6 +16,7 @@ func AdminLogin(ctx context.Context, c *app.RequestContext) {
 		Password string
 	}
 	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
@@ -34,6 +35,7 @@ func Login(ctx context.Context, c *app.RequestContext) {
 		Password string
 	}
 	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
@@ -60,6 +62,7 @@ func Register(ctx context.Context, c *app.RequestContext) {
 		Address  string
 	}
 	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
@@ -85,7 +88,7 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 		Token string `json:"token"`
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		log.Println(err)
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
@@ -109,7 +112,7 @@ func UpdateName(ctx context.Context, c *app.RequestContext) {
 		NewName string `json:"newname"`
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		log.Println(err)
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
@@ -135,6 +138,7 @@ func UpdatePassword(ctx context.Context, c *app.RequestContext) {
 		NewPass string `json:"newpassword"`
 	}
 	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
@@ -160,6 +164,7 @@ func UpdateBalance(ctx context.Context, c *app.RequestContext) {
 		AddBalance int64  `json:"balance"`
 	}
 	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
@@ -184,6 +189,7 @@ func UpdateCost(ctx context.Context, c *app.RequestContext) {
 		AddCost int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
@@ -208,7 +214,7 @@ func UpdateAddress(ctx context.Context, c *app.RequestContext) {
 		Address string
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		log.Println(err)
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}

@@ -5,7 +5,7 @@ import (
 	"Eshop/kitex_gen/orderlist"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
-	"log"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -17,6 +17,7 @@ func CreateOrder(ctx context.Context, c *app.RequestContext) {
 		Cost        int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
@@ -50,6 +51,7 @@ func DeleteOrder(ctx context.Context, c *app.RequestContext) {
 		OrderId int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
@@ -72,13 +74,13 @@ func GetOrderListByUserID(ctx context.Context, c *app.RequestContext) {
 		Token string
 	}
 	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
 	req := &orderlist.GetOrderListByUserIDRequest{
 		Token: reqbody.Token,
 	}
-	log.Println(reqbody.Token)
 	res, _ := rpc.GetOrderListByUserID(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
@@ -95,6 +97,7 @@ func GetOrderListByProductName(ctx context.Context, c *app.RequestContext) {
 		ProductName string
 	}
 	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
@@ -117,7 +120,7 @@ func GetOrderListByState(ctx context.Context, c *app.RequestContext) {
 		state bool
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		log.Println(err)
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
@@ -140,7 +143,7 @@ func UpdateOrderState(ctx context.Context, c *app.RequestContext) {
 		OrderId int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
-		log.Println(err)
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}

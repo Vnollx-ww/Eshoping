@@ -8,6 +8,7 @@ import (
 	"Eshop/pkg/kafka"
 	"Eshop/pkg/middlerware"
 	"context"
+	"go.uber.org/zap"
 	"log"
 )
 
@@ -59,12 +60,13 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 	ol := req.Ol
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
+		logger.Error("token解析失败：", zap.Error(err))
 		log.Println(err)
 		return BadAddOrderResponse("token解析失败"), nil
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
-		log.Println(err)
+		logger.Error("服务器内部错误：", zap.Error(err))
 		return BadAddOrderResponse("服务器内部错误"), err
 	}
 	order := &db.Order{
@@ -76,7 +78,7 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 	}
 	pro, er := db.GetProductByName(ctx, ol.ProductName)
 	if er != nil {
-		log.Println(err)
+		logger.Error("服务器内部错误：", zap.Error(err))
 		return BadAddOrderResponse("服务器内部错误"), err
 	}
 	if pro == nil {
@@ -93,17 +95,17 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 	}
 	err = db.CreateOrder(ctx, order)
 	if err != nil {
-		log.Println(err)
+		logger.Error("订单创建失败：", zap.Error(err))
 		return BadAddOrderResponse("订单创建失败"), err
 	}
-	kafkaProducer, err := kafka.NewKafkaProducer([]string{"localhost:9092"})
+	kafkaProducer, err := kafka.NewKafkaProducer([]string{"localhost:9092"}) //初始化kafka生产者
 	if err != nil {
-		log.Println("无法发送消息到 Kafka:", err)
-		return BadAddOrderResponse("无法发送消息到 Kafka"), err
+		logger.Error("kafka生产者创建失败：", zap.Error(err))
+		return BadAddOrderResponse("Kafka生产者创建失败"), err
 	}
 	err = kafkaProducer.SendCreateOrderEvent(req.Token, order.Cost, order.Number, int64(pro.ID))
 	if err != nil {
-		log.Println("订单创建成功，但更新消息发送失败:", err)
+		logger.Error("订单创建成功，但更新消息发送失败：", zap.Error(err))
 		return BadAddOrderResponse("订单创建成功，但更新消息发送失败"), err
 	}
 	return GoodAddOrderResponse("订单创建成功"), nil
@@ -113,7 +115,7 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 func (s *OrderListServiceImpl) DelOrder(ctx context.Context, req *orderlist.DelOrderRequest) (resp *orderlist.DelOrderResponse, err error) {
 	er := db.DeleteOrder(ctx, req.OrderId)
 	if er != nil {
-		log.Println(er)
+		logger.Error("订单删除失败：", zap.Error(er))
 		return BadDelOrderResponse("订单删除失败"), nil
 	}
 	return GoodDelOrderResponse("订单删除成功"), nil
@@ -123,12 +125,12 @@ func (s *OrderListServiceImpl) DelOrder(ctx context.Context, req *orderlist.DelO
 func (s *OrderListServiceImpl) GetOrderListByUserID(ctx context.Context, req *orderlist.GetOrderListByUserIDRequest) (resp *orderlist.GetOrderListByUserIDResponse, err error) {
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
-		log.Println(err)
+		logger.Error("token解析失败：", zap.Error(err))
 		return BadGetOrderListByUserIDResponse("token解析失败"), nil
 	}
 	orders, er := db.GetOrderListByUserID(ctx, mc.UserId)
 	if er != nil {
-		log.Println(err)
+		logger.Error("用户订单列表获取失败：", zap.Error(err))
 		return BadGetOrderListByUserIDResponse("用户订单列表获取失败"), nil
 	}
 	var or []*orderlist.Order
@@ -151,7 +153,7 @@ func (s *OrderListServiceImpl) GetOrderListByUserID(ctx context.Context, req *or
 func (s *OrderListServiceImpl) GetOrderListByProductNameID(ctx context.Context, req *orderlist.GetOrderListByProductNameRequest) (resp *orderlist.GetOrderListByProductNameResponse, err error) {
 	orders, er := db.GetOrderListByProductName(ctx, req.ProductName)
 	if er != nil {
-		log.Println(err)
+		logger.Error("商品订单列表获取失败：", zap.Error(er))
 		return BadGetOrderListByProductNameResponse("商品订单列表获取失败"), nil
 	}
 	var or []*orderlist.Order
@@ -174,7 +176,7 @@ func (s *OrderListServiceImpl) GetOrderListByProductNameID(ctx context.Context, 
 func (s *OrderListServiceImpl) GetOrderListByState(ctx context.Context, req *orderlist.GetOrderListByStateRequest) (resp *orderlist.GetOrderListByStateResponse, err error) {
 	orders, err := db.GetOrderListByState(ctx, req.State)
 	if err != nil {
-		log.Println(err)
+		logger.Error("未发货订单列表获取失败：", zap.Error(err))
 		return BadGetOrderListByStateResponse("未发货订单列表获取失败"), nil
 	}
 	var or []*orderlist.Order
@@ -197,14 +199,13 @@ func (s *OrderListServiceImpl) GetOrderListByState(ctx context.Context, req *ord
 func (s *OrderListServiceImpl) UpdateOrderState(ctx context.Context, req *orderlist.UpdateOrderStateRequest) (resp *orderlist.UpdateOrderStateResponse, err error) {
 	order, err := db.GetOrderByID(ctx, req.OrderId)
 	if err != nil {
-		log.Println(err)
+		logger.Error("修改订单状态失败，服务器内部错误：", zap.Error(err))
 		return BadUpdateOrderStateResponse("修改订单状态失败，服务器内部错误"), nil
 	}
 	err = db.UpdateOrderState(ctx, order)
 	if err != nil {
-		log.Println(err)
+		logger.Error("订单状态修改失败：", zap.Error(err))
 		return BadUpdateOrderStateResponse("订单状态修改失败"), nil
-		return
 	}
 	return GoodUpdateOrderStateResponse("订单状态修改成功"), nil
 }

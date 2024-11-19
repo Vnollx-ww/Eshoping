@@ -5,6 +5,7 @@ import (
 	"Eshop/kitex_gen/product"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -15,6 +16,7 @@ func AddProduct(ctx context.Context, c *app.RequestContext) {
 		Price       int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
@@ -39,6 +41,7 @@ func DelProduct(ctx context.Context, c *app.RequestContext) {
 		ProductId int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
@@ -61,6 +64,7 @@ func GetProductInfo(ctx context.Context, c *app.RequestContext) {
 		ProductId int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
@@ -99,6 +103,7 @@ func Updatestock(ctx context.Context, c *app.RequestContext) {
 		AddStock  int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
@@ -123,6 +128,7 @@ func UpdatePrice(ctx context.Context, c *app.RequestContext) {
 		Price     int64
 	}
 	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}

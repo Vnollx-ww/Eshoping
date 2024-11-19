@@ -8,7 +8,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/cloudwego/hertz/pkg/common/json"
-	"log"
+	"go.uber.org/zap"
 	"time"
 )
 
@@ -74,7 +74,7 @@ func GoodUpdateBalanceAndCostResponse(s string, flag bool) *user.UpdateBalanceAn
 func (s *UserServiceImpl) UserLogin(ctx context.Context, req *user.UserLoginRequest) (resp *user.UserLoginResponse, err error) {
 	usr, err := db.GetUserByName(ctx, req.Username)
 	if err != nil {
-		log.Println(err.Error())
+		logger.Error("登录失败，服务器内部错误：", zap.Error(err))
 		return BadLoginResponse("登录失败；服务器内部错误"), nil
 	}
 	if usr == nil {
@@ -85,7 +85,7 @@ func (s *UserServiceImpl) UserLogin(ctx context.Context, req *user.UserLoginRequ
 	}
 	token, err := middlerware.NewToken(int64(usr.ID))
 	if err != nil {
-		log.Println(err.Error())
+		logger.Error("Token生成失败：", zap.Error(err))
 		return BadLoginResponse("Token生成失败"), nil
 	}
 	return GoodLoginResponse("欢迎你！ "+req.Username, token), nil
@@ -95,7 +95,7 @@ func (s *UserServiceImpl) UserLogin(ctx context.Context, req *user.UserLoginRequ
 func (s *UserServiceImpl) UserRegiter(ctx context.Context, req *user.UserRegisterRequest) (resp *user.UserRegisterResponse, err error) {
 	usr, err := db.GetUserByName(ctx, req.Username)
 	if err != nil {
-		log.Println(err)
+		logger.Error("注册失败，服务器内部错误：", zap.Error(err))
 		return BadRegisterResponse("注册失败：服务器内部错误"), nil
 	}
 	if usr != nil {
@@ -104,7 +104,7 @@ func (s *UserServiceImpl) UserRegiter(ctx context.Context, req *user.UserRegiste
 	usr = &db.User{UserName: req.Username, Password: req.Password, Address: req.Address}
 	err = db.CreateUser(ctx, usr)
 	if err != nil {
-		log.Println(err)
+		logger.Error("注册失败：", zap.Error(err))
 		return BadRegisterResponse("注册失败"), nil
 	}
 	return GoodRegisterResponse("注册成功", int64(usr.ID)), nil
@@ -114,7 +114,7 @@ func (s *UserServiceImpl) UserRegiter(ctx context.Context, req *user.UserRegiste
 func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfoRequest) (resp *user.GetUserInfoResponse, err error) {
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil || mc == nil {
-		log.Println(err)
+		logger.Error("token解析失败：", zap.Error(err))
 		return BadGetUserInfoResponse("token解析失败"), nil
 	}
 	cachekey := fmt.Sprintf("userinfo:%d", mc.UserId)
@@ -124,7 +124,7 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
-		log.Println(err)
+		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
 		return BadGetUserInfoResponse("获取用户信息失败：服务器内部错误"), nil
 	}
 	if usr == nil {
@@ -133,11 +133,11 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 	u = &user.User{Name: usr.UserName, Id: int64(usr.ID), Balance: usr.Balance, Cost: usr.Cost, Address: usr.Address}
 	userdata, err := json.Marshal(u)
 	if err != nil {
-		log.Println("用户信息数据序列化失败:", err)
+		logger.Error("用户信息数据序列化失败：", zap.Error(err))
 	}
 	err = rs.SetKey(ctx, cachekey, userdata, 10*time.Minute)
 	if err != nil {
-		log.Println("缓存设置失败:", err)
+		logger.Error("缓存设置失败：", zap.Error(err))
 	}
 	return GoodGetUserInfoResponse("获取用户信息成功", u), nil
 }
@@ -146,12 +146,12 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 func (s *UserServiceImpl) UpdateName(ctx context.Context, req *user.UpdateNameRequest) (resp *user.UpdateNameResponse, err error) {
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil || mc == nil {
-		log.Println(err)
+		logger.Error("token解析失败：", zap.Error(err))
 		return BadUpdateNameResponse("token解析失败"), nil
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
-		log.Println(err)
+		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
 		return BadUpdateNameResponse("获取用户信息失败：服务器内部错误"), nil
 	}
 	if usr == nil {
@@ -159,13 +159,13 @@ func (s *UserServiceImpl) UpdateName(ctx context.Context, req *user.UpdateNameRe
 	}
 	err = db.UpdateName(ctx, usr, req.Newname_)
 	if err != nil {
-		log.Println(err)
+		logger.Error("修改用户名失败：", zap.Error(err))
 		return BadUpdateNameResponse("修改用户名失败"), nil
 	}
 	cacheKey := fmt.Sprintf("userinfo:%d", mc.UserId)
 	err = rs.DelKey(ctx, cacheKey) // 删除缓存
 	if err != nil {
-		log.Println("删除缓存失败:", err)
+		logger.Error("删除缓存失败：", zap.Error(err))
 	}
 	return GoodUpdateNameResponse("欢迎你！"+usr.UserName, true), nil
 }
@@ -174,11 +174,12 @@ func (s *UserServiceImpl) UpdateName(ctx context.Context, req *user.UpdateNameRe
 func (s *UserServiceImpl) UpdatePassword(ctx context.Context, req *user.UpdatePasswordRequest) (resp *user.UpdatePasswordResponse, err error) {
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
+		logger.Error("token解析失败：", zap.Error(err))
 		return BadUpdatePasswordResponse("token解析失败"), nil
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
-		log.Println(err)
+		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
 		return BadUpdatePasswordResponse("获取用户信息失败：服务器内部错误"), nil
 	}
 	if usr == nil {
@@ -189,7 +190,7 @@ func (s *UserServiceImpl) UpdatePassword(ctx context.Context, req *user.UpdatePa
 	}
 	err = db.UpdatePassword(ctx, usr, req.Newpassword_)
 	if err != nil {
-		log.Println(err)
+		logger.Error("修改密码失败：", zap.Error(err))
 		return BadUpdatePasswordResponse("修改密码失败"), nil
 	}
 	return GoodUpdatePasswordResponse("修改密码成功", true), nil
@@ -199,13 +200,13 @@ func (s *UserServiceImpl) UpdatePassword(ctx context.Context, req *user.UpdatePa
 func (s *UserServiceImpl) UpdateCost(ctx context.Context, req *user.UpdateCostRequest) (resp *user.UpdateCostResponse, err error) {
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
-		log.Println(err)
+		logger.Error("token解析失败：", zap.Error(err))
 		return BadUpdateCostResponse("token解析失败"), err
 	}
 	lockKey := rs.RedisLockKeyPrefix + string(mc.UserId) + "cost"
 	locked, err := rs.AcquireLock(ctx, lockKey) //获取分布式锁
 	if err != nil {
-		log.Println("获取 Redis 锁失败:", err) //锁已存在
+		logger.Error("获取Redis锁失败：", zap.Error(err)) //锁已存在
 		return BadUpdateCostResponse("获取花费锁失败，稍后重试"), nil
 	}
 	if !locked {
@@ -213,9 +214,8 @@ func (s *UserServiceImpl) UpdateCost(ctx context.Context, req *user.UpdateCostRe
 	}
 	defer rs.ReleaseLock(ctx, lockKey) // 确保操作完成后释放锁
 	usr, err := db.GetUserByID(ctx, mc.UserId)
-	log.Println(usr.UserName)
 	if err != nil {
-		log.Println(err)
+		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
 		return BadUpdateCostResponse("获取用户信息失败：服务器内部错误"), err
 	}
 	if usr == nil {
@@ -223,13 +223,13 @@ func (s *UserServiceImpl) UpdateCost(ctx context.Context, req *user.UpdateCostRe
 	}
 	err = db.UpdateCost(ctx, usr, req.Addcost)
 	if err != nil {
-		log.Println(err)
+		logger.Error("修改花费失败：", zap.Error(err))
 		return BadUpdateCostResponse("修改花费失败"), err
 	}
 	cacheKey := fmt.Sprintf("userinfo:%d", mc.UserId)
 	err = rs.DelKey(ctx, cacheKey) // 删除缓存
 	if err != nil {
-		log.Println("删除缓存失败:", err)
+		logger.Error("删除缓存失败：", zap.Error(err))
 	}
 	return GoodUpdateCostResponse("修改花费成功", true), nil
 }
@@ -238,13 +238,13 @@ func (s *UserServiceImpl) UpdateCost(ctx context.Context, req *user.UpdateCostRe
 func (s *UserServiceImpl) UpdateBalance(ctx context.Context, req *user.UpdateBalanceRequest) (resp *user.UpdateBalanceResponse, err error) {
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
-		log.Println(err)
+		logger.Error("token解析失败：", zap.Error(err))
 		return BadUpdateBalanceResponse("token解析失败"), err
 	}
 	lockKey := rs.RedisLockKeyPrefix + string(mc.UserId) + "balance"
 	locked, err := rs.AcquireLock(ctx, lockKey) //获取分布式锁
 	if err != nil {
-		log.Println("获取 Redis 锁失败:", err) //锁已存在
+		logger.Error("获取Redis锁失败：", zap.Error(err)) //锁已存在
 		return BadUpdateBalanceResponse("获取余额锁失败，稍后重试"), nil
 	}
 	if !locked {
@@ -252,9 +252,8 @@ func (s *UserServiceImpl) UpdateBalance(ctx context.Context, req *user.UpdateBal
 	}
 	defer rs.ReleaseLock(ctx, lockKey) // 确保操作完成后释放锁
 	usr, err := db.GetUserByID(ctx, mc.UserId)
-	log.Println(usr.UserName)
 	if err != nil {
-		log.Println(err)
+		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
 		return BadUpdateBalanceResponse("获取用户信息失败：服务器内部错误"), err
 	}
 	if usr == nil {
@@ -262,13 +261,13 @@ func (s *UserServiceImpl) UpdateBalance(ctx context.Context, req *user.UpdateBal
 	}
 	err = db.UpdateBalance(ctx, usr, req.Addbalance)
 	if err != nil {
-		log.Println(err)
+		logger.Error("修改余额失败：", zap.Error(err))
 		return BadUpdateBalanceResponse("修改余额失败"), err
 	}
 	cacheKey := fmt.Sprintf("userinfo:%d", mc.UserId)
 	err = rs.DelKey(ctx, cacheKey) // 删除缓存
 	if err != nil {
-		log.Println("删除缓存失败:", err)
+		logger.Error("删除缓存失败：", zap.Error(err))
 	}
 	return GoodUpdateBalanceResponse("修改余额成功", true), err
 }
@@ -277,27 +276,26 @@ func (s *UserServiceImpl) UpdateBalance(ctx context.Context, req *user.UpdateBal
 func (s *UserServiceImpl) UpdateAddress(ctx context.Context, req *user.UpdateAddressRequest) (resp *user.UpdateAddressResponse, err error) {
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
-		log.Println(err)
+		logger.Error("token解析失败：", zap.Error(err))
 		return BadUpdateAddressResponse("token解析失败"), nil
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
-		log.Println(err)
+		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
 		return BadUpdateAddressResponse("获取用户信息失败：服务器内部错误"), nil
 	}
 	if usr == nil {
-		log.Println(err)
 		return BadUpdateAddressResponse("用户不存在"), nil
 	}
 	err = db.UpdateAddress(ctx, usr, req.Address)
 	if err != nil {
-		log.Println(err)
+		logger.Error("用户收货地址修改失败：", zap.Error(err))
 		return BadUpdateAddressResponse("用户收货地址修改失败"), nil
 	}
 	cacheKey := fmt.Sprintf("userinfo:%d", mc.UserId)
 	err = rs.DelKey(ctx, cacheKey) // 删除缓存
 	if err != nil {
-		log.Println("删除缓存失败:", err)
+		logger.Error("删除缓存失败：", zap.Error(err))
 	}
 	return GoodUpdateAddressResponse("用户收获地址修改成功", true), nil
 }
@@ -306,27 +304,26 @@ func (s *UserServiceImpl) UpdateAddress(ctx context.Context, req *user.UpdateAdd
 func (s *UserServiceImpl) UpdateBalanceAndCost(ctx context.Context, req *user.UpdateBalanceAndCostRequest) (resp *user.UpdateBalanceAndCostResponse, err error) {
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
-		log.Println(err)
+		logger.Error("token解析失败：", zap.Error(err))
 		return BadUpdateBalanceAndCostResponse("token解析失败"), nil
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
-		log.Println(err)
+		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
 		return BadUpdateBalanceAndCostResponse("获取用户信息失败：服务器内部错误"), nil
 	}
 	if usr == nil {
-		log.Println(err)
 		return BadUpdateBalanceAndCostResponse("用户不存在"), nil
 	}
 	err = db.UpdateBalanceAndCost(ctx, usr, req.Number)
 	if err != nil {
-		log.Println(err)
+		logger.Error("用户余额和花费修改失败：", zap.Error(err))
 		return BadUpdateBalanceAndCostResponse("用户余额和花费修改失败"), nil
 	}
 	cacheKey := fmt.Sprintf("userinfo:%d", mc.UserId)
 	err = rs.DelKey(ctx, cacheKey) // 删除缓存
 	if err != nil {
-		log.Println("删除缓存失败:", err)
+		logger.Error("删除缓存失败：", zap.Error(err))
 	}
 	return GoodUpdateBalanceAndCostResponse("用户余额和花费修改成功", true), nil
 }
