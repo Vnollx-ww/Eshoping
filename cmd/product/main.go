@@ -28,7 +28,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	addr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:8887")
+	addr, err := net.ResolveTCPAddr("tcp", serviceAddr)
 	if err != nil {
 		log.Fatalln(err)
 	}

@@ -14,8 +14,6 @@ var (
 	apiServerName = apiConfig.Viper.GetString("server.name")
 	apiServerAddr = fmt.Sprintf("%s:%d", apiConfig.Viper.GetString("server.host"), apiConfig.Viper.GetInt("server.port"))
 	etcdAddress   = fmt.Sprintf("%s:%d", apiConfig.Viper.GetString("Etcd.host"), apiConfig.Viper.GetInt("Etcd.port"))
-	serverTLSKey  = apiConfig.Viper.GetString("Hertz.tls.keyFile")
-	serverTLSCert = apiConfig.Viper.GetString("Hertz.tls.certFile")
 )
 
 func LoadHtml(hz *server.Hertz) {
@@ -108,7 +106,7 @@ func registerGroup(hz *server.Hertz) {
 }
 
 func main() {
-	hz := server.New(server.WithHostPorts("localhost:8889"))
+	hz := server.New(server.WithHostPorts(apiServerAddr))
 	hz.Static("/images", "./web/images")
 	LoadHtml(hz)
 	registerGroup(hz)
