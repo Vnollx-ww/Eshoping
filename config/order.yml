@@ -7,6 +7,6 @@ rpc:
   host: 127.0.0.1
   port: 50055
 
-etcd:
-  host: 127.0.0.1
+consul:
+  host: my-etcd
   port: 2379

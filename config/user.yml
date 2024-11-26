@@ -8,5 +8,5 @@ rpc:
   port: 50055
 
 etcd:
-  host: 127.0.0.1
+  host: my-etcd
   port: 2379

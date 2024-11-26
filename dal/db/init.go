@@ -3,16 +3,18 @@ package db
 import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"log"
 )
 
 var DB *gorm.DB
 
 func init() {
-	driverName := "mysql"
-	host := "127.0.0.1"
+	//host := "localhost"
+	host := "my-mysql"
 	port := "3306"
-	database := "Eshop"
+	database := "eshop"
 	username := "root"
 	password := "ab147890"
 	charset := "utf8"
@@ -23,7 +25,10 @@ func init() {
 		port,
 		database,
 		charset)
-	db, _ := gorm.Open(driverName, args)
+	db, err := gorm.Open(mysql.Open(args), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
 	//迁移
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Product{})
