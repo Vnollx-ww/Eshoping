@@ -1,12 +1,16 @@
 server:
   name: "ProductServer"
-  host: 127.0.0.1
+  host: 0.0.0.0
   port: 8887
 
 rpc:
   host: 127.0.0.1
   port: 50055
 
-consul:
+etcd:
   host: my-etcd
   port: 2379
+
+kafka:
+  host: my-kafka
+  port: 9092

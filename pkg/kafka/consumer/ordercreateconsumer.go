@@ -6,11 +6,18 @@ import (
 	"Eshop/kitex_gen/product/productservice"
 	"Eshop/kitex_gen/user"
 	"Eshop/kitex_gen/user/userservice"
+	"Eshop/pkg/viper"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/IBM/sarama"
 	"log"
 	"time"
+)
+
+var (
+	config    = viper.Init("user")
+	kafkaAddr = fmt.Sprintf("%s:%d", config.Viper.GetString("kafka.host"), config.Viper.GetInt("kafka.port"))
 )
 
 type UserBalanceAndCostConsumer struct {
@@ -32,14 +39,14 @@ var userclient userservice.Client
 var proclient productservice.Client
 
 func init() {
-	UserBalanceAndCostConsumer, err := NewUserBalanceAndCostConsumer([]string{"localhost:9092"})
+	UserBalanceAndCostConsumer, err := NewUserBalanceAndCostConsumer([]string{kafkaAddr})
 	if err != nil {
-		log.Println("无接收消息到 Kafka:", err)
+		log.Println("无法接收消息到 Kafka:", err)
 		return
 	}
-	ProductStockConsumer, err := NewProductStockConsumer([]string{"localhost:9092"})
+	ProductStockConsumer, err := NewProductStockConsumer([]string{kafkaAddr})
 	if err != nil {
-		log.Println("无接收消息到 Kafka:", err)
+		log.Println("无法接收消息到 Kafka:", err)
 		return
 	}
 

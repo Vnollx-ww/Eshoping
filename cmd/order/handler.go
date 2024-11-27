@@ -98,7 +98,7 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 		logger.Error("订单创建失败：", zap.Error(err))
 		return BadAddOrderResponse("订单创建失败"), err
 	}
-	kafkaProducer, err := kafka.NewKafkaProducer([]string{"localhost:9092"}) //初始化kafka生产者
+	kafkaProducer, err := kafka.NewKafkaProducer([]string{kafkaAddr}) //初始化kafka生产者
 	if err != nil {
 		logger.Error("kafka生产者创建失败：", zap.Error(err))
 		return BadAddOrderResponse("Kafka生产者创建失败"), err

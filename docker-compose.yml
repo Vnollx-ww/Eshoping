@@ -95,26 +95,6 @@ services:
     networks:
       - app-network
 
-#  consul:
-#    image: consul:1.15.4
-#    container_name: my-consul
-#    environment:
-#      - CONSUL_BIND_INTERFACE=eth0
-#      - CONSUL_ADVERTISE_ADDR=my-consul:8500
-#      - CONSUL_BOOTSTRAP_EXPECT=1
-#      - CONSUL_SERVER=true
-#      - CONSUL_DATA_DIR=/consul/data  # 设置 data_dir
-#    volumes:
-#      - consul-data:/consul/data  # 持久化数据
-#    command: "consul agent -server -ui -client=0.0.0.0 -bind=0.0.0.0 -advertise=consul -data-dir=/consul/data" # 使用 -data-dir
-#    ports:
-#      - "8501:8500"
-#      - "8300:8300"
-#      - "8301:8301"
-#      - "8302:8302"
-#      - "8600:8600/udp"
-#    networks:
-#      - app-network
   etcd:
     image: 'bitnami/etcd:latest'
     container_name: my-etcd
@@ -126,37 +106,10 @@ services:
       - 2380:2380
     networks:
       - app-network
-#  zookeeper:
-#    image: bitnami/zookeeper:latest
-#    container_name: my-zookeeper
-#    environment:
-#      - ZOOKEEPER_CLIENT_PORT=2181
-#      - ALLOW_ANONYMOUS_LOGIN=yes
-#    networks:
-#      - app-network
-
-#  kafka:
-#    image: bitnami/kafka:latest
-#    container_name: my-kafka
-#    environment:
-#      - KAFKA_ADVERTISED_LISTENER=PLAINTEXT://my-kafka:9093
-#      - KAFKA_LISTENER_SECURITY_PROTOCOL=PLAINTEXT
-#      - KAFKA_LISTENER_NAME=PLAINTEXT
-#      - KAFKA_LISTENER_PORT=9093
-#      - KAFKA_LISTENER_INTERNAL=PLAINTEXT://my-kafka:9092
-#      - KAFKA_LISTENERS=PLAINTEXT://my-kafka:9093   #
-#      - KAFKA_ZOOKEEPER_CONNECT=my-zookeeper:2181
-#      - KAFKA_LOG_DIRS=/var/lib/kafka/data
-#      - KAFKA_NUM_PARTITIONS=1
-#      - KAFKA_LOG_RETENTION_HOURS=168
-#      - KAFKA_LOG_SEGMENT_BYTES=1073741824
-#    volumes:
-#      - ./kafka_data:/var/lib/kafka/data
-#    networks:
-#      - app-network
 
   kafka:
     image: 'bitnami/kafka:latest'
+    container_name: my-kafka
     ports:
       - '9094:9094'
     environment:
@@ -169,6 +122,8 @@ services:
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
     volumes:
       - ./kafka_data:/var/lib/kafka/data
+    networks:
+      - app-network
 
 volumes:
   mysql_data:

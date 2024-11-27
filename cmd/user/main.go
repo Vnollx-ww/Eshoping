@@ -18,6 +18,7 @@ var (
 	serviceName             = config.Viper.GetString("server.name")
 	serviceAddr             = fmt.Sprintf("%s:%d", config.Viper.GetString("server.host"), config.Viper.GetInt("server.port"))
 	etcdAddr                = fmt.Sprintf("%s:%d", config.Viper.GetString("etcd.host"), config.Viper.GetInt("etcd.port"))
+	kafkaAddr               = fmt.Sprintf("%s:%d", config.Viper.GetString("kafka.host"), config.Viper.GetInt("kafka.port"))
 	logger      *zap.Logger = zaplog.GetLogger()
 )
 
