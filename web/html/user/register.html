@@ -6,24 +6,29 @@
     <title>注册</title>
     <script>
         function check(){
-            var username=document.getElementById("username").value;
-            var password=document.getElementById("password").value;
-            var repassword=document.getElementById("repassword").value;
-            var address=document.getElementById("address").value;
-            if(username===""){
+            var username = document.getElementById("username").value;
+            var password = document.getElementById("password").value;
+            var repassword = document.getElementById("repassword").value;
+            var address = document.getElementById("address").value;
+            var captcha = document.getElementById("captcha").value;
+            if(username === ""){
                 alert("用户名不能为空!");
                 return false;
             }
-            if(password===""){
+            if(password === ""){
                 alert("密码不能为空!");
                 return false;
             }
-            if(address===""){
+            if(address === ""){
                 alert("收货地址不能为空!");
                 return false;
             }
-            if(password!==repassword){
+            if(password !== repassword){
                 alert("两次密码不一致!");
+                return false;
+            }
+            if(captcha === ""){
+                alert("验证码不能为空!");
                 return false;
             }
             return true;
@@ -117,6 +122,21 @@
                 padding: 15px;
             }
         }
+
+        /* 这里是验证码输入框和图片的布局 */
+        #captcha-container {
+            display: flex; /* 使用flex布局 */
+            justify-content: space-between; /* 让输入框和图片分开 */
+            align-items: center; /* 垂直居中对齐 */
+            gap: 10px; /* 控制输入框和验证码图片之间的间距 */
+        }
+        #captcha-container input {
+            width: 70%; /* 设置验证码输入框的宽度 */
+        }
+        #captchaImage {
+            width: 100px; /* 设置验证码图片的宽度 */
+            cursor: pointer; /* 鼠标悬停时显示为可点击 */
+        }
     </style>
 </head>
 <body>
@@ -135,6 +155,10 @@
         <div class="input-group">
             <input type="text" id="address" placeholder="请输入收货地址" required />
         </div>
+        <div id="captcha-container" div class="input-group">
+            <input type="text" id="captcha" placeholder="请输入验证码" required />
+            <img id="captchaImage" src="user/captcha" alt="验证码" onclick="this.src='user/captcha?'+Math.random();" />
+        </div>
         <div id="subdiv">
             <button type="submit" class="button">注册</button>
             <button type="reset" class="button reset-btn">重置</button>
@@ -145,21 +169,22 @@
 
 <script>
     document.getElementById("form").addEventListener('submit', async function (e) {
-        if(!check()){
+        if (!check()) {
             e.preventDefault();
-            return ;
+            return;
         }
         e.preventDefault();
         var username = document.getElementById('username').value;
         var password = document.getElementById('password').value;
-        var address=document.getElementById('address').value
+        var address = document.getElementById('address').value;
+        var captcha = document.getElementById('captcha').value;
         try {
             const response = await fetch("/user/register", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, password ,address})
+                body: JSON.stringify({ username, password, address, captcha })
             });
             var data = await response.json();
             alert(data.status_msg);

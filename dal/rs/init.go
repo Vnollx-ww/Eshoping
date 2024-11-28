@@ -33,6 +33,10 @@ func ReleaseLock(ctx context.Context, lockKey string) error {
 func SetKey(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
 	return client.Set(ctx, key, value, expiration).Err()
 }
+func GetKeyValue(ctx context.Context, key string) (string, error) {
+	value, err := client.Get(ctx, key).Result()
+	return value, err
+}
 func DelKey(ctx context.Context, key string) error {
 	return client.Del(ctx, key).Err()
 }

@@ -10,6 +10,7 @@ struct User{
 struct UserLoginRequest {
     1: string username;
     2: string password;
+    3: string captcha;
 }
 struct UserLoginResponse {
     1: i32    status_code
@@ -20,7 +21,8 @@ struct UserLoginResponse {
 struct UserRegisterRequest {
     1: string username;
     2: string password;
-    3:string address;
+    3: string address;
+    4: string captcha;
 }
 struct UserRegisterResponse {
     1: i32    status_code

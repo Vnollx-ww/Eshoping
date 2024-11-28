@@ -2,12 +2,15 @@ package handler
 
 import (
 	"Eshop/cmd/api/rpc"
+	"Eshop/dal/rs"
 	"Eshop/kitex_gen/base"
 	"Eshop/kitex_gen/user"
+	captcha2 "Eshop/pkg/captcha"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	"go.uber.org/zap"
 	"net/http"
+	"time"
 )
 
 func AdminLogin(ctx context.Context, c *app.RequestContext) {
@@ -33,15 +36,27 @@ func Login(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
 		Username string
 		Password string
+		Captcha  string
 	}
 	if err := c.Bind(&reqbody); err != nil {
 		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
+	key := "captcha:" + c.ClientIP()
+	captcha, err := rs.GetKeyValue(ctx, key)
+	if err != nil {
+		logger.Error("验证码已过期，请刷新重试", zap.Error(err))
+		BadBaseResponse(c, "验证码已过期")
+	}
+	if captcha != reqbody.Captcha {
+		BadBaseResponse(c, "验证码错误，请重试")
+		return
+	}
 	req := &user.UserLoginRequest{
 		Username: reqbody.Username,
 		Password: reqbody.Password,
+		Captcha:  reqbody.Captcha,
 	}
 	res, _ := rpc.Login(ctx, req)
 	if res.StatusCode == -1 {
@@ -60,16 +75,28 @@ func Register(ctx context.Context, c *app.RequestContext) {
 		Username string
 		Password string
 		Address  string
+		Captcha  string
 	}
 	if err := c.Bind(&reqbody); err != nil {
 		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
 		return
 	}
+	key := "captcha:" + c.ClientIP()
+	captcha, err := rs.GetKeyValue(ctx, key)
+	if err != nil {
+		logger.Error("验证码已过期，请刷新重试", zap.Error(err))
+		BadBaseResponse(c, "验证码已过期")
+	}
+	if captcha != reqbody.Captcha {
+		BadBaseResponse(c, "验证码错误，请重试")
+		return
+	}
 	req := &user.UserRegisterRequest{
 		Username: reqbody.Username,
 		Password: reqbody.Password,
 		Address:  reqbody.Address,
+		Captcha:  reqbody.Captcha,
 	}
 	res, _ := rpc.Register(ctx, req)
 	if res.StatusCode == -1 {
@@ -82,6 +109,15 @@ func Register(ctx context.Context, c *app.RequestContext) {
 		StatusMsg:  res.StatusMsg,
 		StatusCode: res.StatusCode,
 	})
+}
+
+func GetCaptcha(ctx context.Context, c *app.RequestContext) {
+	captcha := captcha2.GenerateCaptcha(c)
+	key := "captcha:" + c.ClientIP()
+	err := rs.SetKey(ctx, key, captcha, 2*time.Minute)
+	if err != nil {
+		logger.Error("验证码存入redis失败", zap.Error(err))
+	}
 }
 func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {

@@ -92,6 +92,7 @@ func LoadHtml(hz *server.Hertz) {
 func registerGroup(hz *server.Hertz) {
 	user := hz.Group("/user")
 	{
+		user.GET("/captcha", handler.GetCaptcha)
 		user.POST("/register", handler.Register)
 		user.POST("/adminlogin", handler.AdminLogin)
 		user.POST("/login", handler.Login)
