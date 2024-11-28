@@ -23,7 +23,7 @@ func GetProductByName(ctx context.Context, productName string) (*Product, error)
 	product := new(Product)
 	if err := DB.Where("product_name = ?", productName).First(&product).Error; err == nil {
 		return product, nil
-	} else if err == gorm.ErrRecordNotFound {
+	} else if product.ID == 0 {
 		return nil, nil
 	} else {
 		return nil, err
@@ -33,7 +33,7 @@ func GetProductByID(ctx context.Context, ID int64) (*Product, error) {
 	product := new(Product)
 	if err := DB.Where("ID = ?", ID).First(&product).Error; err == nil {
 		return product, nil
-	} else if err == gorm.ErrRecordNotFound {
+	} else if product.ID == 0 {
 		return nil, nil
 	} else {
 		return nil, err

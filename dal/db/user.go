@@ -23,7 +23,7 @@ func GetUserByName(ctx context.Context, userName string) (*User, error) {
 	//db.Where("user_name = ?", userName).First(&user)
 	if err := DB.Where("user_name = ?", userName).First(&user).Error; err == nil {
 		return user, nil
-	} else if err == gorm.ErrRecordNotFound {
+	} else if user.ID == 0 {
 		return nil, nil
 	} else {
 		return nil, err
@@ -33,7 +33,7 @@ func GetUserByID(ctx context.Context, ID int64) (*User, error) {
 	user := new(User)
 	if err := DB.Where("ID = ?", ID).First(&user).Error; err == nil {
 		return user, nil
-	} else if err == gorm.ErrRecordNotFound {
+	} else if user.ID == 0 {
 		return nil, nil
 	} else {
 		return nil, err
