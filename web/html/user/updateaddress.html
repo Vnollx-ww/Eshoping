@@ -139,7 +139,6 @@
             var data = await response.json();
             if (response.ok) {
                 alert("修改成功！");
-                localStorage.setItem('message', data.status_msg);
                 setTimeout(() => {
                     window.location.href = "homepage"; // 如果返回响应正确，则进入主页面
                 }, 1000);

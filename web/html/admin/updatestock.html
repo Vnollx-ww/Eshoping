@@ -162,9 +162,8 @@
                                 alert("请输入有效的库存添加量！");
                                 return;
                             }
-
                             // 显示确认对话框
-                            const userConfirmed = confirm(`确定将商品 ${product.name} 的库存添加至 ${newStock} 吗？`);
+                            const userConfirmed = confirm(`确定将商品 ${product.name} 的库存添加至 ${product.stock+newStock} 吗？`);
                             if (userConfirmed) {
                                 try {
                                     var productid = product.id;
