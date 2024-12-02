@@ -6,6 +6,8 @@ import (
 	"Eshop/kitex_gen/user"
 	"Eshop/pkg/middlerware"
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"github.com/cloudwego/hertz/pkg/common/json"
 	"go.uber.org/zap"
@@ -15,6 +17,11 @@ import (
 // UserServiceImpl implements the last service interface defined in the IDL.
 type UserServiceImpl struct{}
 
+func MD5Encrypt(password string) string {
+	hash := md5.New()
+	hash.Write([]byte(password))
+	return hex.EncodeToString(hash.Sum(nil))
+}
 func BadLoginResponse(s string) *user.UserLoginResponse {
 	return &user.UserLoginResponse{StatusCode: -1, StatusMsg: s}
 }
@@ -80,9 +87,11 @@ func (s *UserServiceImpl) UserLogin(ctx context.Context, req *user.UserLoginRequ
 	if usr == nil {
 		return BadLoginResponse("用户不存在"), nil
 	}
-	if req.Password != usr.Password {
+	encryptedPassword := MD5Encrypt(req.Password)
+	if encryptedPassword != usr.Password {
 		return BadLoginResponse("密码错误"), nil
 	}
+
 	token, err := middlerware.NewToken(int64(usr.ID))
 	if err != nil {
 		logger.Error("Token生成失败：", zap.Error(err))
@@ -101,7 +110,8 @@ func (s *UserServiceImpl) UserRegiter(ctx context.Context, req *user.UserRegiste
 	if usr != nil {
 		return BadRegisterResponse("用户已存在"), nil
 	}
-	usr = &db.User{UserName: req.Username, Password: req.Password, Address: req.Address}
+	encryptedPassword := MD5Encrypt(req.Password)
+	usr = &db.User{UserName: req.Username, Password: encryptedPassword, Address: req.Address}
 	err = db.CreateUser(ctx, usr)
 	if err != nil {
 		logger.Error("注册失败：", zap.Error(err))
