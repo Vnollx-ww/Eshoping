@@ -7,6 +7,9 @@ import (
 	"log"
 )
 
+// cd D:
+// cd kafka_2.13-3.9.0
+// .\bin\windows\kafka-server-start.bat .\config\server.properties
 // Kafka 生产者结构体
 type KafkaProducer struct {
 	producer sarama.SyncProducer

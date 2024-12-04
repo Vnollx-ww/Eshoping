@@ -8,7 +8,6 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -18,7 +17,7 @@
 
         #productlist {
             width: 90%;
-            max-width: 500px;
+            max-width: 800px;
             padding: 25px;
             border: 1px solid #ddd;
             border-radius: 12px;
@@ -71,14 +70,29 @@
             margin: 12px 0;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
             display: flex;
-            flex-direction: column;
-            gap: 10px;
+            align-items: center;
+            gap: 20px;
             border-left: 4px solid #007BFF;
             transition: transform 0.2s ease;
         }
 
         .product:hover {
             transform: scale(1.02);
+        }
+
+        .product-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 60%;
+        }
+
+        .product-img {
+            width: 150px;
+            height: 150px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            object-fit: cover;
         }
 
         .product span {
@@ -126,6 +140,16 @@
                 width: 100%;
                 font-size: 14px;
                 padding: 12px 16px;
+            }
+
+            .product {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .product-img {
+                width: 100px;
+                height: 100px;
             }
         }
 
@@ -183,6 +207,9 @@
                         // 创建商品容器
                         var productDiv = document.createElement("div");
                         productDiv.classList.add("product");
+
+                        var productInfoDiv = document.createElement("div");
+                        productInfoDiv.classList.add("product-info");
 
                         var proidSpan = document.createElement("span");
                         proidSpan.textContent = `商品ID: ${product.id}`;
@@ -256,31 +283,40 @@
                             }
                         });
 
-                        // 将元素添加到商品容器中
-                        productDiv.appendChild(proidSpan);
-                        productDiv.appendChild(proSpan);
-                        productDiv.appendChild(stockSpan);
-                        productDiv.appendChild(priceSpan);
-                        productDiv.appendChild(quantityInput);
-                        productDiv.appendChild(totalPriceSpan);
-                        productDiv.appendChild(buyButton);
+                        // 将元素添加到商品信息容器
+                        productInfoDiv.appendChild(proidSpan);
+                        productInfoDiv.appendChild(proSpan);
+                        productInfoDiv.appendChild(stockSpan);
+                        productInfoDiv.appendChild(priceSpan);
+                        productInfoDiv.appendChild(quantityInput);
+                        productInfoDiv.appendChild(totalPriceSpan);
+                        productInfoDiv.appendChild(buyButton);
 
-                        // 添加商品容器到#productinfo中
+                        // 创建商品图片容器
+                        var productImageDiv = document.createElement("div");
+                        productImageDiv.classList.add("product-img");
+                        productImageDiv.style.backgroundImage = `url("http://127.0.0.1:9000/eshoping/3eb64f07d70733eeb91e38084046dc9.jpg")`;
+                        productImageDiv.style.backgroundSize = "cover"; // 让图片填充容器
+                        productImageDiv.style.backgroundPosition = "center"; // 居中显示图片
+                        // 将商品信息和图片添加到商品容器
+                        productDiv.appendChild(productImageDiv);
+                        productDiv.appendChild(productInfoDiv);
+
+                        // 将商品容器添加到产品信息列表
                         div.appendChild(productDiv);
                     });
                 } else {
-                    div.innerHTML = '<p class="no-products">没有找到任何商品。</p>';
+                    div.innerHTML = "没有找到任何商品。";
                 }
             } else {
-                alert(data.status_msg);
+                div.innerHTML = "加载商品列表失败。";
             }
         } catch (error) {
-            console.error("发生错误:", error);
-            alert("发生错误，请重试");
+            console.error("加载商品列表失败:", error);
         }
     }
 
-    // 初始加载商品列表
+    // 为查询按钮添加点击事件
     document.getElementById("getproductlist").addEventListener("click", loadProductList);
 </script>
 

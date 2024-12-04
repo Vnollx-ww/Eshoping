@@ -25,8 +25,8 @@ func MD5Encrypt(password string) string {
 func BadLoginResponse(s string) *user.UserLoginResponse {
 	return &user.UserLoginResponse{StatusCode: -1, StatusMsg: s}
 }
-func GoodLoginResponse(s string, token string) *user.UserLoginResponse {
-	return &user.UserLoginResponse{StatusCode: 200, StatusMsg: s, Token: token}
+func GoodLoginResponse(s string, token string, ID int64) *user.UserLoginResponse {
+	return &user.UserLoginResponse{StatusCode: 200, StatusMsg: s, Token: token, UserId: ID}
 }
 func BadRegisterResponse(s string) *user.UserRegisterResponse {
 	return &user.UserRegisterResponse{StatusCode: -1, StatusMsg: s}
@@ -97,7 +97,7 @@ func (s *UserServiceImpl) UserLogin(ctx context.Context, req *user.UserLoginRequ
 		logger.Error("Token生成失败：", zap.Error(err))
 		return BadLoginResponse("Token生成失败"), nil
 	}
-	return GoodLoginResponse("欢迎你！ "+req.Username, token), nil
+	return GoodLoginResponse("欢迎你！ "+req.Username, token, int64(usr.ID)), nil
 }
 
 // UserRegiter implements the UserServiceImpl interface.

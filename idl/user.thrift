@@ -6,6 +6,7 @@ struct User{
 3:i64 balance
 4:i64 cost
 5:string address
+6:string avatar
 }
 struct UserLoginRequest {
     1: string username;

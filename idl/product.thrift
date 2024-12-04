@@ -4,6 +4,7 @@ struct Product{//商品有id,商品名，有单价，库存
 2:string name
 3:i64 price
 4:i64 stock
+5:string productimage
 }
 struct AddProductRequest{
 1:string name

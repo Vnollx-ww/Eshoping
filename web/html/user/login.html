@@ -170,6 +170,7 @@
             if (response.ok) {
                 alert("登录成功！");
                 localStorage.setItem('message', data.status_msg);
+                localStorage.setItem('objectname',data.user_id)
                 setTimeout(() => {
                     window.location.href = "homepage";
                 }, 1000);

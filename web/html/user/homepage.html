@@ -3,243 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>主页</title>
+    <title>VNOLLX商城</title>
     <style>
-        * {
+        body {
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            background-color: #f4f4f4;
         }
 
-        body {
-            font-family: 'Arial', sans-serif;
+        /* 顶部导航栏样式 */
+        header {
+            background: linear-gradient(to right, #ffffff, #b3d9ff);  /* 渐变的背景从白色到深蓝 */
+            padding: 15px 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* 为导航栏添加阴影 */
+        }
+
+        .navbar {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #b3d9ff, #80bfff);
-            background-size: 200% 200%; /* 动态渐变效果 */
-            color: #333;
-            overflow: hidden;
-            position: relative;
-            animation: gradientAnimation 5s ease infinite;
         }
 
-        /* 增加背景噪点和渐变的纹理 */
-        body::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/asfalt.png'); /* 轻微的纹理 */
-            opacity: 0.2; /* 设置透明度使得纹理效果不太抢眼 */
-            pointer-events: none; /* 让纹理层不会影响用户交互 */
-        }
-        /* 动态渐变动画 */
-        @keyframes gradientAnimation {
-            0% {
-                background-position: 200% 200%;
-            }
-            50% {
-                background-position: 0% 0%;
-            }
-            100% {
-                background-position: 200% 200%;
-            }
-        }
-
-        #container {
+        .nav-left, .nav-right {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 15px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            height: 90vh;
-            overflow-y: auto;
         }
 
-        #InfoDiv {
-            width: 100%;
-            padding: 30px 20px;
-            background-color: #f7f7f7;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+        .nav-left li {
+            margin-right: 20px;
         }
 
-        h1 {
-            margin-top: 20px;
-            margin-bottom: 15px;
-            color: #4e5d94;
-            font-size: 24px;
-        }
-
-        p {
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        #userinfo {
-            margin-top: 15px;
-            background-color: #e8f0fe;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        #function {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 30px;
-        }
-
-        button {
-            margin: 10px 0;
-            padding: 12px 20px;
-            background: linear-gradient(135deg, #0099ff, #00c2ff);
+        .nav-left a {
             color: white;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
+            text-decoration: none;
             font-size: 16px;
-            transition: all 0.3s ease;
-            width: 100%;
-            max-width: 300px;
-        }
-
-        button:hover {
-            background: linear-gradient(135deg, #00c2ff, #0099ff);
-            transform: translateY(-4px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        button:focus {
-            outline: none;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #ccc;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-        }
-
-        input[type="text"]:focus {
-            border-color: #0099ff;
-            box-shadow: 0 0 8px rgba(0, 153, 255, 0.5);
-        }
-
-        #message-container {
-            font-size: 14px;
             font-weight: bold;
-            margin-bottom: 10px;
-            color: #666;
+            position: relative;
         }
 
-        .function-buttons {
+        .nav-left a:hover {
+            text-decoration: underline;
+        }
+
+        .nav-center {
+            flex-grow: 1;
+            text-align: center;
+            color: white;
+            font-size: 16px;
+            font-weight: normal;
+            margin-left: -150px;  /* 向左移动一些 */
+        }
+
+        /* 用户头像样式 */
+        .nav-right img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;  /* 头像周围添加白色边框 */
+            transition: transform 0.3s ease;
+        }
+
+        .nav-right img:hover {
+            transform: scale(1.1);  /* 头像悬停时放大效果 */
+        }
+
+        /* 商品列表样式 */
+        #productlist {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);  /* 每行4个商品 */
+            gap: 20px;
+            padding: 30px 20px;
+            background: linear-gradient(to bottom, #f9f9f9, #e0f7fa);  /* 从浅灰到淡蓝的渐变背景 */
+        }
+
+        @media (max-width: 1200px) {
+            #productlist {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            #productlist {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            #productlist {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .product {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);  /* 增加阴影效果 */
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product:hover {
+            transform: translateY(-10px);  /* 悬停时商品卡片浮动 */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);  /* 增强悬停效果 */
+        }
+
+        .product-img {
             width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            height: 200px;
+            background-color: #ecf0f1;
+            margin-bottom: 15px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+        }
+
+        .product-info {
+            padding: 10px;
+        }
+
+        .product-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .product-price {
+            font-size: 16px;
+            color: #e60012;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-<div id="container">
-    <div id="InfoDiv">
-        <h1 style="text-align: center">欢迎回来!</h1>
-        <p id="message-container" style="text-align: center">加载中...</p>
-        <div id="userinfo"></div>
-    </div>
+<!-- 顶部导航栏 -->
+<header>
+    <nav class="navbar">
+        <ul class="nav-left">
+            <li><a href="homepage" style="color: #007BFF">首页</a></li>
+            <li><a href="friends" style="color: #007BFF">好友</a></li>
+        </ul>
 
-    <div id="function" class="function-buttons">
-        <button id="Shoping">购物</button>
-        <button id="Recharge">充值</button>
-        <button id="updatename">修改用户名</button>
-        <button id="updatepassword">修改密码</button>
-        <button id="updateaddress">修改收货地址</button>
-        <button id="fetchOrderListInfo">查看购买记录</button>
-    </div>
-</div>
+        <div class="nav-center">
+            <span style="color: black">欢迎来到 VNOLLX 商城购物系统</span>
+        </div>
+
+        <div class="nav-right">
+            <img src="https://via.placeholder.com/40" alt="User Avatar" id="user-avatar">
+        </div>
+    </nav>
+</header>
+
+<main>
+    <div id="productlist"></div>  <!-- 商品列表容器 -->
+</main>
 
 <script>
-    const message = localStorage.getItem('message');
-    const messageContainer = document.getElementById('message-container');
-    const toggleInfoBtn = document.getElementById('toggleInfoBtn');
-    const userinfoDiv = document.getElementById('userinfo');
-    const fetchUserInfoBtn = document.getElementById('fetchUserInfo');
+    window.onload = function() {
+        const objectname = localStorage.getItem('objectname');
+        if (objectname) {
+            const userAvatarPath = "http://localhost:9000/eshoping/" + "UserId=" + objectname + ".jpg";
+            // 如果 localStorage 中有存储头像路径，则更新头像图片的 src 属性
+            document.getElementById('user-avatar').src = userAvatarPath;
+        }
+        loadProductList();  // 页面加载时自动调用商品加载函数
+    };
 
-    if (message) {
-        messageContainer.textContent = message;
-    } else {
-        messageContainer.textContent = "没有消息";
-    }
+    document.getElementById('user-avatar').addEventListener('click', function() {
+        window.location.href = "userinfo";
+    });
 
-    // 自动加载用户信息
-    window.onload = async function() {
+    // 加载商品列表的函数
+    async function loadProductList() {
         try {
-            const token = localStorage.getItem("token");
-            const response = await fetch("/user/getuserinfo", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ token })
+            const response = await fetch("/product/getproductlistinfo", {
+                method: 'GET',
             });
+
             const data = await response.json();
+            const div = document.getElementById("productlist");
+
             if (response.ok) {
-                // 显示用户信息
-                const userinfoDiv = document.getElementById('userinfo');
-                userinfoDiv.innerHTML = `
-                    <p><strong>用户名:</strong> ${data.user.name}</p>
-                    <p><strong>用户ID:</strong> ${data.user.id}</p>
-                    <p><strong>用户余额:</strong> ${data.user.balance}</p>
-                    <p><strong>用户消费:</strong> ${data.user.cost}</p>
-                    <p><strong>用户收货地址:</strong> ${data.user.address}</p>
-                `;
+                div.innerHTML = '';  // 清空当前显示的商品列表
+                if (Array.isArray(data.productlist) && data.productlist.length > 0) {
+                    data.productlist.forEach(product => {
+                        const productDiv = document.createElement("div");
+                        productDiv.classList.add("product");
+
+                        // 商品图片
+                        const productImageDiv = document.createElement("div");
+                        productImageDiv.classList.add("product-img");
+                        productImageDiv.style.backgroundImage = `url("http://127.0.0.1:9000/eshoping/UserId=3.jpg")`;
+
+                        // 商品信息
+                        const productInfoDiv = document.createElement("div");
+                        productInfoDiv.classList.add("product-info");
+
+                        // 商品名称
+                        const productName = document.createElement("div");
+                        productName.classList.add("product-name");
+                        productName.textContent = product.name;
+
+                        // 商品价格
+                        const productPrice = document.createElement("div");
+                        productPrice.classList.add("product-price");
+                        productPrice.textContent = `￥${product.price}`;
+
+                        // 将商品名和价格添加到商品信息区域
+                        productInfoDiv.appendChild(productName);
+                        productInfoDiv.appendChild(productPrice);
+
+                        // 将图片和信息加入商品容器
+                        productDiv.appendChild(productImageDiv);
+                        productDiv.appendChild(productInfoDiv);
+
+                        // 商品点击事件，跳转到购买界面
+                        productDiv.addEventListener('click', function () {
+                            window.location.href = `productDetail.html?id=${product.id}`;
+                        });
+
+                        // 将商品容器添加到商品列表
+                        div.appendChild(productDiv);
+                    });
+                } else {
+                    div.innerHTML = "没有找到任何商品。";
+                }
             } else {
-                alert(data.message);
+                div.innerHTML = "加载商品列表失败。";
             }
         } catch (error) {
-            console.error("发生错误:", error);
-            alert("发生错误，请重试");
+            console.error("加载商品列表失败:", error);
         }
     }
-
-    // 页面中各个按钮的事件处理
-    document.getElementById('Recharge').addEventListener('click', function() {
-        window.location.href = "recharge";
-    });
-
-    document.getElementById('updatename').addEventListener('click', function() {
-        window.location.href = "updatename";
-    });
-
-    document.getElementById('updatepassword').addEventListener('click', function() {
-        window.location.href = "updatepassword";
-    });
-
-    document.getElementById('Shoping').addEventListener('click', function() {
-        window.location.href = "shop";
-    });
-
-    document.getElementById('fetchOrderListInfo').addEventListener('click', function() {
-        window.location.href = "getorderlist";
-    });
-    document.getElementById('updateaddress').addEventListener('click', function() {
-        window.location.href = "updateaddress";
-    });
 </script>
 </body>
 </html>
