@@ -12,6 +12,7 @@ type User struct {
 	Balance  int64  `gorm:"default:0" json:"balance,omitempty"`
 	Cost     int64  `gorm:"default:0" json:"cost,omitempty"`
 	Address  string `gorm:"varchar(256);not null" json:"address,omitempty"`
+	Avatar   string `gorm:"varchar(256);not null" json:"avatar,omitempty"`
 }
 
 func CreateUser(ctx context.Context, usr *User) error {

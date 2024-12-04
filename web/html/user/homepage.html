@@ -169,8 +169,9 @@
 <script>
     window.onload = function() {
         const objectname = localStorage.getItem('objectname');
+        console.log(objectname)
         if (objectname) {
-            const userAvatarPath = "http://localhost:9000/eshoping/" + "UserId=" + objectname + ".jpg";
+            const userAvatarPath = "http://localhost:9000/user/" + "UserName=" + objectname + ".jpg";
             // 如果 localStorage 中有存储头像路径，则更新头像图片的 src 属性
             document.getElementById('user-avatar').src = userAvatarPath;
         }
@@ -201,7 +202,7 @@
                         // 商品图片
                         const productImageDiv = document.createElement("div");
                         productImageDiv.classList.add("product-img");
-                        productImageDiv.style.backgroundImage = `url("http://127.0.0.1:9000/eshoping/UserId=3.jpg")`;
+                        productImageDiv.style.backgroundImage = `url(${product.productimage})`;
 
                         // 商品信息
                         const productInfoDiv = document.createElement("div");

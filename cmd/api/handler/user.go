@@ -6,6 +6,8 @@ import (
 	"Eshop/kitex_gen/base"
 	"Eshop/kitex_gen/user"
 	captcha2 "Eshop/pkg/captcha"
+	"Eshop/pkg/kafka"
+	"Eshop/pkg/minio"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	"go.uber.org/zap"
@@ -72,14 +74,27 @@ func Login(ctx context.Context, c *app.RequestContext) {
 }
 func Register(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
-		Username string
-		Password string
-		Address  string
-		Captcha  string
+		Username string `form:"username"`
+		Password string `form:"password"`
+		Address  string `form:"address"`
+		Captcha  string `form:"captcha"`
 	}
+
 	if err := c.Bind(&reqbody); err != nil {
 		logger.Error("前后端数据绑定错误", zap.Error(err))
 		BadBaseResponse(c, "无效的请求格式")
+		return
+	}
+	file, err := c.FormFile("avatar")
+	if err != nil {
+		logger.Error("文件上传错误", zap.Error(err))
+		BadBaseResponse(c, "头像上传失败")
+		return
+	}
+	fileURL, err := minio.UserUploadFileToMinio(ctx, file, reqbody.Username) // 传递用户 ID，这里假设为 12345
+	if err != nil {
+		logger.Error("头像上传到 MinIO 失败", zap.Error(err))
+		BadBaseResponse(c, "头像上传到 MinIO 失败")
 		return
 	}
 	key := "captcha:" + c.ClientIP()
@@ -97,10 +112,21 @@ func Register(ctx context.Context, c *app.RequestContext) {
 		Password: reqbody.Password,
 		Address:  reqbody.Address,
 		Captcha:  reqbody.Captcha,
+		Avatar:   fileURL,
 	}
 	res, _ := rpc.Register(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		kafkaProducer, err := kafka.NewKafkaProducer([]string{kafkaAddr}) //初始化kafka生产者
+		if err != nil {
+			logger.Error("kafka生产者创建失败：", zap.Error(err))
+			return
+		}
+		err = kafkaProducer.SendDeleteAvatarEvent(req.Username)
+		if err != nil {
+			logger.Error("删除头像成功，但更新消息发送失败：", zap.Error(err))
+			return
+		}
 		return
 	}
 	c.JSON(http.StatusOK, user.UserLoginResponse{

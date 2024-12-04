@@ -41,9 +41,11 @@
             box-sizing: border-box;
             transition: border-color 0.3s ease;
         }
+
         #subdiv {
             margin-top: 20px;  /* 增加按钮和输入框之间的间距 */
         }
+
         input:focus {
             border-color: #007BFF;
             outline: none;
@@ -74,6 +76,52 @@
             border-radius: 5px;
             display: none;
         }
+
+        #avatarContainer {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        /* 设置头像框为圆形，大小为100px */
+        #avatarPreview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;  /* 圆形头像框 */
+            object-fit: cover;
+            border: 2px solid #ccc;
+            margin-bottom: 10px;
+        }
+
+        #avatarInput {
+            display: none;
+        }
+
+        #avatarLabel {
+            display: inline-block;
+            padding: 10px;
+            background-color: #4A90E2;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        #avatarLabel:hover {
+            background-color: #1C75D7;
+        }
+
+        /* 图片框内的文字 */
+        #avatarPreview::before {
+            content: "上传图片";
+            color: #fff;
+            font-size: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.5); /* 半透明背景 */
+        }
     </style>
 
     <script>
@@ -99,48 +147,84 @@
             }
             return true;
         }
+
+        // 图片预览功能
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function() {
+                const img = document.getElementById("product-image");
+                img.src = reader.result; // 显示图片预览
+            }
+            reader.readAsDataURL(file);
+        }
     </script>
 </head>
 <body>
 
 <div id="productinfo">
     <h2>添加商品</h2>
-    <form action="/product/addproduct" id="form" method="post">
+    <form action="/product/addproduct" id="form" method="post" enctype="multipart/form-data">
+        <!-- 商品图片上传 -->
+        <div id="avatarContainer">
+            <img id="product-image" src="https://via.placeholder.com/100" alt="商品图片" id="avatarPreview" />
+            <br />
+            <input type="file" id="avatarInput" accept="image/*" onchange="previewImage(event)" />
+            <label id="avatarLabel" for="avatarInput">上传图片</label>
+        </div>
+
+        <!-- 商品名输入框 -->
         <input id="productname" type="text" placeholder="请输入商品名" />
+
+        <!-- 商品库存输入框 -->
         <input id="productstock" type="text" placeholder="请输入商品库存" />
+
+        <!-- 商品价格输入框 -->
         <input id="productprice" type="text" placeholder="请输入商品价格" />
 
+        <!-- 提交按钮 -->
         <div id="subdiv">
             <button type="submit" class="button">添加</button>
         </div>
     </form>
+
     <div class="alert" id="error-message"></div>
 </div>
 
 <script>
+    // 提交表单前验证
     document.getElementById("form").addEventListener('submit', async function (e) {
         if (!check()) {
             e.preventDefault();
             return;
         }
         e.preventDefault();
+
+        // 获取表单数据
         var productname = document.getElementById("productname").value;
         var stock = parseInt(document.getElementById("productstock").value, 10);
         var price = parseInt(document.getElementById("productprice").value, 10);
+        var productImage = document.getElementById("avatarInput").files[0]; // 获取上传的商品图片
+
+        var formData = new FormData();
+        formData.append("productname", productname);
+        formData.append("stock", stock);
+        formData.append("price", price);
+        if (productImage) {
+            formData.append("productimage", productImage);
+        }
 
         try {
             const response = await fetch("/product/addproduct", {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ productname, stock, price })
+                body: formData
             });
+
             var data = await response.json();
             if (response.ok) {
-                alert("添加商品成功！");
+                alert("商品添加成功！");
                 setTimeout(() => {
-                    window.location.href = "admin";
+                    window.location.href = "/admin"; // 重定向到商品管理页面
                 }, 1000);
             } else {
                 showError(data.status_msg);
@@ -151,6 +235,7 @@
         }
     });
 
+    // 显示错误信息
     function showError(message) {
         var errorMessage = document.getElementById("error-message");
         errorMessage.textContent = message;

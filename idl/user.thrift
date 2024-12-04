@@ -24,6 +24,7 @@ struct UserRegisterRequest {
     2: string password;
     3: string address;
     4: string captcha;
+    5: string avatar;
 }
 struct UserRegisterResponse {
     1: i32    status_code

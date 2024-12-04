@@ -10,6 +10,7 @@ struct AddProductRequest{
 1:string name
 2:i64 stock
 3:i64 price
+4:string productimage
 }
 struct AddProductResponse{
 1: i32    status_code

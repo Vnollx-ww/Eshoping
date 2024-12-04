@@ -7,17 +7,15 @@ import (
 
 type Product struct {
 	gorm.Model
-	ProductName string `gorm:"unique;varchar(40);not null" json:"name,omitempty"`
-	Price       int64  `gorm:"default:0" json:"price,omitempty"`
-	Stock       int64  `gorm:"default:0" json:"stock,omitempty"`
+	ProductName  string `gorm:"unique;varchar(40);not null" json:"name,omitempty"`
+	Price        int64  `gorm:"default:0" json:"price,omitempty"`
+	Stock        int64  `gorm:"default:0" json:"stock,omitempty"`
+	ProductImage string `gorm:"varchar(256);not null" json:"product-image,omitempty"`
 }
 
 func CreateProduct(ctx context.Context, pro *Product) error {
 	err := DB.Create(pro).Error
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 func GetProductByName(ctx context.Context, productName string) (*Product, error) {
 	product := new(Product)

@@ -51,3 +51,35 @@ func (k *KafkaProducer) SendCreateOrderEvent(token string, amount int64, number 
 	log.Println("发送订单消息到kafka成功")
 	return nil
 }
+func (k *KafkaProducer) SendDeleteAvatarEvent(username string) error {
+	message := fmt.Sprintf(`{
+		"username": "%s",
+	}`, username)
+	msg := &sarama.ProducerMessage{
+		Topic: "Avatar-delete",
+		Value: sarama.StringEncoder(message),
+	}
+	_, _, err := k.producer.SendMessage(msg)
+	if err != nil {
+		log.Printf("发送删除头像消息到kafka失败: %v", err)
+		return err
+	}
+	log.Println("发送删除头像消息到kafka成功")
+	return nil
+}
+func (k *KafkaProducer) SendDeleteProductImageEvent(productname string) error {
+	message := fmt.Sprintf(`{
+		"productname": "%s",
+	}`, productname)
+	msg := &sarama.ProducerMessage{
+		Topic: "productimage-delete",
+		Value: sarama.StringEncoder(message),
+	}
+	_, _, err := k.producer.SendMessage(msg)
+	if err != nil {
+		log.Printf("发送删除商品图片消息到kafka失败: %v", err)
+		return err
+	}
+	log.Println("发送删除商品图片消息到kafka成功")
+	return nil
+}

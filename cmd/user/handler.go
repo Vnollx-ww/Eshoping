@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"github.com/cloudwego/hertz/pkg/common/json"
 	"go.uber.org/zap"
+	"log"
 	"time"
 )
 
@@ -111,7 +112,7 @@ func (s *UserServiceImpl) UserRegiter(ctx context.Context, req *user.UserRegiste
 		return BadRegisterResponse("用户已存在"), nil
 	}
 	encryptedPassword := MD5Encrypt(req.Password)
-	usr = &db.User{UserName: req.Username, Password: encryptedPassword, Address: req.Address}
+	usr = &db.User{UserName: req.Username, Password: encryptedPassword, Address: req.Address, Avatar: req.Avatar}
 	err = db.CreateUser(ctx, usr)
 	if err != nil {
 		logger.Error("注册失败：", zap.Error(err))
@@ -130,6 +131,7 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 	cachekey := fmt.Sprintf("userinfo:%d", mc.UserId)
 	u, err := rs.GetUserInfo(ctx, cachekey)
 	if err == nil && u != nil {
+		log.Println(u.Avatar + "ok")
 		return GoodGetUserInfoResponse("获取用户信息成功", u), nil
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
@@ -140,7 +142,7 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 	if usr == nil {
 		return BadGetUserInfoResponse("用户不存在"), nil
 	}
-	u = &user.User{Name: usr.UserName, Id: int64(usr.ID), Balance: usr.Balance, Cost: usr.Cost, Address: usr.Address}
+	u = &user.User{Name: usr.UserName, Id: int64(usr.ID), Balance: usr.Balance, Cost: usr.Cost, Address: usr.Address, Avatar: usr.Avatar}
 	userdata, err := json.Marshal(u)
 	if err != nil {
 		logger.Error("用户信息数据序列化失败：", zap.Error(err))
@@ -149,6 +151,7 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 	if err != nil {
 		logger.Error("缓存设置失败：", zap.Error(err))
 	}
+	log.Println(u.Avatar)
 	return GoodGetUserInfoResponse("获取用户信息成功", u), nil
 }
 

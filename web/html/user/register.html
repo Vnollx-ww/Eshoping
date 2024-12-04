@@ -33,6 +33,16 @@
             }
             return true;
         }
+
+        // 头像预览功能
+        function previewAvatar(event) {
+            var file = event.target.files[0];
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById("avatarPreview").src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
     </script>
     <style>
         body {
@@ -123,19 +133,45 @@
             }
         }
 
-        /* 这里是验证码输入框和图片的布局 */
+        /* 头像上传相关样式 */
+        #avatarContainer {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        #avatarPreview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;  /* 圆形头像 */
+            object-fit: cover;
+            border: 2px solid #ccc;
+        }
+        #avatarInput {
+            display: none;
+        }
+        #avatarLabel {
+            display: inline-block;
+            padding: 10px;
+            background-color: #4A90E2;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+        }
+        #avatarLabel:hover {
+            background-color: #1C75D7;
+        }
         #captcha-container {
-            display: flex; /* 使用flex布局 */
-            justify-content: space-between; /* 让输入框和图片分开 */
-            align-items: center; /* 垂直居中对齐 */
-            gap: 10px; /* 控制输入框和验证码图片之间的间距 */
+            display: flex;
+            justify-content: space-between; /* 让输入框和验证码图片在同一行，间隔分开 */
+            align-items: center;
+            gap: 10px; /* 控制输入框与图片之间的间距 */
         }
         #captcha-container input {
             width: 70%; /* 设置验证码输入框的宽度 */
         }
         #captchaImage {
             width: 100px; /* 设置验证码图片的宽度 */
-            cursor: pointer; /* 鼠标悬停时显示为可点击 */
+            cursor: pointer;
         }
     </style>
 </head>
@@ -143,6 +179,13 @@
 <div id="registerdiv">
     <form action="/user/register" method="post" id="form">
         <h1 id="title">注册</h1>
+        <!-- 头像上传区域 -->
+        <div id="avatarContainer">
+            <img id="avatarPreview" src="https://via.placeholder.com/100" alt="头像预览">
+            <br>
+            <label id="avatarLabel" for="avatarInput">上传头像</label>
+            <input type="file" id="avatarInput" accept="image/*" onchange="previewAvatar(event)">
+        </div>
         <div class="input-group">
             <input type="text" id="username" placeholder="请输入用户名" required />
         </div>
@@ -155,7 +198,7 @@
         <div class="input-group">
             <input type="text" id="address" placeholder="请输入收货地址" required />
         </div>
-        <div id="captcha-container" div class="input-group">
+        <div id="captcha-container" class="input-group">
             <input type="text" id="captcha" placeholder="请输入验证码" required />
             <img id="captchaImage" src="user/captcha" alt="验证码" onclick="this.src='user/captcha?'+Math.random();" />
         </div>
@@ -178,14 +221,23 @@
         var password = document.getElementById('password').value;
         var address = document.getElementById('address').value;
         var captcha = document.getElementById('captcha').value;
+
+        // 获取头像文件
+        var avatarFile = document.getElementById('avatarInput').files[0];
+        var formData = new FormData();
+        formData.append("username", username);
+        formData.append("password", password);
+        formData.append("address", address);
+        formData.append("captcha", captcha);
+        if (avatarFile) {
+            formData.append("avatar", avatarFile); // 添加头像文件
+        }
         try {
             const response = await fetch("/user/register", {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password, address, captcha })
+                body: formData,  // 将表单数据作为请求体
             });
+
             var data = await response.json();
             alert(data.status_msg);
             if (response.ok) {

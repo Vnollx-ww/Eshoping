@@ -63,9 +63,10 @@ func (s *ProductServiceImpl) AddProduct(ctx context.Context, req *product.AddPro
 		return BadAddProductResponse("商品已存在"), nil
 	}
 	pro = &db.Product{
-		ProductName: req.Name,
-		Price:       req.Price,
-		Stock:       req.Stock,
+		ProductName:  req.Name,
+		Price:        req.Price,
+		Stock:        req.Stock,
+		ProductImage: req.Productimage,
 	}
 	err = db.CreateProduct(ctx, pro)
 	if err != nil {
@@ -91,10 +92,11 @@ func (s *ProductServiceImpl) GetProductInfo(ctx context.Context, req *product.Ge
 		return BadGetProductInfoResponse("商品不存在"), nil
 	}
 	p := &product.Product{
-		Name:  pro.ProductName,
-		Id:    int64(pro.ID),
-		Price: pro.Price,
-		Stock: pro.Stock,
+		Name:         pro.ProductName,
+		Id:           int64(pro.ID),
+		Price:        pro.Price,
+		Stock:        pro.Stock,
+		Productimage: pro.ProductImage,
 	}
 	return GoodGetProductInfoResponse("获取商品信息成功", p), nil
 }
@@ -204,6 +206,7 @@ func (s *ProductServiceImpl) GetProductListInfo(ctx context.Context) (resp *prod
 		p.Name = pro.ProductName
 		p.Price = pro.Price
 		p.Stock = pro.Stock
+		p.Productimage = pro.ProductImage
 		productlist = append(productlist, &p)
 	}
 	cacheddatabytes, err := json.Marshal(productlist)

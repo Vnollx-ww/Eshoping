@@ -37,6 +37,7 @@
             opacity: 0.2; /* 设置透明度使得纹理效果不太抢眼 */
             pointer-events: none; /* 让纹理层不会影响用户交互 */
         }
+
         /* 动态渐变动画 */
         @keyframes gradientAnimation {
             0% {
@@ -72,6 +73,7 @@
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
+            text-align: center;
         }
 
         h1 {
@@ -92,6 +94,15 @@
             padding: 15px;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        #userinfo img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
         }
 
         #function {
@@ -158,9 +169,9 @@
 <body>
 <div id="container">
     <div id="InfoDiv">
-        <h1 style="text-align: center">欢迎回来!</h1>
-        <p id="message-container" style="text-align: center">加载中...</p>
-        <div id="userinfo"></div>
+        <div id="userinfo">
+            <!-- 用户头像和信息将动态加载到此处 -->
+        </div>
     </div>
 
     <div id="function" class="function-buttons">
@@ -174,19 +185,6 @@
 </div>
 
 <script>
-    const message = localStorage.getItem('message');
-    const messageContainer = document.getElementById('message-container');
-    const toggleInfoBtn = document.getElementById('toggleInfoBtn');
-    const userinfoDiv = document.getElementById('userinfo');
-    const fetchUserInfoBtn = document.getElementById('fetchUserInfo');
-
-    if (message) {
-        messageContainer.textContent = message;
-    } else {
-        messageContainer.textContent = "没有消息";
-    }
-
-    // 自动加载用户信息
     window.onload = async function() {
         try {
             const token = localStorage.getItem("token");
@@ -199,9 +197,12 @@
             });
             const data = await response.json();
             if (response.ok) {
-                // 显示用户信息
+                // 动态插入用户头像
                 const userinfoDiv = document.getElementById('userinfo');
+                const avatarUrl = data.user.avatar;  // 假设头像URL在data.user.avatar中
+                console.log(avatarUrl)
                 userinfoDiv.innerHTML = `
+                    <img src="${avatarUrl}" alt="用户头像" />
                     <p><strong>用户名:</strong> ${data.user.name}</p>
                     <p><strong>用户ID:</strong> ${data.user.id}</p>
                     <p><strong>用户余额:</strong> ${data.user.balance}</p>
@@ -215,7 +216,7 @@
             console.error("发生错误:", error);
             alert("发生错误，请重试");
         }
-    }
+    };
 
     // 页面中各个按钮的事件处理
     document.getElementById('Recharge').addEventListener('click', function() {
@@ -237,6 +238,7 @@
     document.getElementById('fetchOrderListInfo').addEventListener('click', function() {
         window.location.href = "getorderlist";
     });
+
     document.getElementById('updateaddress').addEventListener('click', function() {
         window.location.href = "updateaddress";
     });
