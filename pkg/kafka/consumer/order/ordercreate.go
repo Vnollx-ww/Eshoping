@@ -1,4 +1,4 @@
-package consumer
+package order
 
 import (
 	"Eshop/cmd/api/rpc"
@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	config    = viper.Init("user")
+	config    = viper.Init("order")
 	kafkaAddr = fmt.Sprintf("%s:%d", config.Viper.GetString("kafka.host"), config.Viper.GetInt("kafka.port"))
 )
 

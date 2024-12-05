@@ -28,7 +28,7 @@ func AddProduct(ctx context.Context, c *app.RequestContext) {
 		BadBaseResponse(c, "图片上传失败")
 		return
 	}
-	fileURL := fmt.Sprintf("http://localhost:9000/user/UserName=%s.jpg", reqbody.ProductName)
+	fileURL := fmt.Sprintf("http://localhost:9000/product/ProductName=%s.jpg", reqbody.ProductName)
 	req := &product.AddProductRequest{
 		Name:         reqbody.ProductName,
 		Stock:        reqbody.Stock,

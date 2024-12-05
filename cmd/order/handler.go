@@ -5,7 +5,7 @@ import (
 	"Eshop/kitex_gen/orderlist"
 	"Eshop/kitex_gen/product/productservice"
 	"Eshop/kitex_gen/user/userservice"
-	"Eshop/pkg/kafka"
+	order2 "Eshop/pkg/kafka/producer/order"
 	"Eshop/pkg/middlerware"
 	"context"
 	"go.uber.org/zap"
@@ -87,9 +87,6 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 	if pro.Stock < order.Number {
 		return BadAddOrderResponse("商品库存不足"), err
 	}
-	if usr == nil {
-		return BadAddOrderResponse("用户不存在"), err
-	}
 	if usr.Balance < order.Cost {
 		return BadAddOrderResponse("用户余额不足"), err
 	}
@@ -98,7 +95,7 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 		logger.Error("订单创建失败：", zap.Error(err))
 		return BadAddOrderResponse("订单创建失败"), err
 	}
-	kafkaProducer, err := kafka.NewKafkaProducer([]string{kafkaAddr}) //初始化kafka生产者
+	kafkaProducer, err := order2.NewKafkaProducer([]string{kafkaAddr}) //初始化kafka生产者
 	if err != nil {
 		logger.Error("kafka生产者创建失败：", zap.Error(err))
 		return BadAddOrderResponse("Kafka生产者创建失败"), err

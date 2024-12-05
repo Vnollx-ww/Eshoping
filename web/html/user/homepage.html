@@ -141,6 +141,148 @@
             color: #e60012;
             font-weight: bold;
         }
+        /* 弹窗背景 */
+        /* 整体弹窗样式 */
+        .modal {
+            display: none; /* 默认隐藏 */
+            position: fixed;
+            z-index: 1000; /* 层级 */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; /* 滚动条 */
+            background-color: rgba(0, 0, 0, 0.6);  /* 半透明黑色背景 */
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        /* 弹窗内容 */
+        .modal-content {
+            position: relative;
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s ease-out;
+        }
+
+        /* 弹窗打开时的动画效果 */
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        /* 关闭按钮样式 */
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #aaa;
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #333;
+        }
+
+        /* 商品名称 */
+        .product-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        /* 商品价格 */
+        .product-price {
+            font-size: 20px;
+            color: #f44336;  /* 红色 */
+            margin-bottom: 15px;
+        }
+
+        /* 库存显示 */
+        #modalProductStock {
+            font-size: 16px;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        /* 总价显示 */
+        #totalPrice {
+            font-size: 18px;
+            color: #2c3e50; /* 深色 */
+            font-weight: bold;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background-color: #f9f9f9; /* 背景颜色 */
+        }
+
+        /* 数量输入框 */
+        input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            font-size: 16px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin: 0 10px;
+            transition: border-color 0.3s ease;
+        }
+        .product-img {
+            width: 100%;         /* 容器宽度占满弹窗 */
+            height: 0;           /* 初始高度为0，用 padding-bottom 来设置 */
+            padding-bottom: 75%; /* 使容器的高度和宽度保持 4:3 比例（可根据需要调整） */
+            background-size: contain;  /* 确保图片完整显示，保持比例 */
+            background-position: center; /* 图片居中显示 */
+            background-repeat: no-repeat; /* 防止图片重复 */
+            margin-bottom: 20px;  /* 图片和其他内容之间留空 */
+        }
+        /* 立即购买按钮 */
+        #buyBtn {
+            background-color: #f44336;
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 15px;
+        }
+
+        #buyBtn:hover {
+            background-color: #d32f2f;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 90%;
+                max-width: 400px;
+            }
+
+            .product-img {
+                height: 200px;
+            }
+
+            #buyBtn {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -164,13 +306,30 @@
 
 <main>
     <div id="productlist"></div>  <!-- 商品列表容器 -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalProductImage" class="product-img"></div>
+            <div id="modalProductInfo">
+                <div id="modalProductName" class="product-name"></div>
+                <div id="modalProductPrice" class="product-price"></div>
+                <div id="modalProductStock">库存：<span id="productStock"></span>件</div>
+                <div>
+                    数量：
+                    <input type="number" id="quantityInput" value="1" min="1" />
+                </div>
+                <div id="totalPrice">总价：￥0</div> <!-- 显示总价的区域 -->
+                <button id="buyBtn">立即购买</button>
+            </div>
+        </div>
+    </div>
 </main>
 
 <script>
     window.onload = function() {
         const objectname = localStorage.getItem('objectname');
         if (objectname) {
-            const userAvatarPath = "http://localhost:9000/user/" + "UserName=" + objectname + ".jpg"+ "?t=" + new Date().getTime();
+            const userAvatarPath = "http://localhost:9000/user/" + "UserName=" + objectname + ".jpg" + "?t=" + new Date().getTime();
             document.getElementById('user-avatar').src = userAvatarPath;
         }
         loadProductList();  // 页面加载时自动调用商品加载函数
@@ -224,9 +383,9 @@
                         productDiv.appendChild(productImageDiv);
                         productDiv.appendChild(productInfoDiv);
 
-                        // 商品点击事件，跳转到购买界面
+                        // 商品点击事件，弹出商品详细信息的弹窗
                         productDiv.addEventListener('click', function () {
-                            window.location.href = `productDetail.html?id=${product.id}`;
+                            openProductModal(product);
                         });
 
                         // 将商品容器添加到商品列表
@@ -242,6 +401,94 @@
             console.error("加载商品列表失败:", error);
         }
     }
+
+    let buyBtnClickListener;  // 用于存储购买按钮点击事件
+
+    function openProductModal(product) {
+        document.getElementById("modalProductImage").style.backgroundImage = `url(${product.productimage})`;
+        document.getElementById("modalProductName").textContent = product.name;
+        document.getElementById("modalProductPrice").textContent = `￥${product.price}`;
+        document.getElementById("productStock").textContent = product.stock;
+
+        // 设置最大数量
+        const quantityInput = document.getElementById("quantityInput");
+        quantityInput.max = product.stock;
+
+        // 初始化总价
+        updateTotalPrice(product.price, quantityInput.value);
+
+        // 监听数量变化，动态更新总价
+        quantityInput.addEventListener('input', function() {
+            updateTotalPrice(product.price, quantityInput.value);
+        });
+
+        // 打开弹窗
+        document.getElementById("productModal").style.display = "block";
+
+        // 清除上一次绑定的事件
+        if (buyBtnClickListener) {
+            document.getElementById("buyBtn").removeEventListener("click", buyBtnClickListener);
+        }
+
+        // 定义购买按钮点击事件
+        buyBtnClickListener = async function () {
+            try {
+                var Token = localStorage.getItem("token")
+                var ProductName = product.name
+                let quantity = parseInt(quantityInput.value) || 1;
+                var Number = quantity
+                if (Number > product.stock) {
+                    alert("商品库存不足")
+                    return
+                }
+                var Cost = Number * product.price
+                const response = await fetch("/order/addorder", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ Token, ProductName, Number, Cost })
+                });
+                const data = await response.json()
+                if (response.ok) {
+                    alert(`你购买了 ${quantity} 件 ${product.name}，总价: ${product.price * quantity}`);
+                    loadProductList();  // 购买成功后刷新商品列表
+                } else {
+                    alert(data.status_msg);
+                }
+            } catch (error) {
+                console.error("发生错误:", error);
+                alert("发生错误，请重试");
+            }
+            closeModal();  // 关闭弹窗
+        };
+
+        // 为立即购买按钮绑定点击事件
+        document.getElementById("buyBtn").addEventListener("click", buyBtnClickListener);
+    }
+
+    // 更新总价显示
+    function updateTotalPrice(price, quantity) {
+        const totalPrice = price * quantity;
+        document.getElementById("totalPrice").textContent = `总价：￥${totalPrice.toFixed(2)}`;
+    }
+
+    // 关闭弹窗
+    function closeModal() {
+        document.getElementById("productModal").style.display = "none";
+    }
+
+    // 点击关闭按钮时关闭弹窗
+    document.querySelector(".close").addEventListener("click", closeModal);
+
+    // 点击弹窗外区域时关闭弹窗
+    window.onclick = function(event) {
+        const modal = document.getElementById("productModal");
+        if (event.target === modal) {
+            closeModal();
+        }
+    };
 </script>
+</body>
 </body>
 </html>

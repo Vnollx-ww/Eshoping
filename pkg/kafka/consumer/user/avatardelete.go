@@ -1,12 +1,19 @@
-package consumer
+package user
 
 import (
 	"Eshop/pkg/minio"
+	"Eshop/pkg/viper"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/IBM/sarama"
 	"log"
 	"time"
+)
+
+var (
+	config    = viper.Init("user")
+	kafkaAddr = fmt.Sprintf("%s:%d", config.Viper.GetString("kafka.host"), config.Viper.GetInt("kafka.port"))
 )
 
 type AvatarConsumer struct {

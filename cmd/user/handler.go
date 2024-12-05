@@ -4,7 +4,7 @@ import (
 	"Eshop/dal/db"
 	"Eshop/dal/rs"
 	"Eshop/kitex_gen/user"
-	"Eshop/pkg/kafka"
+	user2 "Eshop/pkg/kafka/producer/user"
 	"Eshop/pkg/middlerware"
 	"Eshop/pkg/minio"
 	"context"
@@ -174,7 +174,7 @@ func (s *UserServiceImpl) UpdateName(ctx context.Context, req *user.UpdateNameRe
 		logger.Error("用户头像路径修改失败：", zap.Error(err))
 		return BadUpdateNameResponse("用户头像路径修改失败"), nil
 	}
-	kafkaProducer, err := kafka.NewKafkaProducer([]string{kafkaAddr}) //初始化kafka生产者
+	kafkaProducer, err := user2.NewKafkaProducer([]string{kafkaAddr}) //初始化kafka生产者
 	if err != nil {
 		logger.Error("kafka生产者创建失败：", zap.Error(err))
 		return BadUpdateNameResponse("Kafka生产者创建失败"), err

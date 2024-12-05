@@ -1,12 +1,19 @@
-package consumer
+package product
 
 import (
 	"Eshop/pkg/minio"
+	"Eshop/pkg/viper"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/IBM/sarama"
 	"log"
 	"time"
+)
+
+var (
+	config    = viper.Init("product")
+	kafkaAddr = fmt.Sprintf("%s:%d", config.Viper.GetString("kafka.host"), config.Viper.GetInt("kafka.port"))
 )
 
 type ProductImageConsumer struct {
@@ -54,7 +61,7 @@ func (c *ProductImageConsumer) Listen() {
 			log.Printf("反序列化删除商品图片失败: %v", err)
 			continue
 		}
-		err = DeleteAvatar(event.Productname)
+		err = DeleteProductImage(event.Productname)
 		if err != nil {
 			log.Printf("删除商品图片失败: %v", err)
 		}

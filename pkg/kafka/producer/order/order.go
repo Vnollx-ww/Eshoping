@@ -1,8 +1,7 @@
-package kafka
+package order
 
 import (
-	"Eshop/pkg/kafka/consumer"
-	_ "Eshop/pkg/kafka/consumer"
+	"Eshop/pkg/kafka/consumer/order"
 	"encoding/json"
 	"fmt"
 	"github.com/IBM/sarama"
@@ -31,9 +30,8 @@ func NewKafkaProducer(brokerList []string) (*KafkaProducer, error) {
 
 	return &KafkaProducer{producer: producer}, nil
 }
-
 func (k *KafkaProducer) SendCreateOrderEvent(token string, amount int64, number int64, productid int64) error {
-	message := &consumer.CreateOrderMessage{Token: token, Amount: amount, Number: number, Productid: productid}
+	message := &order.CreateOrderMessage{Token: token, Amount: amount, Number: number, Productid: productid}
 	msgBytes, err := json.Marshal(message)
 	msg := &sarama.ProducerMessage{
 		Topic: "order-create",
@@ -46,35 +44,5 @@ func (k *KafkaProducer) SendCreateOrderEvent(token string, amount int64, number 
 		return err
 	}
 	log.Println("发送订单消息到kafka成功")
-	return nil
-}
-func (k *KafkaProducer) SendDeleteAvatarEvent(username string) error {
-	message := &consumer.DeleteAvatarMessage{Username: username}
-	msgBytes, err := json.Marshal(message)
-	msg := &sarama.ProducerMessage{
-		Topic: "avatar-delete",
-		Value: sarama.StringEncoder(msgBytes),
-	}
-	_, _, err = k.producer.SendMessage(msg)
-	if err != nil {
-		log.Printf("发送删除头像消息到kafka失败: %v", err)
-		return err
-	}
-	log.Println("发送删除头像消息到kafka成功")
-	return nil
-}
-func (k *KafkaProducer) SendDeleteProductImageEvent(productname string) error {
-	message := &consumer.DeleteProductImageMessage{Productname: productname}
-	msgBytes, err := json.Marshal(message)
-	msg := &sarama.ProducerMessage{
-		Topic: "avatar-delete",
-		Value: sarama.StringEncoder(msgBytes),
-	}
-	_, _, err = k.producer.SendMessage(msg)
-	if err != nil {
-		log.Printf("发送删除商品图片消息到kafka失败: %v", err)
-		return err
-	}
-	log.Println("发送删除商品图片消息到kafka成功")
 	return nil
 }
