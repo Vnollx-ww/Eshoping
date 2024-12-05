@@ -4,14 +4,15 @@ import (
 	"Eshop/dal/db"
 	"Eshop/dal/rs"
 	"Eshop/kitex_gen/user"
+	"Eshop/pkg/kafka"
 	"Eshop/pkg/middlerware"
+	"Eshop/pkg/minio"
 	"context"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
 	"github.com/cloudwego/hertz/pkg/common/json"
 	"go.uber.org/zap"
-	"log"
 	"time"
 )
 
@@ -131,7 +132,6 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 	cachekey := fmt.Sprintf("userinfo:%d", mc.UserId)
 	u, err := rs.GetUserInfo(ctx, cachekey)
 	if err == nil && u != nil {
-		log.Println(u.Avatar + "ok")
 		return GoodGetUserInfoResponse("获取用户信息成功", u), nil
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
@@ -151,7 +151,6 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 	if err != nil {
 		logger.Error("缓存设置失败：", zap.Error(err))
 	}
-	log.Println(u.Avatar)
 	return GoodGetUserInfoResponse("获取用户信息成功", u), nil
 }
 
@@ -170,7 +169,22 @@ func (s *UserServiceImpl) UpdateName(ctx context.Context, req *user.UpdateNameRe
 	if usr == nil {
 		return BadUpdateNameResponse("用户不存在"), nil
 	}
-	err = db.UpdateName(ctx, usr, req.Newname_)
+	err = minio.UserCopyFileMinio(ctx, usr.UserName, req.Newname_)
+	if err != nil {
+		logger.Error("用户头像路径修改失败：", zap.Error(err))
+		return BadUpdateNameResponse("用户头像路径修改失败"), nil
+	}
+	kafkaProducer, err := kafka.NewKafkaProducer([]string{kafkaAddr}) //初始化kafka生产者
+	if err != nil {
+		logger.Error("kafka生产者创建失败：", zap.Error(err))
+		return BadUpdateNameResponse("Kafka生产者创建失败"), err
+	}
+	err = kafkaProducer.SendDeleteAvatarEvent(usr.UserName)
+	if err != nil {
+		logger.Error("删除旧路径消息创建成功，但更新消息发送失败：", zap.Error(err))
+		return BadUpdateNameResponse("删除旧路径消息创建成功，但更新消息发送失败"), err
+	}
+	err = db.UpdateNameAndAvatar(ctx, usr, req.Newname_)
 	if err != nil {
 		logger.Error("修改用户名失败：", zap.Error(err))
 		return BadUpdateNameResponse("修改用户名失败"), nil
@@ -339,4 +353,10 @@ func (s *UserServiceImpl) UpdateBalanceAndCost(ctx context.Context, req *user.Up
 		logger.Error("删除缓存失败：", zap.Error(err))
 	}
 	return GoodUpdateBalanceAndCostResponse("用户余额和花费修改成功", true), nil
+}
+
+// UpdateAvatar implements the UserServiceImpl interface.
+func (s *UserServiceImpl) UpdateAvatar(ctx context.Context, req *user.UpdateAvatarRequest) (resp *user.UpdateAvatarResponse, err error) {
+	// TODO: Your code here...
+	return
 }

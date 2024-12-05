@@ -28,6 +28,7 @@ func NewServiceInfo() *kitex.ServiceInfo {
 		"UpdateBalance":        kitex.NewMethodInfo(updateBalanceHandler, newUserServiceUpdateBalanceArgs, newUserServiceUpdateBalanceResult, false),
 		"UpdateBalanceAndCost": kitex.NewMethodInfo(updateBalanceAndCostHandler, newUserServiceUpdateBalanceAndCostArgs, newUserServiceUpdateBalanceAndCostResult, false),
 		"UpdateAddress":        kitex.NewMethodInfo(updateAddressHandler, newUserServiceUpdateAddressArgs, newUserServiceUpdateAddressResult, false),
+		"UpdateAvatar":         kitex.NewMethodInfo(updateAvatarHandler, newUserServiceUpdateAvatarArgs, newUserServiceUpdateAvatarResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName":     "user",
@@ -206,6 +207,24 @@ func newUserServiceUpdateAddressResult() interface{} {
 	return user.NewUserServiceUpdateAddressResult()
 }
 
+func updateAvatarHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceUpdateAvatarArgs)
+	realResult := result.(*user.UserServiceUpdateAvatarResult)
+	success, err := handler.(user.UserService).UpdateAvatar(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceUpdateAvatarArgs() interface{} {
+	return user.NewUserServiceUpdateAvatarArgs()
+}
+
+func newUserServiceUpdateAvatarResult() interface{} {
+	return user.NewUserServiceUpdateAvatarResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -301,6 +320,16 @@ func (p *kClient) UpdateAddress(ctx context.Context, req *user.UpdateAddressRequ
 	_args.Req = req
 	var _result user.UserServiceUpdateAddressResult
 	if err = p.c.Call(ctx, "UpdateAddress", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) UpdateAvatar(ctx context.Context, req *user.UpdateAvatarRequest) (r *user.UpdateAvatarResponse, err error) {
+	var _args user.UserServiceUpdateAvatarArgs
+	_args.Req = req
+	var _result user.UserServiceUpdateAvatarResult
+	if err = p.c.Call(ctx, "UpdateAvatar", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

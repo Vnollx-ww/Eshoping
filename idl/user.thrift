@@ -95,6 +95,15 @@ struct UpdateAddressResponse{
 2:string status_msg
 3:bool succed
 }
+struct UpdateAvatarRequest{
+1:string token
+2:string avatar
+}
+struct UpdateAvatarResponse{
+1:i32 status_code
+2:string status_msg
+3:bool succed
+}
 service UserService {
     UserLoginResponse UserLogin(1:UserLoginRequest req)
     UserRegisterResponse UserRegiter(1:UserRegisterRequest req)
@@ -105,4 +114,5 @@ service UserService {
     UpdateBalanceResponse UpdateBalance(1:UpdateBalanceRequest req)
     UpdateBalanceAndCostResponse UpdateBalanceAndCost(1:UpdateBalanceAndCostRequest req)
     UpdateAddressResponse UpdateAddress(1:UpdateAddressRequest req)
+    UpdateAvatarResponse UpdateAvatar(1:UpdateAvatarRequest req)
 }

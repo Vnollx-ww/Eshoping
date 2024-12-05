@@ -180,6 +180,7 @@
         <button id="updatename">修改用户名</button>
         <button id="updatepassword">修改密码</button>
         <button id="updateaddress">修改收货地址</button>
+        <button id="updateavatar">修改头像</button>
         <button id="fetchOrderListInfo">查看购买记录</button>
     </div>
 </div>
@@ -199,8 +200,7 @@
             if (response.ok) {
                 // 动态插入用户头像
                 const userinfoDiv = document.getElementById('userinfo');
-                const avatarUrl = data.user.avatar;  // 假设头像URL在data.user.avatar中
-                console.log(avatarUrl)
+                const avatarUrl = data.user.avatar+ "?t=" + new Date().getTime();;  // 假设头像URL在data.user.avatar中,加入时间戳避免游览器缓存
                 userinfoDiv.innerHTML = `
                     <img src="${avatarUrl}" alt="用户头像" />
                     <p><strong>用户名:</strong> ${data.user.name}</p>
@@ -241,6 +241,9 @@
 
     document.getElementById('updateaddress').addEventListener('click', function() {
         window.location.href = "updateaddress";
+    });
+    document.getElementById('updateavatar').addEventListener('click', function() {
+        window.location.href = "updateavatar";
     });
 </script>
 </body>

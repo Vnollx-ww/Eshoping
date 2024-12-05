@@ -20,6 +20,7 @@ type Client interface {
 	UpdateBalance(ctx context.Context, req *user.UpdateBalanceRequest, callOptions ...callopt.Option) (r *user.UpdateBalanceResponse, err error)
 	UpdateBalanceAndCost(ctx context.Context, req *user.UpdateBalanceAndCostRequest, callOptions ...callopt.Option) (r *user.UpdateBalanceAndCostResponse, err error)
 	UpdateAddress(ctx context.Context, req *user.UpdateAddressRequest, callOptions ...callopt.Option) (r *user.UpdateAddressResponse, err error)
+	UpdateAvatar(ctx context.Context, req *user.UpdateAvatarRequest, callOptions ...callopt.Option) (r *user.UpdateAvatarResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -94,4 +95,9 @@ func (p *kUserServiceClient) UpdateBalanceAndCost(ctx context.Context, req *user
 func (p *kUserServiceClient) UpdateAddress(ctx context.Context, req *user.UpdateAddressRequest, callOptions ...callopt.Option) (r *user.UpdateAddressResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.UpdateAddress(ctx, req)
+}
+
+func (p *kUserServiceClient) UpdateAvatar(ctx context.Context, req *user.UpdateAvatarRequest, callOptions ...callopt.Option) (r *user.UpdateAvatarResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.UpdateAvatar(ctx, req)
 }

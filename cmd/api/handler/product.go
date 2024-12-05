@@ -3,9 +3,9 @@ package handler
 import (
 	"Eshop/cmd/api/rpc"
 	"Eshop/kitex_gen/product"
-	"Eshop/pkg/kafka"
 	"Eshop/pkg/minio"
 	"context"
+	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
 	"go.uber.org/zap"
 	"net/http"
@@ -28,7 +28,7 @@ func AddProduct(ctx context.Context, c *app.RequestContext) {
 		BadBaseResponse(c, "图片上传失败")
 		return
 	}
-	fileURL, err := minio.ProductUploadFileToMinio(ctx, file, reqbody.ProductName)
+	fileURL := fmt.Sprintf("http://localhost:9000/user/UserName=%s.jpg", reqbody.ProductName)
 	req := &product.AddProductRequest{
 		Name:         reqbody.ProductName,
 		Stock:        reqbody.Stock,
@@ -38,16 +38,12 @@ func AddProduct(ctx context.Context, c *app.RequestContext) {
 	res, _ := rpc.AddProduct(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
-		kafkaProducer, err := kafka.NewKafkaProducer([]string{kafkaAddr}) //初始化kafka生产者
-		if err != nil {
-			logger.Error("kafka生产者创建失败：", zap.Error(err))
-			return
-		}
-		err = kafkaProducer.SendDeleteProductImageEvent(reqbody.ProductName)
-		if err != nil {
-			logger.Error("删除商品图片成功，但更新消息发送失败：", zap.Error(err))
-			return
-		}
+		return
+	}
+	err = minio.ProductUploadFileToMinio(ctx, file, reqbody.ProductName)
+	if err != nil {
+		logger.Error("商品图片上传到 MinIO 失败", zap.Error(err))
+		BadBaseResponse(c, "商品图片上传到 MinIO 失败")
 		return
 	}
 	c.JSON(http.StatusOK, product.AddProductResponse{

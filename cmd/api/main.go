@@ -59,6 +59,10 @@ func LoadHtml(hz *server.Hertz) {
 		c.File("D:/GolandProgram/Eshoping/web/html/user/updateaddress.html")
 		//c.File("/app/web/html/user/updateaddress.html")
 	})
+	hz.GET("/updateavatar", func(ctx context.Context, c *app.RequestContext) {
+		c.File("D:/GolandProgram/Eshoping/web/html/user/updateavatar.html")
+		//c.File("/app/web/html/user/updateavatar.html")
+	})
 	hz.GET("/getorderlist", func(ctx context.Context, c *app.RequestContext) {
 		c.File("D:/GolandProgram/Eshoping/web/html/user/getorderlist.html")
 		//c.File("/app/web/html/user/getorderlist.html")
@@ -106,6 +110,7 @@ func registerGroup(hz *server.Hertz) {
 		user.POST("/updatecost", handler.UpdateCost)
 		user.POST("/updatebalance", handler.UpdateBalance)
 		user.POST("/updateaddress", handler.UpdateAddress)
+		user.POST("/updateavatar", handler.UpdateAvatar)
 	}
 	product := hz.Group("/product")
 	{

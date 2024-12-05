@@ -295,7 +295,7 @@
                         // 创建商品图片容器
                         var productImageDiv = document.createElement("div");
                         productImageDiv.classList.add("product-img");
-                        productImageDiv.style.backgroundImage = `url("http://127.0.0.1:9000/eshoping/3eb64f07d70733eeb91e38084046dc9.jpg")`;
+                        productImageDiv.style.backgroundImage = `url(${product.productimage})`;
                         productImageDiv.style.backgroundSize = "cover"; // 让图片填充容器
                         productImageDiv.style.backgroundPosition = "center"; // 居中显示图片
                         // 将商品信息和图片添加到商品容器

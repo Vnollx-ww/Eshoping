@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"github.com/jinzhu/gorm"
 )
 
@@ -40,8 +41,9 @@ func GetUserByID(ctx context.Context, ID int64) (*User, error) {
 		return nil, err
 	}
 }
-func UpdateName(ctx context.Context, user *User, name string) error {
+func UpdateNameAndAvatar(ctx context.Context, user *User, name string) error {
 	user.UserName = name
+	user.Avatar = fmt.Sprintf("http://localhost:9000/user/UserName=%s.jpg", name)
 	err := DB.Save(&user).Error
 	if err != nil {
 		return err

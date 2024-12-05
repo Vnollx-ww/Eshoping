@@ -8,7 +8,7 @@ import (
 	"mime/multipart"
 )
 
-func ProductUploadFileToMinio(c context.Context, file *multipart.FileHeader, productname string) (string, error) {
+func ProductUploadFileToMinio(c context.Context, file *multipart.FileHeader, productname string) error {
 	// 设置 MinIO 上传的桶名称
 	bucketName := "product"
 	// 上传文件到 MinIO
@@ -17,7 +17,7 @@ func ProductUploadFileToMinio(c context.Context, file *multipart.FileHeader, pro
 	uploadedFile, err := file.Open()
 	if err != nil {
 		log.Println("打开文件时出错:", err)
-		return "", err
+		return err
 	}
 	defer uploadedFile.Close()
 	_, err = MinioClient.PutObject(
@@ -32,10 +32,9 @@ func ProductUploadFileToMinio(c context.Context, file *multipart.FileHeader, pro
 	)
 	if err != nil {
 		log.Println("上传文件到 MinIO 时出错:", err)
-		return "", err
+		return err
 	}
-	fileURL := fmt.Sprintf("http://localhost:9000/%s/%s", bucketName, objectName)
-	return fileURL, nil
+	return nil
 }
 func ProductDeleteFileMinio(c context.Context, productname string) error {
 	bucketName := "product"

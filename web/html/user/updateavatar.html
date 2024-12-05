@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Avatar</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #ffffff, #a2c8ff); /* 白蓝渐变 */
+            font-family: 'Arial', sans-serif;
+        }
+        #updateavatar {
+            width: 100%;
+            max-width: 380px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* 阴影效果 */
+            opacity: 0.95;
+        }
+        #title {
+            text-align: center;
+            font-size: 2rem;
+            color: #4A90E2;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #4A90E2, #1C75D7);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, background 0.3s;
+            margin-top: 20px; /* 上方间距 */
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #1C75D7, #4A90E2);
+        }
+        .button:active {
+            transform: translateY(2px);
+        }
+        a {
+            color: #4A90E2;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 500px) {
+            #registerdiv {
+                width: 90%;
+                padding: 15px;
+            }
+        }
+
+        /* 头像上传相关样式 */
+        #avatarContainer {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        #avatarPreview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;  /* 圆形头像 */
+            object-fit: cover;
+            border: 2px solid #ccc;
+        }
+        #avatarInput {
+            display: none;
+        }
+        #avatarLabel {
+            display: inline-block;
+            padding: 10px;
+            background-color: #4A90E2;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+        }
+        #avatarLabel:hover {
+            background-color: #1C75D7;
+        }
+
+        /* 居中按钮容器 */
+        .button-container {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+<div id="updateavatar">
+    <h1 style="text-align: center">上传新头像</h1>
+
+    <!-- 上传头像的输入框 -->
+
+    <div id="avatarContainer">
+        <img id="avatarPreview" src="https://via.placeholder.com/100" alt="头像预览">
+        <br>
+        <label id="avatarLabel" for="avatarInput">上传头像</label>
+        <input type="file" id="avatarInput" accept="image/*" onchange="previewAvatar(event)">
+    </div>
+
+    <!-- 居中按钮 -->
+    <div class="button-container">
+        <button id="upload-button" class="button">提交修改</button>
+    </div>
+</div>
+
+<script>
+    function previewAvatar(event) {
+        var file = event.target.files[0];
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById("avatarPreview").src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    document.getElementById("upload-button").addEventListener('click', async function (e) {
+        e.preventDefault();
+
+        var token = localStorage.getItem("token");
+        var avatarFile = document.getElementById('avatarInput').files[0];
+        var formData = new FormData();
+        formData.append("token", token);
+
+        if (avatarFile) {
+            formData.append("avatar", avatarFile); // 添加头像文件
+        }
+
+        try {
+            const response = await fetch("/user/updateavatar", {
+                method: 'POST',
+                body: formData,  // 将表单数据作为请求体
+            });
+
+            var data = await response.json();
+            alert(data.status_msg);
+            if (response.ok) {
+                setTimeout(() => {
+                    window.location.href = "userinfo"; // 注册成功后跳转到用户信息页面
+                }, 1000);
+            }
+        } catch (error) {
+            console.error("发生错误:", error);
+            alert("发生错误，请重试");
+        }
+    });
+</script>
+</body>
+</html>

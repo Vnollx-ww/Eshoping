@@ -169,10 +169,8 @@
 <script>
     window.onload = function() {
         const objectname = localStorage.getItem('objectname');
-        console.log(objectname)
         if (objectname) {
-            const userAvatarPath = "http://localhost:9000/user/" + "UserName=" + objectname + ".jpg";
-            // 如果 localStorage 中有存储头像路径，则更新头像图片的 src 属性
+            const userAvatarPath = "http://localhost:9000/user/" + "UserName=" + objectname + ".jpg"+ "?t=" + new Date().getTime();
             document.getElementById('user-avatar').src = userAvatarPath;
         }
         loadProductList();  // 页面加载时自动调用商品加载函数
