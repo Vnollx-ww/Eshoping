@@ -106,7 +106,9 @@ func (s *UserServiceImpl) UserRegiter(ctx context.Context, req *user.UserRegiste
 		return BadRegisterResponse("用户已存在"), nil
 	}
 	encryptedPassword := middlerware.MD5Encrypt(req.Password)
-	usr = &db.User{UserName: req.Username, Password: encryptedPassword, Address: req.Address, Avatar: req.Avatar}
+	usr = &db.User{UserName: req.Username, Password: encryptedPassword, Address: req.Address, Avatar: req.Avatar} // 设置为 NULL}
+	usr.SendMessage = "{}"
+	usr.ReceiveMessage = "{}"
 	err = db.CreateUser(ctx, usr)
 	if err != nil {
 		logger.Error("注册失败：", zap.Error(err))

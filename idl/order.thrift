@@ -62,6 +62,8 @@ struct GetOrderListByStateResponse{
 2:string status_msg
 3:list<order> orderlist
 }
+//kitex -module Eshop idl/order.thrift
+//kitex -module Eshop -service Eshop.item -use Eshop/kitex_gen ../../idl/order.thrift
 service OrderListService{
 AddOrderResponse AddOrder(1:AddOrderRequest req)
 DelOrderResponse DelOrder(1:DelOrderRequest req)

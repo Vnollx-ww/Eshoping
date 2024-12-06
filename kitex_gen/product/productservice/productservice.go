@@ -19,12 +19,14 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "ProductService"
 	handlerType := (*product.ProductService)(nil)
 	methods := map[string]kitex.MethodInfo{
-		"AddProduct":         kitex.NewMethodInfo(addProductHandler, newProductServiceAddProductArgs, newProductServiceAddProductResult, false),
-		"GetProductInfo":     kitex.NewMethodInfo(getProductInfoHandler, newProductServiceGetProductInfoArgs, newProductServiceGetProductInfoResult, false),
-		"GetProductListInfo": kitex.NewMethodInfo(getProductListInfoHandler, newProductServiceGetProductListInfoArgs, newProductServiceGetProductListInfoResult, false),
-		"DelProduct":         kitex.NewMethodInfo(delProductHandler, newProductServiceDelProductArgs, newProductServiceDelProductResult, false),
-		"UpdatePrice":        kitex.NewMethodInfo(updatePriceHandler, newProductServiceUpdatePriceArgs, newProductServiceUpdatePriceResult, false),
-		"UpdateStock":        kitex.NewMethodInfo(updateStockHandler, newProductServiceUpdateStockArgs, newProductServiceUpdateStockResult, false),
+		"AddProduct":               kitex.NewMethodInfo(addProductHandler, newProductServiceAddProductArgs, newProductServiceAddProductResult, false),
+		"GetProductInfo":           kitex.NewMethodInfo(getProductInfoHandler, newProductServiceGetProductInfoArgs, newProductServiceGetProductInfoResult, false),
+		"GetProductListInfo":       kitex.NewMethodInfo(getProductListInfoHandler, newProductServiceGetProductListInfoArgs, newProductServiceGetProductListInfoResult, false),
+		"DelProduct":               kitex.NewMethodInfo(delProductHandler, newProductServiceDelProductArgs, newProductServiceDelProductResult, false),
+		"UpdatePrice":              kitex.NewMethodInfo(updatePriceHandler, newProductServiceUpdatePriceArgs, newProductServiceUpdatePriceResult, false),
+		"UpdateStock":              kitex.NewMethodInfo(updateStockHandler, newProductServiceUpdateStockArgs, newProductServiceUpdateStockResult, false),
+		"GetProductListInfoByUser": kitex.NewMethodInfo(getProductListInfoByUserHandler, newProductServiceGetProductListInfoByUserArgs, newProductServiceGetProductListInfoByUserResult, false),
+		"UpdateStockAndSales":      kitex.NewMethodInfo(updateStockAndSalesHandler, newProductServiceUpdateStockAndSalesArgs, newProductServiceUpdateStockAndSalesResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName":     "product",
@@ -149,6 +151,42 @@ func newProductServiceUpdateStockResult() interface{} {
 	return product.NewProductServiceUpdateStockResult()
 }
 
+func getProductListInfoByUserHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*product.ProductServiceGetProductListInfoByUserArgs)
+	realResult := result.(*product.ProductServiceGetProductListInfoByUserResult)
+	success, err := handler.(product.ProductService).GetProductListInfoByUser(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newProductServiceGetProductListInfoByUserArgs() interface{} {
+	return product.NewProductServiceGetProductListInfoByUserArgs()
+}
+
+func newProductServiceGetProductListInfoByUserResult() interface{} {
+	return product.NewProductServiceGetProductListInfoByUserResult()
+}
+
+func updateStockAndSalesHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*product.ProductServiceUpdateStockAndSalesArgs)
+	realResult := result.(*product.ProductServiceUpdateStockAndSalesResult)
+	success, err := handler.(product.ProductService).UpdateStockAndSales(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newProductServiceUpdateStockAndSalesArgs() interface{} {
+	return product.NewProductServiceUpdateStockAndSalesArgs()
+}
+
+func newProductServiceUpdateStockAndSalesResult() interface{} {
+	return product.NewProductServiceUpdateStockAndSalesResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -213,6 +251,26 @@ func (p *kClient) UpdateStock(ctx context.Context, req *product.UpdateStockReque
 	_args.Req = req
 	var _result product.ProductServiceUpdateStockResult
 	if err = p.c.Call(ctx, "UpdateStock", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetProductListInfoByUser(ctx context.Context, req *product.GetProductListInfoByUserRequest) (r *product.GetProductListInfoByUserResponse, err error) {
+	var _args product.ProductServiceGetProductListInfoByUserArgs
+	_args.Req = req
+	var _result product.ProductServiceGetProductListInfoByUserResult
+	if err = p.c.Call(ctx, "GetProductListInfoByUser", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) UpdateStockAndSales(ctx context.Context, req *product.UpdateStockAndSalesRequest) (r *product.UpdateStockAndSalesResponse, err error) {
+	var _args product.ProductServiceUpdateStockAndSalesArgs
+	_args.Req = req
+	var _result product.ProductServiceUpdateStockAndSalesResult
+	if err = p.c.Call(ctx, "UpdateStockAndSales", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

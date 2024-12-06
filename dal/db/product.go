@@ -7,10 +7,12 @@ import (
 
 type Product struct {
 	gorm.Model
-	ProductName  string `gorm:"unique;varchar(40);not null" json:"name,omitempty"`
+	ProductName  string `gorm:"type:varchar(40);not null" json:"name,omitempty"`
 	Price        int64  `gorm:"default:0" json:"price,omitempty"`
 	Stock        int64  `gorm:"default:0" json:"stock,omitempty"`
 	ProductImage string `gorm:"varchar(256);not null" json:"product-image,omitempty"`
+	UserID       int64  `gorm:"not null" json:"Userid,omitempty"`
+	Sales        int64  `gorm:"default:0" json:"sales,omitempty"`
 }
 
 func CreateProduct(ctx context.Context, pro *Product) error {
@@ -44,26 +46,30 @@ func GetProductListInfo(ctx context.Context) ([]*Product, error) {
 	}
 	return products, nil
 }
+func GetProductListInfoByUser(ctx context.Context, ID int64) ([]*Product, error) {
+	var products []*Product
+	if err := DB.Where("user_id = ?", ID).Find(&products).Error; err != nil {
+		return nil, err
+	}
+	return products, nil
+}
 func DeleteProduct(ctx context.Context, pro *Product) error {
 	err := DB.Unscoped().Delete(&pro).Error
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 func UpdateStock(ctx context.Context, pro *Product, stock int64) error {
 	pro.Stock += stock
 	err := DB.Save(&pro).Error
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
+}
+func UpdateStockAndSales(ctx context.Context, pro *Product, stock int64) error {
+	pro.Sales += stock
+	pro.Stock -= stock
+	err := DB.Save(&pro).Error
+	return err
 }
 func UpdatePrice(ctx context.Context, pro *Product, price int64) error {
 	pro.Price = price
 	err := DB.Save(&pro).Error
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

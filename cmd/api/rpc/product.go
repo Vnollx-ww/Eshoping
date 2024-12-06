@@ -62,3 +62,9 @@ func UpdatePrice(ctx context.Context, req *product.UpdatePriceRequest) (*product
 func UpdateStock(ctx context.Context, req *product.UpdateStockRequest) (*product.UpdateStockResponse, error) {
 	return productClient.UpdateStock(ctx, req)
 }
+func GetProductListInfoByUser(ctx context.Context, req *product.GetProductListInfoByUserRequest) (*product.GetProductListInfoByUserResponse, error) {
+	return productClient.GetProductListInfoByUser(ctx, req)
+}
+func UpdateStockAndSales(ctx context.Context, req *product.UpdateStockAndSalesRequest) (*product.UpdateStockAndSalesResponse, error) {
+	return productClient.UpdateStockAndSales(ctx, req)
+}

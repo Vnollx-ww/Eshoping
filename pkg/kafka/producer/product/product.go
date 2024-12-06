@@ -30,7 +30,7 @@ func (k *KafkaProducer) SendDeleteProductImageEvent(productname string) error {
 	message := &product.DeleteProductImageMessage{Productname: productname}
 	msgBytes, err := json.Marshal(message)
 	msg := &sarama.ProducerMessage{
-		Topic: "avatar-delete",
+		Topic: "ProductImage-delete",
 		Value: sarama.StringEncoder(msgBytes),
 	}
 	_, _, err = k.producer.SendMessage(msg)

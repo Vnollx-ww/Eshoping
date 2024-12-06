@@ -67,3 +67,6 @@ func UpdateAddress(ctx context.Context, req *user.UpdateAddressRequest) (*user.U
 func UpdateAvatar(ctx context.Context, req *user.UpdateAvatarRequest) (*user.UpdateAvatarResponse, error) {
 	return userClient.UpdateAvatar(ctx, req)
 }
+func UpdateBalanceAndCost(ctx context.Context, req *user.UpdateBalanceAndCostRequest) (*user.UpdateBalanceAndCostResponse, error) {
+	return userClient.UpdateBalanceAndCost(ctx, req)
+}

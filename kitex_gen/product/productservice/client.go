@@ -17,6 +17,8 @@ type Client interface {
 	DelProduct(ctx context.Context, req *product.DelProductRequest, callOptions ...callopt.Option) (r *product.DelProductResponse, err error)
 	UpdatePrice(ctx context.Context, req *product.UpdatePriceRequest, callOptions ...callopt.Option) (r *product.UpdatePriceResponse, err error)
 	UpdateStock(ctx context.Context, req *product.UpdateStockRequest, callOptions ...callopt.Option) (r *product.UpdateStockResponse, err error)
+	GetProductListInfoByUser(ctx context.Context, req *product.GetProductListInfoByUserRequest, callOptions ...callopt.Option) (r *product.GetProductListInfoByUserResponse, err error)
+	UpdateStockAndSales(ctx context.Context, req *product.UpdateStockAndSalesRequest, callOptions ...callopt.Option) (r *product.UpdateStockAndSalesResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -76,4 +78,14 @@ func (p *kProductServiceClient) UpdatePrice(ctx context.Context, req *product.Up
 func (p *kProductServiceClient) UpdateStock(ctx context.Context, req *product.UpdateStockRequest, callOptions ...callopt.Option) (r *product.UpdateStockResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.UpdateStock(ctx, req)
+}
+
+func (p *kProductServiceClient) GetProductListInfoByUser(ctx context.Context, req *product.GetProductListInfoByUserRequest, callOptions ...callopt.Option) (r *product.GetProductListInfoByUserResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetProductListInfoByUser(ctx, req)
+}
+
+func (p *kProductServiceClient) UpdateStockAndSales(ctx context.Context, req *product.UpdateStockAndSalesRequest, callOptions ...callopt.Option) (r *product.UpdateStockAndSalesResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.UpdateStockAndSales(ctx, req)
 }

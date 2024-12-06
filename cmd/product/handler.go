@@ -4,6 +4,8 @@ import (
 	"Eshop/dal/db"
 	"Eshop/dal/rs"
 	product "Eshop/kitex_gen/product"
+	product2 "Eshop/pkg/kafka/producer/product"
+	"Eshop/pkg/middlerware"
 	"context"
 	"encoding/json"
 	"go.uber.org/zap"
@@ -51,22 +53,37 @@ func BadUpdateStockResponse(s string) *product.UpdateStockResponse {
 func GoodUpdateStockResponse(s string, flag bool) *product.UpdateStockResponse {
 	return &product.UpdateStockResponse{StatusCode: 200, StatusMsg: s, Succed: flag}
 }
+func BadGetProductListInfoByUserResponse(s string) *product.GetProductListInfoByUserResponse {
+	return &product.GetProductListInfoByUserResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodGetProductListInfoByUserResponse(s string, prolist []*product.Product) *product.GetProductListInfoByUserResponse {
+	return &product.GetProductListInfoByUserResponse{StatusCode: 200, StatusMsg: s, Productlist: prolist}
+}
+func BadUpdateStockAndSalesResponse(s string) *product.UpdateStockAndSalesResponse {
+	return &product.UpdateStockAndSalesResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodUpdateStockAndSalesResponse(s string, flag bool) *product.UpdateStockAndSalesResponse {
+	return &product.UpdateStockAndSalesResponse{StatusCode: 200, StatusMsg: s, Succed: flag}
+}
 
 // AddProduct implements the ProductServiceImpl interface.
 func (s *ProductServiceImpl) AddProduct(ctx context.Context, req *product.AddProductRequest) (resp *product.AddProductResponse, err error) {
-	pro, err := db.GetProductByName(ctx, req.Name)
+	mc, err := middlerware.ParseToken(req.Token)
+	if err != nil || mc == nil {
+		logger.Error("token解析失败：", zap.Error(err))
+		return BadAddProductResponse("token解析失败"), nil
+	}
+	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
 		logger.Error("添加失败，服务器内部错误：", zap.Error(err))
 		return BadAddProductResponse("添加失败，服务器内部错误"), err
 	}
-	if pro != nil {
-		return BadAddProductResponse("商品已存在"), nil
-	}
-	pro = &db.Product{
+	pro := &db.Product{
 		ProductName:  req.Name,
 		Price:        req.Price,
 		Stock:        req.Stock,
 		ProductImage: req.Productimage,
+		UserID:       int64(usr.ID),
 	}
 	err = db.CreateProduct(ctx, pro)
 	if err != nil {
@@ -119,6 +136,16 @@ func (s *ProductServiceImpl) DelProduct(ctx context.Context, req *product.DelPro
 	err = rs.DelKey(ctx, cacheKey) // 删除缓存
 	if err != nil {
 		logger.Error("删除缓存失败：", zap.Error(err))
+	}
+	kafkaProducer, err := product2.NewKafkaProducer([]string{kafkaAddr}) //初始化kafka生产者
+	if err != nil {
+		logger.Error("kafka生产者创建失败：", zap.Error(err))
+		return BadDelProductResponse("Kafka生产者创建失败"), err
+	}
+	err = kafkaProducer.SendDeleteProductImageEvent(pro.ProductName)
+	if err != nil {
+		logger.Error("删除商品图片消息创建成功，但更新消息发送失败：", zap.Error(err))
+		return BadDelProductResponse("删除商品图片消息创建成功，但更新消息发送失败"), err
 	}
 	return GoodDelProductResponse("删除商品成功", true), nil
 }
@@ -218,4 +245,63 @@ func (s *ProductServiceImpl) GetProductListInfo(ctx context.Context) (resp *prod
 		logger.Error("缓存设置失败：", zap.Error(err))
 	}
 	return GoodGetProductListInfoResponse("获取商品列表信息成功", productlist), nil
+}
+
+// GetProductListInfoByUser implements the ProductServiceImpl interface.
+func (s *ProductServiceImpl) GetProductListInfoByUser(ctx context.Context, req *product.GetProductListInfoByUserRequest) (resp *product.GetProductListInfoByUserResponse, err error) {
+	mc, err := middlerware.ParseToken(req.Token)
+	if err != nil || mc == nil {
+		logger.Error("token解析失败：", zap.Error(err))
+		return BadGetProductListInfoByUserResponse("token解析失败"), nil
+	}
+	usr, err := db.GetUserByID(ctx, mc.UserId)
+	prolist, err := db.GetProductListInfoByUser(ctx, int64(usr.ID))
+	if err != nil {
+		logger.Error("获取商品列表信息失败：", zap.Error(err))
+		return BadGetProductListInfoByUserResponse("获取商品列表信息失败"), nil
+	}
+	var productlist []*product.Product
+	for _, pro := range prolist {
+		var p product.Product
+		p.Id = int64(pro.ID)
+		p.Name = pro.ProductName
+		p.Price = pro.Price
+		p.Stock = pro.Stock
+		p.Productimage = pro.ProductImage
+		productlist = append(productlist, &p)
+	}
+	return GoodGetProductListInfoByUserResponse("获取商品列表信息成功", productlist), nil
+}
+
+// UpdateStockAndSales implements the ProductServiceImpl interface.
+func (s *ProductServiceImpl) UpdateStockAndSales(ctx context.Context, req *product.UpdateStockAndSalesRequest) (resp *product.UpdateStockAndSalesResponse, err error) {
+	lockKey := rs.RedisLockKeyPrefix + string(req.ProductId) + "stock"
+	locked, err := rs.AcquireLock(ctx, lockKey) //获取分布式锁
+	if err != nil {
+		logger.Error("获取Redis锁失败：", zap.Error(err)) //锁已存在
+		return BadUpdateStockAndSalesResponse("获取库存锁失败，稍后重试"), nil
+	}
+	if !locked {
+		return BadUpdateStockAndSalesResponse("库存操作正在进行中，请稍后重试"), nil
+	}
+	defer rs.ReleaseLock(ctx, lockKey) // 确保操作完成后释放锁
+	pro, err := db.GetProductByID(ctx, req.ProductId)
+	if err != nil {
+		logger.Error("修改商品库存销量失败，服务器内部错误：", zap.Error(err))
+		return BadUpdateStockAndSalesResponse("修改商品库存销量失败，服务器内部错误"), nil
+	}
+	if pro == nil {
+		return BadUpdateStockAndSalesResponse("商品不存在"), nil
+	}
+	err = db.UpdateStockAndSales(ctx, pro, req.Number)
+	if err != nil {
+		logger.Error("修改商品库存和销量失败：", zap.Error(err))
+		return BadUpdateStockAndSalesResponse("修改商品库存和销量失败"), nil
+	}
+	cacheKey := "productlistinfo"
+	err = rs.DelKey(ctx, cacheKey) // 删除缓存
+	if err != nil {
+		logger.Error("删除缓存失败：", zap.Error(err))
+	}
+	return GoodUpdateStockAndSalesResponse("修改商品库存和销量成功", true), nil
 }

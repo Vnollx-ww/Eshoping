@@ -8,6 +8,13 @@ struct User{
 5:string address
 6:string avatar
 }
+struct Message{
+1:i64 id
+2:string publisher_id
+3:string recipient_id
+4:string content
+5:string create_time
+}
 struct UserLoginRequest {
     1: string username;
     2: string password;
@@ -104,6 +111,16 @@ struct UpdateAvatarResponse{
 2:string status_msg
 3:bool succed
 }
+struct SendMessageRequest{
+1:Message message
+}
+struct SendMessageReqeust{
+1:i32 status_code
+2:string status_msg
+3:bool succed
+}
+//kitex -module Eshop idl/user.thrift
+//kitex -module Eshop -service Eshop.item -use Eshop/kitex_gen ../../idl/user.thrift
 service UserService {
     UserLoginResponse UserLogin(1:UserLoginRequest req)
     UserRegisterResponse UserRegiter(1:UserRegisterRequest req)

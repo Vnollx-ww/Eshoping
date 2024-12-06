@@ -181,6 +181,8 @@
         <button id="updatepassword">修改密码</button>
         <button id="updateaddress">修改收货地址</button>
         <button id="updateavatar">修改头像</button>
+        <button id="addproduct">上架商品</button>
+        <button id="deleteproduct">下架商品</button>
         <button id="fetchOrderListInfo">查看购买记录</button>
     </div>
 </div>
@@ -244,6 +246,12 @@
     });
     document.getElementById('updateavatar').addEventListener('click', function() {
         window.location.href = "updateavatar";
+    });
+    document.getElementById('addproduct').addEventListener('click', function() {
+        window.location.href = "addproduct";
+    });
+    document.getElementById('deleteproduct').addEventListener('click', function() {
+        window.location.href = "deleteproduct";
     });
 </script>
 </body>

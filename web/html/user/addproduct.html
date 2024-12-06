@@ -205,7 +205,7 @@
         var stock = parseInt(document.getElementById("productstock").value, 10);
         var price = parseInt(document.getElementById("productprice").value, 10);
         var productImage = document.getElementById("avatarInput").files[0]; // 获取上传的商品图片
-
+        var token=localStorage.getItem('token')
         var formData = new FormData();
         formData.append("productname", productname);
         formData.append("stock", stock);
@@ -213,6 +213,7 @@
         if (productImage) {
             formData.append("productimage", productImage);
         }
+        formData.append("token",token)
 
         try {
             const response = await fetch("/product/addproduct", {
@@ -224,7 +225,7 @@
             if (response.ok) {
                 alert("商品添加成功！");
                 setTimeout(() => {
-                    window.location.href = "/admin"; // 重定向到商品管理页面
+                    window.location.href = "userinfo"; // 重定向到商品管理页面
                 }, 1000);
             } else {
                 showError(data.status_msg);

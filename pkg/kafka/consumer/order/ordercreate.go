@@ -105,7 +105,7 @@ func (c *UserBalanceAndCostConsumer) ListenBalanceAndCost() {
 	}
 }
 func (c *ProductStockConsumer) ListenStock() {
-	log.Println("listenstock")
+	log.Println("listenstockandsales")
 	partitionConsumer, err := c.consumer.ConsumePartition("order-create", 0, sarama.OffsetNewest)
 	if err != nil {
 		log.Fatalf("Error consuming partition: %v", err)
@@ -121,7 +121,7 @@ func (c *ProductStockConsumer) ListenStock() {
 			log.Printf("反序列化更新商品库存事件失败: %v", err)
 			continue
 		}
-		err = UpdateProductStock(event.Productid, event.Number)
+		err = UpdateProductStockAndSales(event.Productid, event.Number)
 		if err != nil {
 			log.Printf("更新商品库存失败: %v", err)
 		}
@@ -134,16 +134,16 @@ func UpdateUserBalanceAndCost(token string, amount int64) error {
 		Number: amount,
 	}
 	log.Println("尝试调用余额和花费")
-	_, err := userclient.UpdateBalanceAndCost(ctx, req)
+	_, err := rpc.UpdateBalanceAndCost(ctx, req)
 	return err
 }
-func UpdateProductStock(ID int64, stock int64) error {
+func UpdateProductStockAndSales(ID int64, stock int64) error {
 	ctx := context.Background()
-	req := &product.UpdateStockRequest{
+	req := &product.UpdateStockAndSalesRequest{
 		ProductId: ID,
-		Addstock:  -stock,
+		Number:    stock,
 	}
-	log.Println("尝试调用库存")
-	_, err := proclient.UpdateStock(ctx, req)
+	log.Println("尝试调用库存和销量")
+	_, err := rpc.UpdateStockAndSales(ctx, req)
 	return err
 }

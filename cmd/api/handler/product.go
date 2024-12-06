@@ -16,6 +16,7 @@ func AddProduct(ctx context.Context, c *app.RequestContext) {
 		ProductName string `form:"productname"`
 		Stock       int64  `form:"stock"`
 		Price       int64  `form:"price"`
+		Token       string `form:"token"`
 	}
 	if err := c.Bind(&reqbody); err != nil {
 		logger.Error("前后端数据绑定错误", zap.Error(err))
@@ -34,6 +35,7 @@ func AddProduct(ctx context.Context, c *app.RequestContext) {
 		Stock:        reqbody.Stock,
 		Price:        reqbody.Price,
 		Productimage: fileURL,
+		Token:        reqbody.Token,
 	}
 	res, _ := rpc.AddProduct(ctx, req)
 	if res.StatusCode == -1 {
@@ -161,5 +163,28 @@ func UpdatePrice(ctx context.Context, c *app.RequestContext) {
 		StatusMsg:  res.StatusMsg,
 		StatusCode: res.StatusCode,
 		Succed:     true,
+	})
+}
+func GetProductListInfoByUser(ctx context.Context, c *app.RequestContext) {
+	var reqbody struct {
+		Token string
+	}
+	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
+		BadBaseResponse(c, "无效的请求格式")
+		return
+	}
+	req := &product.GetProductListInfoByUserRequest{
+		Token: reqbody.Token,
+	}
+	res, _ := rpc.GetProductListInfoByUser(ctx, req)
+	if res.StatusCode == -1 {
+		BadBaseResponse(c, res.StatusMsg)
+		return
+	}
+	c.JSON(http.StatusOK, product.GetProductListInfoByUserResponse{
+		StatusMsg:   res.StatusMsg,
+		StatusCode:  res.StatusCode,
+		Productlist: res.Productlist,
 	})
 }
