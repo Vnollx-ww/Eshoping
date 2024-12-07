@@ -193,6 +193,15 @@
 
 <script>
     // 提交表单前验证
+    window.onload = function() {
+        var token=localStorage.getItem('token')
+        if(token===null){
+            alert("请先登录！");
+            setTimeout(() => {
+                window.location.href = "login"; // 重定向到商品管理页面
+            }, 1000);
+        }
+    };
     document.getElementById("form").addEventListener('submit', async function (e) {
         if (!check()) {
             e.preventDefault();

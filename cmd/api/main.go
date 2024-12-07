@@ -82,7 +82,7 @@ func LoadHtml(hz *server.Hertz) {
 	})
 	hz.GET("/deleteproduct", func(ctx context.Context, c *app.RequestContext) {
 		c.File("D:/GolandProgram/Eshoping/web/html/user/deleteproduct.html")
-		//c.File("/app/web/html/admin/deleteproduct.html")
+		//c.File("/app/web/html/user/deleteproduct.html")
 	})
 	hz.GET("/updateprice", func(ctx context.Context, c *app.RequestContext) {
 		c.File("D:/GolandProgram/Eshoping/web/html/admin/updateprice.html")
@@ -96,6 +96,10 @@ func LoadHtml(hz *server.Hertz) {
 		//c.File("/app/web/html/admin/getorderlistbystate.html")
 		c.File("D:/GolandProgram/Eshoping/web/html/admin/getorderlistbystate.html")
 	})
+	hz.GET("friend", func(ctx context.Context, c *app.RequestContext) {
+		//c.File("/app/web/html/user/friend.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/friend.html")
+	})
 }
 func registerGroup(hz *server.Hertz) {
 	user := hz.Group("/user")
@@ -105,12 +109,18 @@ func registerGroup(hz *server.Hertz) {
 		user.POST("/adminlogin", handler.AdminLogin)
 		user.POST("/login", handler.Login)
 		user.POST("/getuserinfo", handler.GetUserInfo)
+		user.POST("/getuserinfobyuserid", handler.GetUserInfoByUserID)
 		user.POST("/updatepassword", handler.UpdatePassword)
 		user.POST("/updatename", handler.UpdateName)
 		user.POST("/updatecost", handler.UpdateCost)
 		user.POST("/updatebalance", handler.UpdateBalance)
 		user.POST("/updateaddress", handler.UpdateAddress)
 		user.POST("/updateavatar", handler.UpdateAvatar)
+		user.POST("/getfriendlist", handler.GetFriendList)
+		user.POST("/addfriend", handler.AddFriend)
+		user.POST("/deletefriend", handler.DelFriend)
+		user.POST("/getmessagelist", handler.GetMessageList)
+		user.POST("/sendmessage", handler.SendMessage)
 	}
 	product := hz.Group("/product")
 	{
@@ -135,7 +145,6 @@ func registerGroup(hz *server.Hertz) {
 
 func main() {
 	hz := server.New(server.WithHostPorts(apiServerAddr))
-	hz.Static("/images", "./web/images")
 	LoadHtml(hz)
 	registerGroup(hz)
 	hz.Spin()

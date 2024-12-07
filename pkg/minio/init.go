@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// D:\minio.exe server D:\minio --console-address :9090
 var MinioClient *minio.Client
 var logger *zap.Logger = zaplog.GetLogger()
 

@@ -145,8 +145,16 @@
     <div id="orderinfo"></div>
 </div>
 <script>
+    window.onload = function() {
+        var token=localStorage.getItem('token')
+        if(token===null){
+            alert("请先登录！");
+            setTimeout(() => {
+                window.location.href = "login"; // 重定向到商品管理页面
+            }, 1000);
+        }
+    };
     document.getElementById("getorderlist").addEventListener("click", fetchOrderList);
-
     async function deleteOrder(orderId) {
         try {
             const token = localStorage.getItem("token");

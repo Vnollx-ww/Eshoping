@@ -9,11 +9,14 @@ struct User{
 6:string avatar
 }
 struct Message{
-1:i64 id
-2:string publisher_id
-3:string recipient_id
-4:string content
-5:string create_time
+1:string content
+2:string create_time
+3:i64 user_id
+}
+struct FriendInfo{
+1:string name
+2:string avatar
+3:i64 user_id
 }
 struct UserLoginRequest {
     1: string username;
@@ -47,6 +50,15 @@ struct GetUserInfoResponse {
     2: string status_msg
     3: User user
 }
+struct GetUserInfoByUserIDRequest{
+    1:i64 user_id
+}
+struct GetUserInfoByUserIDResponse{
+    1: i32    status_code
+    2: string status_msg
+    3: User user
+}
+
 struct UpdateNameRequest{
 1:string token
 2:string newname
@@ -102,22 +114,50 @@ struct UpdateAddressResponse{
 2:string status_msg
 3:bool succed
 }
-struct UpdateAvatarRequest{
-1:string token
-2:string avatar
-}
-struct UpdateAvatarResponse{
-1:i32 status_code
-2:string status_msg
-3:bool succed
-}
 struct SendMessageRequest{
-1:Message message
+1:string content
+2:string token
+3:i64 touser_id
 }
-struct SendMessageReqeust{
+struct SendMessageResponse{
 1:i32 status_code
 2:string status_msg
 3:bool succed
+}
+struct GetFriendListRequest{
+1:string token
+}
+struct GetFriendListResponse{
+1:i32 status_code
+2:string status_msg
+3:list<FriendInfo> friend
+}
+struct AddFriendRequest{
+1:string token
+2:i64 touser_id
+}
+struct AddFriendResponse{
+1:i32 status_code
+2:string status_msg
+3:bool succed
+}
+struct DeleteFriendRequest{
+1:string token
+2:i64 touser_id
+}
+struct DeleteFriendResponse{
+1:i32 status_code
+2:string status_msg
+3:bool succed
+}
+struct GetMessageListRequest{
+1:string token
+2:i64 touser_id
+}
+struct GetMessageListResponse{
+1:i32 status_code
+2:string status_msg
+3:list<Message> message
 }
 //kitex -module Eshop idl/user.thrift
 //kitex -module Eshop -service Eshop.item -use Eshop/kitex_gen ../../idl/user.thrift
@@ -125,11 +165,16 @@ service UserService {
     UserLoginResponse UserLogin(1:UserLoginRequest req)
     UserRegisterResponse UserRegiter(1:UserRegisterRequest req)
     GetUserInfoResponse GetUserInfo(1:GetUserInfoRequest req)
+    GetUserInfoByUserIDResponse GetUserInfoByUserID(1:GetUserInfoByUserIDRequest req)
     UpdateNameResponse UpdateName(1:UpdateNameRequest req)
     UpdatePasswordResponse UpdatePassword(1:UpdatePasswordRequest req)
     UpdateCostResponse UpdateCost(1:UpdateCostRequest req)
     UpdateBalanceResponse UpdateBalance(1:UpdateBalanceRequest req)
     UpdateBalanceAndCostResponse UpdateBalanceAndCost(1:UpdateBalanceAndCostRequest req)
     UpdateAddressResponse UpdateAddress(1:UpdateAddressRequest req)
-    UpdateAvatarResponse UpdateAvatar(1:UpdateAvatarRequest req)
+    GetFriendListResponse GetFriendList(1:GetFriendListRequest req)
+    AddFriendResponse AddFriend(1:AddFriendRequest req)
+    DeleteFriendResponse DeleteFriend(1:DeleteFriendRequest req)
+    GetMessageListResponse GetMessageList(1: GetMessageListRequest req)
+    SendMessageResponse SendMessage(1: SendMessageRequest req)
 }

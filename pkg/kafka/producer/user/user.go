@@ -45,3 +45,18 @@ func (k *KafkaProducer) SendDeleteAvatarEvent(username string) error {
 	log.Println("发送删除头像消息到kafka成功")
 	return nil
 }
+func (k *KafkaProducer) SendSendMessageEvent(Token string, Content string, TouserId int64) error {
+	message := &user.SendMessageMessage{Token: Token, Content: Content, ToUserId: TouserId}
+	msgBytes, err := json.Marshal(message)
+	msg := &sarama.ProducerMessage{
+		Topic: "send-message",
+		Value: sarama.StringEncoder(msgBytes),
+	}
+	_, _, err = k.producer.SendMessage(msg)
+	if err != nil {
+		log.Printf("发送发送消息到kafka失败: %v", err)
+		return err
+	}
+	log.Println("发送发送消息到kafka成功")
+	return nil
+}

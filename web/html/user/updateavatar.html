@@ -120,6 +120,15 @@
 </div>
 
 <script>
+    window.onload = function() {
+        var token=localStorage.getItem('token')
+        if(token===null){
+            alert("请先登录！");
+            setTimeout(() => {
+                window.location.href = "login"; // 重定向到商品管理页面
+            }, 1000);
+        }
+    };
     function previewAvatar(event) {
         var file = event.target.files[0];
         var reader = new FileReader();

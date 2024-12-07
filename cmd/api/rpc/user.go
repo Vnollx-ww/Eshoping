@@ -64,9 +64,24 @@ func UpdateCost(ctx context.Context, req *user.UpdateCostRequest) (*user.UpdateC
 func UpdateAddress(ctx context.Context, req *user.UpdateAddressRequest) (*user.UpdateAddressResponse, error) {
 	return userClient.UpdateAddress(ctx, req)
 }
-func UpdateAvatar(ctx context.Context, req *user.UpdateAvatarRequest) (*user.UpdateAvatarResponse, error) {
-	return userClient.UpdateAvatar(ctx, req)
-}
 func UpdateBalanceAndCost(ctx context.Context, req *user.UpdateBalanceAndCostRequest) (*user.UpdateBalanceAndCostResponse, error) {
 	return userClient.UpdateBalanceAndCost(ctx, req)
+}
+func GetUserInfoByUserID(ctx context.Context, req *user.GetUserInfoByUserIDRequest) (*user.GetUserInfoByUserIDResponse, error) {
+	return userClient.GetUserInfoByUserID(ctx, req)
+}
+func GetFriendList(ctx context.Context, req *user.GetFriendListRequest) (*user.GetFriendListResponse, error) {
+	return userClient.GetFriendList(ctx, req)
+}
+func AddFriend(ctx context.Context, req *user.AddFriendRequest) (*user.AddFriendResponse, error) {
+	return userClient.AddFriend(ctx, req)
+}
+func DeleteFriend(ctx context.Context, req *user.DeleteFriendRequest) (*user.DeleteFriendResponse, error) {
+	return userClient.DeleteFriend(ctx, req)
+}
+func GetMessageList(ctx context.Context, req *user.GetMessageListRequest) (*user.GetMessageListResponse, error) {
+	return userClient.GetMessageList(ctx, req)
+}
+func SendMessage(ctx context.Context, req *user.SendMessageRequest) (*user.SendMessageResponse, error) {
+	return userClient.SendMessage(ctx, req)
 }

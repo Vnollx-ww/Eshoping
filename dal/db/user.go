@@ -10,15 +10,14 @@ import (
 
 type User struct {
 	gorm.Model
-	UserName       string  `gorm:"unique;varchar(40);not null" json:"name,omitempty"`
-	Password       string  `gorm:"type:varchar(256);not null" json:"password,omitempty"`
-	Balance        int64   `gorm:"default:0" json:"balance,omitempty"`
-	Cost           int64   `gorm:"default:0" json:"cost,omitempty"`
-	Address        string  `gorm:"varchar(256);not null" json:"address,omitempty"`
-	Avatar         string  `gorm:"varchar(256);not null" json:"avatar,omitempty"`
-	Friend         []int64 `gorm:"type:json" json:"friend,omitempty"`
-	SendMessage    string  `gorm:"type:json" json:"send_message,omitempty"`    // 设置默认值为空 JSON 对象
-	ReceiveMessage string  `gorm:"type:json" json:"receive_message,omitempty"` // 设置默认值为空 JSON 对象
+	UserName    string `gorm:"unique;varchar(40);not null" json:"name,omitempty"`
+	Password    string `gorm:"type:varchar(256);not null" json:"password,omitempty"`
+	Balance     int64  `gorm:"default:0" json:"balance,omitempty"`
+	Cost        int64  `gorm:"default:0" json:"cost,omitempty"`
+	Address     string `gorm:"varchar(256);not null" json:"address,omitempty"`
+	Avatar      string `gorm:"varchar(256);not null" json:"avatar,omitempty"`
+	Friend      string `gorm:"type:json" json:"friend,omitempty"`
+	SendMessage string `gorm:"type:json" json:"send_message,omitempty"` // 设置默认值为空 JSON 对象
 }
 
 func CreateUser(ctx context.Context, usr *User) error {
@@ -34,6 +33,26 @@ func GetUserByName(ctx context.Context, userName string) (*User, error) {
 		return nil, nil
 	} else {
 		return nil, err
+	}
+}
+func GetUserNameByID(ctx context.Context, ID int64) (string, error) {
+	user := new(User)
+	if err := DB.Where("ID = ?", ID).First(&user).Error; err == nil {
+		return user.UserName, nil
+	} else if user.ID == 0 {
+		return "", nil
+	} else {
+		return "", err
+	}
+}
+func GetAvatarByID(ctx context.Context, ID int64) (string, error) {
+	user := new(User)
+	if err := DB.Where("ID = ?", ID).First(&user).Error; err == nil {
+		return user.Avatar, nil
+	} else if user.ID == 0 {
+		return "", nil
+	} else {
+		return "", err
 	}
 }
 func GetUserByID(ctx context.Context, ID int64) (*User, error) {
@@ -96,28 +115,110 @@ func UpdateAddress(ctx context.Context, usr *User, address string) error {
 	}
 	return nil
 }
-func AddFriend(ctx context.Context, usr *User, friend int64) error {
-	for _, v := range usr.Friend {
-		if v == friend {
-			return fmt.Errorf("已经是好友了，无需再次添加")
-		}
-	}
-	if usr.Friend == nil {
-		usr.Friend = []int64{}
-	}
-	usr.Friend = append(usr.Friend, friend)
-	if err := DB.Save(&usr).Error; err != nil {
+
+func AddFriend(ctx context.Context, usra *User, usrb *User) error {
+	// 如果 usra.Friend 或 usrb.Friend 为 nil，则初始化为空 map
+	var usrafriend map[int64]int
+	var usrbfriend map[int64]int
+	err := json.Unmarshal([]byte(usra.Friend), &usrafriend)
+	if err != nil {
 		return err
 	}
-	return nil
+	err = json.Unmarshal([]byte(usrb.Friend), &usrbfriend)
+	if err != nil {
+		return err
+	}
+	_, exists := usrafriend[int64(usrb.ID)]
+	if exists {
+		return fmt.Errorf("已经是好友了，无需再次添加")
+	}
+	// 使用数据库事务，确保原子性
+	tx := DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+	// 添加好友关系
+	usrafriend[int64(usrb.ID)] = 1 // 将 usrb 添加到 usra 的好友列表
+	usrbfriend[int64(usra.ID)] = 1 // 将 usra 添加到 usrb 的好友列表
+	// 将 map 转换为 JSON 格式
+	usraJSON, err := json.Marshal(usrafriend)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("序列化 用户A 的 Friend 错误: %v", err)
+	}
+	usrbJSON, err := json.Marshal(usrbfriend)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("序列化 用户b 的 Friend 错误: %v", err)
+	}
+	usra.Friend = string(usraJSON)
+	usrb.Friend = string(usrbJSON)
+	// 保存 usra 和 usrb
+	if err := tx.Save(&usra).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Save(&usrb).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	// 提交事务
+	return tx.Commit().Error
 }
-func DeleteFriend(ctx context.Context, usr *User, friend int64) error {
-	err := DB.Exec(`
-		UPDATE users
-		SET friend = JSON_REMOVE(friend, JSON_UNQUOTE(JSON_SEARCH(friend, 'one', ?)))
-		WHERE id = ?`, friend, usr.ID).Error
-
-	return err
+func DeleteFriend(ctx context.Context, usra *User, usrb *User) error {
+	// 如果 usra.Friend 或 usrb.Friend 为 nil，则初始化为空 map
+	var usrafriend map[int64]int
+	var usrbfriend map[int64]int
+	err := json.Unmarshal([]byte(usra.Friend), &usrafriend)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal([]byte(usrb.Friend), &usrbfriend)
+	if err != nil {
+		return err
+	}
+	_, exists := usrafriend[int64(usrb.ID)]
+	if !exists {
+		return fmt.Errorf("已经不再是好友了，无需再次删除")
+	}
+	// 使用数据库事务，确保原子性
+	tx := DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+	// 添加好友关系
+	usrafriend[int64(usrb.ID)] = 1 // 将 usrb 添加到 usra 的好友列表
+	usrbfriend[int64(usra.ID)] = 1 // 将 usra 添加到 usrb 的好友列表
+	delete(usrafriend, int64(usrb.ID))
+	delete(usrbfriend, int64(usra.ID))
+	// 将 map 转换为 JSON 格式
+	usraJSON, err := json.Marshal(usrafriend)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("序列化 用户A 的 Friend 错误: %v", err)
+	}
+	usrbJSON, err := json.Marshal(usrbfriend)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("序列化 用户b 的 Friend 错误: %v", err)
+	}
+	usra.Friend = string(usraJSON)
+	usrb.Friend = string(usrbJSON)
+	// 保存 usra 和 usrb
+	if err := tx.Save(&usra).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Save(&usrb).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	// 提交事务
+	return tx.Commit().Error
 }
 func SendMessage(ctx context.Context, usr *User, tousr *User, msg string) error {
 	var Sendmessage map[int64][][2]string
@@ -138,29 +239,6 @@ func SendMessage(ctx context.Context, usr *User, tousr *User, msg string) error 
 	}
 	usr.SendMessage = string(sendmessage)
 	err = DB.Save(&usr).Error
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func ReceiveMessage(ctx context.Context, usr *User, tousr *User, msg string) error {
-	var Receivemessage map[int64][][2]string
-	err := json.Unmarshal([]byte(tousr.ReceiveMessage), &Receivemessage)
-	if err != nil {
-		return err
-	}
-	currentTime := time.Now().Format("2006-01-02 15:04:05")
-	messageItem := [2]string{msg, currentTime} // 构建消息项：包含消息和时间
-	if _, exists := Receivemessage[int64(usr.ID)]; !exists {
-		Receivemessage[int64(usr.ID)] = [][2]string{}
-	}
-	Receivemessage[int64(usr.ID)] = append(Receivemessage[int64(usr.ID)], messageItem)
-	receivemessage, err := json.Marshal(Receivemessage)
-	if err != nil {
-		return err
-	}
-	tousr.ReceiveMessage = string(receivemessage)
-	err = DB.Save(&tousr).Error
 	if err != nil {
 		return err
 	}

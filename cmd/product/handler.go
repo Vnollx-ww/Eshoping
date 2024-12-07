@@ -133,10 +133,6 @@ func (s *ProductServiceImpl) DelProduct(ctx context.Context, req *product.DelPro
 		logger.Error("删除商品失败：", zap.Error(err))
 		return BadDelProductResponse("删除商品失败"), nil
 	}
-	err = rs.DelKey(ctx, cacheKey) // 删除缓存
-	if err != nil {
-		logger.Error("删除缓存失败：", zap.Error(err))
-	}
 	kafkaProducer, err := product2.NewKafkaProducer([]string{kafkaAddr}) //初始化kafka生产者
 	if err != nil {
 		logger.Error("kafka生产者创建失败：", zap.Error(err))
@@ -146,6 +142,10 @@ func (s *ProductServiceImpl) DelProduct(ctx context.Context, req *product.DelPro
 	if err != nil {
 		logger.Error("删除商品图片消息创建成功，但更新消息发送失败：", zap.Error(err))
 		return BadDelProductResponse("删除商品图片消息创建成功，但更新消息发送失败"), err
+	}
+	err = rs.DelKey(ctx, cacheKey) // 删除缓存
+	if err != nil {
+		logger.Error("删除缓存失败：", zap.Error(err))
 	}
 	return GoodDelProductResponse("删除商品成功", true), nil
 }
@@ -234,6 +234,8 @@ func (s *ProductServiceImpl) GetProductListInfo(ctx context.Context) (resp *prod
 		p.Price = pro.Price
 		p.Stock = pro.Stock
 		p.Productimage = pro.ProductImage
+		p.Sales = pro.Sales
+		p.UserId = pro.UserID
 		productlist = append(productlist, &p)
 	}
 	cacheddatabytes, err := json.Marshal(productlist)
@@ -268,6 +270,8 @@ func (s *ProductServiceImpl) GetProductListInfoByUser(ctx context.Context, req *
 		p.Price = pro.Price
 		p.Stock = pro.Stock
 		p.Productimage = pro.ProductImage
+		p.Sales = pro.Sales
+		p.UserId = pro.UserID
 		productlist = append(productlist, &p)
 	}
 	return GoodGetProductListInfoByUserResponse("获取商品列表信息成功", productlist), nil

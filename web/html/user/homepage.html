@@ -12,7 +12,6 @@
             box-sizing: border-box;
             background-color: #f4f4f4;
         }
-
         /* 顶部导航栏样式 */
         header {
             background: linear-gradient(to right, #ffffff, #b3d9ff);  /* 渐变的背景从白色到深蓝 */
@@ -53,7 +52,7 @@
             color: white;
             font-size: 16px;
             font-weight: normal;
-            margin-left: -150px;  /* 向左移动一些 */
+            margin-left: -60px;  /* 向左移动一些 */
         }
 
         /* 用户头像样式 */
@@ -283,6 +282,19 @@
                 width: 100%;
             }
         }
+        #sortSelect {
+            padding: 5px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        #info{
+            background: linear-gradient(to bottom, #f9f9f9, #e0f7fa);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+        }
     </style>
 </head>
 <body>
@@ -291,11 +303,11 @@
     <nav class="navbar">
         <ul class="nav-left">
             <li><a href="homepage" style="color: #007BFF">首页</a></li>
-            <li><a href="friends" style="color: #007BFF">好友</a></li>
+            <li><a href="friend" style="color: #007BFF">好友</a></li>
         </ul>
 
         <div class="nav-center">
-            <span style="color: black">欢迎来到 VNOLLX 商城购物系统</span>
+            <h1 style="color: black">VNOLLX-商城购物系统</h1>
         </div>
 
         <div class="nav-right">
@@ -305,7 +317,18 @@
 </header>
 
 <main>
+    <div id="info">
     <h1 style="text-align: center">商品区</h1>
+    <div style="text-align: center">
+        <label for="sortSelect">选择排序方式：</label>
+        <select id="sortSelect">
+            <option value="sales-asc">按销量升序</option>
+            <option value="sales-desc">按销量降序</option>
+            <option value="price-asc">按价格升序</option>
+            <option value="price-desc">按价格降序</option>
+        </select>
+    </div>
+    </div>
     <div id="productlist"></div>  <!-- 商品列表容器 -->
     <div id="productModal" class="modal">
         <div class="modal-content">
@@ -328,6 +351,14 @@
 
 <script>
     window.onload = function() {
+        var token = localStorage.getItem('token');
+        if (token === null) {
+            alert("请先登录！");
+            setTimeout(() => {
+                window.location.href = "login"; // 重定向到商品管理页面
+            }, 1000);
+            return;
+        }
         const objectname = localStorage.getItem('objectname');
         if (objectname) {
             const userAvatarPath = "http://localhost:9000/user/" + "UserName=" + objectname + ".jpg" + "?t=" + new Date().getTime();
@@ -335,7 +366,9 @@
         }
         loadProductList();  // 页面加载时自动调用商品加载函数
     };
-
+    document.getElementById('sortSelect').addEventListener('change', function() {
+        loadProductList();  // 重新加载商品列表并排序
+    });
     document.getElementById('user-avatar').addEventListener('click', function() {
         window.location.href = "userinfo";
     });
@@ -353,6 +386,19 @@
             if (response.ok) {
                 div.innerHTML = '';  // 清空当前显示的商品列表
                 if (Array.isArray(data.productlist) && data.productlist.length > 0) {
+                    // 获取排序方式
+                    const sortOption = document.getElementById('sortSelect').value;
+
+                    // 根据选择的排序方式对商品列表进行排序
+                    if (sortOption === 'sales-asc') {
+                        data.productlist.sort((a, b) => a.sales - b.sales);  // 按销量升序
+                    } else if (sortOption === 'sales-desc') {
+                        data.productlist.sort((a, b) => b.sales - a.sales);  // 按销量降序
+                    } else if (sortOption === 'price-asc') {
+                        data.productlist.sort((a, b) => a.price - b.price);  // 按价格升序
+                    } else if (sortOption === 'price-desc') {
+                        data.productlist.sort((a, b) => b.price - a.price);  // 按价格降序
+                    }
                     data.productlist.forEach(product => {
                         const productDiv = document.createElement("div");
                         productDiv.classList.add("product");
@@ -376,9 +422,20 @@
                         productPrice.classList.add("product-price");
                         productPrice.textContent = `￥${product.price}`;
 
-                        // 将商品名和价格添加到商品信息区域
+                        // 商品销量
+                        const productSales = document.createElement("div");
+                        productSales.classList.add("product-sales");
+                        productSales.textContent = `销量：${product.sales} 件`;  // 显示销量
+
+                        const productSeller = document.createElement("div");
+                        productSeller.classList.add("product-seller");
+                        productSeller.textContent = "商家：加载中...";  // 默认显示为“加载中...”
+
+                        // 将商品名、价格和销量添加到商品信息区域
                         productInfoDiv.appendChild(productName);
                         productInfoDiv.appendChild(productPrice);
+                        productInfoDiv.appendChild(productSales);
+                        productInfoDiv.appendChild(productSeller);
 
                         // 将图片和信息加入商品容器
                         productDiv.appendChild(productImageDiv);
@@ -391,6 +448,7 @@
 
                         // 将商品容器添加到商品列表
                         div.appendChild(productDiv);
+                        loadSellerInfo(product.user_id, productSeller);
                     });
                 } else {
                     div.innerHTML = "没有找到任何商品。";
@@ -402,7 +460,33 @@
             console.error("加载商品列表失败:", error);
         }
     }
+    async function loadSellerInfo(sellerId, sellerElement) {
+        try {
+            // 请求获取商家信息
+            var userid=parseInt(sellerId)
+            const response = await fetch("/user/getuserinfobyuserid", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userid})
+            });
 
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.user.name) {
+                    sellerElement.textContent = `商家：${data.user.name}`;
+                } else {
+                    sellerElement.textContent = "商家：未知";
+                }
+            } else {
+                sellerElement.textContent = "商家：信息加载失败";
+            }
+        } catch (error) {
+            console.error("获取商家信息失败:", error);
+            sellerElement.textContent = "商家：信息加载失败";
+        }
+    }
     let buyBtnClickListener;  // 用于存储购买按钮点击事件
 
     function openProductModal(product) {
@@ -490,6 +574,5 @@
         }
     };
 </script>
-</body>
 </body>
 </html>

@@ -184,13 +184,21 @@
         <button id="addproduct">上架商品</button>
         <button id="deleteproduct">下架商品</button>
         <button id="fetchOrderListInfo">查看购买记录</button>
+        <button id="exit">退出登录</button>
     </div>
 </div>
 
 <script>
     window.onload = async function() {
+        const token = localStorage.getItem("token");
+        if(token===null){
+            alert("请先登录！");
+            setTimeout(() => {
+                window.location.href = "login"; // 重定向到商品管理页面
+            }, 1000);
+            return
+        }
         try {
-            const token = localStorage.getItem("token");
             const response = await fetch("/user/getuserinfo", {
                 method: 'POST',
                 headers: {
@@ -252,6 +260,10 @@
     });
     document.getElementById('deleteproduct').addEventListener('click', function() {
         window.location.href = "deleteproduct";
+    });
+    document.getElementById('exit').addEventListener('click', function() {
+        localStorage.removeItem('token')
+        window.location.href = "login";
     });
 </script>
 </body>

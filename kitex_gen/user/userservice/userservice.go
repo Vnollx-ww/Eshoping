@@ -22,13 +22,18 @@ func NewServiceInfo() *kitex.ServiceInfo {
 		"UserLogin":            kitex.NewMethodInfo(userLoginHandler, newUserServiceUserLoginArgs, newUserServiceUserLoginResult, false),
 		"UserRegiter":          kitex.NewMethodInfo(userRegiterHandler, newUserServiceUserRegiterArgs, newUserServiceUserRegiterResult, false),
 		"GetUserInfo":          kitex.NewMethodInfo(getUserInfoHandler, newUserServiceGetUserInfoArgs, newUserServiceGetUserInfoResult, false),
+		"GetUserInfoByUserID":  kitex.NewMethodInfo(getUserInfoByUserIDHandler, newUserServiceGetUserInfoByUserIDArgs, newUserServiceGetUserInfoByUserIDResult, false),
 		"UpdateName":           kitex.NewMethodInfo(updateNameHandler, newUserServiceUpdateNameArgs, newUserServiceUpdateNameResult, false),
 		"UpdatePassword":       kitex.NewMethodInfo(updatePasswordHandler, newUserServiceUpdatePasswordArgs, newUserServiceUpdatePasswordResult, false),
 		"UpdateCost":           kitex.NewMethodInfo(updateCostHandler, newUserServiceUpdateCostArgs, newUserServiceUpdateCostResult, false),
 		"UpdateBalance":        kitex.NewMethodInfo(updateBalanceHandler, newUserServiceUpdateBalanceArgs, newUserServiceUpdateBalanceResult, false),
 		"UpdateBalanceAndCost": kitex.NewMethodInfo(updateBalanceAndCostHandler, newUserServiceUpdateBalanceAndCostArgs, newUserServiceUpdateBalanceAndCostResult, false),
 		"UpdateAddress":        kitex.NewMethodInfo(updateAddressHandler, newUserServiceUpdateAddressArgs, newUserServiceUpdateAddressResult, false),
-		"UpdateAvatar":         kitex.NewMethodInfo(updateAvatarHandler, newUserServiceUpdateAvatarArgs, newUserServiceUpdateAvatarResult, false),
+		"GetFriendList":        kitex.NewMethodInfo(getFriendListHandler, newUserServiceGetFriendListArgs, newUserServiceGetFriendListResult, false),
+		"AddFriend":            kitex.NewMethodInfo(addFriendHandler, newUserServiceAddFriendArgs, newUserServiceAddFriendResult, false),
+		"DeleteFriend":         kitex.NewMethodInfo(deleteFriendHandler, newUserServiceDeleteFriendArgs, newUserServiceDeleteFriendResult, false),
+		"GetMessageList":       kitex.NewMethodInfo(getMessageListHandler, newUserServiceGetMessageListArgs, newUserServiceGetMessageListResult, false),
+		"SendMessage":          kitex.NewMethodInfo(sendMessageHandler, newUserServiceSendMessageArgs, newUserServiceSendMessageResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName":     "user",
@@ -97,6 +102,24 @@ func newUserServiceGetUserInfoArgs() interface{} {
 
 func newUserServiceGetUserInfoResult() interface{} {
 	return user.NewUserServiceGetUserInfoResult()
+}
+
+func getUserInfoByUserIDHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceGetUserInfoByUserIDArgs)
+	realResult := result.(*user.UserServiceGetUserInfoByUserIDResult)
+	success, err := handler.(user.UserService).GetUserInfoByUserID(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceGetUserInfoByUserIDArgs() interface{} {
+	return user.NewUserServiceGetUserInfoByUserIDArgs()
+}
+
+func newUserServiceGetUserInfoByUserIDResult() interface{} {
+	return user.NewUserServiceGetUserInfoByUserIDResult()
 }
 
 func updateNameHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
@@ -207,22 +230,94 @@ func newUserServiceUpdateAddressResult() interface{} {
 	return user.NewUserServiceUpdateAddressResult()
 }
 
-func updateAvatarHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
-	realArg := arg.(*user.UserServiceUpdateAvatarArgs)
-	realResult := result.(*user.UserServiceUpdateAvatarResult)
-	success, err := handler.(user.UserService).UpdateAvatar(ctx, realArg.Req)
+func getFriendListHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceGetFriendListArgs)
+	realResult := result.(*user.UserServiceGetFriendListResult)
+	success, err := handler.(user.UserService).GetFriendList(ctx, realArg.Req)
 	if err != nil {
 		return err
 	}
 	realResult.Success = success
 	return nil
 }
-func newUserServiceUpdateAvatarArgs() interface{} {
-	return user.NewUserServiceUpdateAvatarArgs()
+func newUserServiceGetFriendListArgs() interface{} {
+	return user.NewUserServiceGetFriendListArgs()
 }
 
-func newUserServiceUpdateAvatarResult() interface{} {
-	return user.NewUserServiceUpdateAvatarResult()
+func newUserServiceGetFriendListResult() interface{} {
+	return user.NewUserServiceGetFriendListResult()
+}
+
+func addFriendHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceAddFriendArgs)
+	realResult := result.(*user.UserServiceAddFriendResult)
+	success, err := handler.(user.UserService).AddFriend(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceAddFriendArgs() interface{} {
+	return user.NewUserServiceAddFriendArgs()
+}
+
+func newUserServiceAddFriendResult() interface{} {
+	return user.NewUserServiceAddFriendResult()
+}
+
+func deleteFriendHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceDeleteFriendArgs)
+	realResult := result.(*user.UserServiceDeleteFriendResult)
+	success, err := handler.(user.UserService).DeleteFriend(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceDeleteFriendArgs() interface{} {
+	return user.NewUserServiceDeleteFriendArgs()
+}
+
+func newUserServiceDeleteFriendResult() interface{} {
+	return user.NewUserServiceDeleteFriendResult()
+}
+
+func getMessageListHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceGetMessageListArgs)
+	realResult := result.(*user.UserServiceGetMessageListResult)
+	success, err := handler.(user.UserService).GetMessageList(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceGetMessageListArgs() interface{} {
+	return user.NewUserServiceGetMessageListArgs()
+}
+
+func newUserServiceGetMessageListResult() interface{} {
+	return user.NewUserServiceGetMessageListResult()
+}
+
+func sendMessageHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceSendMessageArgs)
+	realResult := result.(*user.UserServiceSendMessageResult)
+	success, err := handler.(user.UserService).SendMessage(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceSendMessageArgs() interface{} {
+	return user.NewUserServiceSendMessageArgs()
+}
+
+func newUserServiceSendMessageResult() interface{} {
+	return user.NewUserServiceSendMessageResult()
 }
 
 type kClient struct {
@@ -260,6 +355,16 @@ func (p *kClient) GetUserInfo(ctx context.Context, req *user.GetUserInfoRequest)
 	_args.Req = req
 	var _result user.UserServiceGetUserInfoResult
 	if err = p.c.Call(ctx, "GetUserInfo", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetUserInfoByUserID(ctx context.Context, req *user.GetUserInfoByUserIDRequest) (r *user.GetUserInfoByUserIDResponse, err error) {
+	var _args user.UserServiceGetUserInfoByUserIDArgs
+	_args.Req = req
+	var _result user.UserServiceGetUserInfoByUserIDResult
+	if err = p.c.Call(ctx, "GetUserInfoByUserID", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
@@ -325,11 +430,51 @@ func (p *kClient) UpdateAddress(ctx context.Context, req *user.UpdateAddressRequ
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) UpdateAvatar(ctx context.Context, req *user.UpdateAvatarRequest) (r *user.UpdateAvatarResponse, err error) {
-	var _args user.UserServiceUpdateAvatarArgs
+func (p *kClient) GetFriendList(ctx context.Context, req *user.GetFriendListRequest) (r *user.GetFriendListResponse, err error) {
+	var _args user.UserServiceGetFriendListArgs
 	_args.Req = req
-	var _result user.UserServiceUpdateAvatarResult
-	if err = p.c.Call(ctx, "UpdateAvatar", &_args, &_result); err != nil {
+	var _result user.UserServiceGetFriendListResult
+	if err = p.c.Call(ctx, "GetFriendList", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) AddFriend(ctx context.Context, req *user.AddFriendRequest) (r *user.AddFriendResponse, err error) {
+	var _args user.UserServiceAddFriendArgs
+	_args.Req = req
+	var _result user.UserServiceAddFriendResult
+	if err = p.c.Call(ctx, "AddFriend", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) DeleteFriend(ctx context.Context, req *user.DeleteFriendRequest) (r *user.DeleteFriendResponse, err error) {
+	var _args user.UserServiceDeleteFriendArgs
+	_args.Req = req
+	var _result user.UserServiceDeleteFriendResult
+	if err = p.c.Call(ctx, "DeleteFriend", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetMessageList(ctx context.Context, req *user.GetMessageListRequest) (r *user.GetMessageListResponse, err error) {
+	var _args user.UserServiceGetMessageListArgs
+	_args.Req = req
+	var _result user.UserServiceGetMessageListResult
+	if err = p.c.Call(ctx, "GetMessageList", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) SendMessage(ctx context.Context, req *user.SendMessageRequest) (r *user.SendMessageResponse, err error) {
+	var _args user.UserServiceSendMessageArgs
+	_args.Req = req
+	var _result user.UserServiceSendMessageResult
+	if err = p.c.Call(ctx, "SendMessage", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

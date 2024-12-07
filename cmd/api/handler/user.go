@@ -315,8 +315,155 @@ func UpdateAvatar(ctx context.Context, c *app.RequestContext) {
 		BadBaseResponse(c, "头像上传到 MinIO 失败")
 		return
 	}
-	c.JSON(http.StatusOK, user.UpdateAvatarResponse{
-		StatusMsg:  "头像修改成功!",
+	c.JSON(http.StatusOK, base.Base{
+		StatusCode: 200,
+		StatusMsg:  "头像修改成功！",
+	})
+}
+func GetUserInfoByUserID(ctx context.Context, c *app.RequestContext) {
+	var reqbody struct {
+		UserId int64
+	}
+	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
+		BadBaseResponse(c, "无效的请求格式")
+		return
+	}
+	req := &user.GetUserInfoByUserIDRequest{
+		UserId: reqbody.UserId,
+	}
+	res, _ := rpc.GetUserInfoByUserID(ctx, req)
+	if res.StatusCode == -1 {
+		BadBaseResponse(c, res.StatusMsg)
+		return
+	}
+	c.JSON(http.StatusOK, user.GetUserInfoResponse{
+		StatusMsg:  res.StatusMsg,
+		StatusCode: res.StatusCode,
+		User:       res.User,
+	})
+}
+func GetFriendList(ctx context.Context, c *app.RequestContext) {
+	var reqbody struct {
+		Token string
+	}
+	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
+		BadBaseResponse(c, "无效的请求格式")
+		return
+	}
+	req := &user.GetFriendListRequest{
+		Token: reqbody.Token,
+	}
+	res, _ := rpc.GetFriendList(ctx, req)
+	if res.StatusCode == -1 {
+		BadBaseResponse(c, res.StatusMsg)
+		return
+	}
+	c.JSON(http.StatusOK, user.GetFriendListResponse{
+		StatusMsg:  res.StatusMsg,
+		StatusCode: res.StatusCode,
+		Friend:     res.Friend,
+	})
+}
+func AddFriend(ctx context.Context, c *app.RequestContext) {
+	var reqbody struct {
+		Token    string
+		ToUserId int64
+	}
+	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
+		BadBaseResponse(c, "无效的请求格式")
+		return
+	}
+	req := &user.AddFriendRequest{
+		Token:    reqbody.Token,
+		TouserId: reqbody.ToUserId,
+	}
+	res, _ := rpc.AddFriend(ctx, req)
+	if res.StatusCode == -1 {
+		BadBaseResponse(c, res.StatusMsg)
+		return
+	}
+	c.JSON(http.StatusOK, user.AddFriendResponse{
+		StatusMsg:  res.StatusMsg,
+		StatusCode: res.StatusCode,
+		Succed:     true,
+	})
+}
+func DelFriend(ctx context.Context, c *app.RequestContext) {
+	var reqbody struct {
+		Token    string
+		ToUserId int64
+	}
+	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
+		BadBaseResponse(c, "无效的请求格式")
+		return
+	}
+	req := &user.DeleteFriendRequest{
+		Token:    reqbody.Token,
+		TouserId: reqbody.ToUserId,
+	}
+	res, _ := rpc.DeleteFriend(ctx, req)
+	if res.StatusCode == -1 {
+		BadBaseResponse(c, res.StatusMsg)
+		return
+	}
+	c.JSON(http.StatusOK, user.DeleteFriendResponse{
+		StatusMsg:  res.StatusMsg,
+		StatusCode: res.StatusCode,
+		Succed:     true,
+	})
+}
+func GetMessageList(ctx context.Context, c *app.RequestContext) {
+	var reqbody struct {
+		Token    string
+		ToUserId int64
+	}
+	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
+		BadBaseResponse(c, "无效的请求格式")
+		return
+	}
+	req := &user.GetMessageListRequest{
+		Token:    reqbody.Token,
+		TouserId: reqbody.ToUserId,
+	}
+	res, _ := rpc.GetMessageList(ctx, req)
+	if res.StatusCode == -1 {
+		BadBaseResponse(c, res.StatusMsg)
+		return
+	}
+	c.JSON(http.StatusOK, user.GetMessageListResponse{
+		StatusMsg:  res.StatusMsg,
+		StatusCode: res.StatusCode,
+		Message:    res.Message,
+	})
+}
+func SendMessage(ctx context.Context, c *app.RequestContext) {
+	var reqbody struct {
+		Token    string
+		ToUserId int64
+		Content  string
+	}
+	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
+		BadBaseResponse(c, "无效的请求格式")
+		return
+	}
+	req := &user.SendMessageRequest{
+		Token:    reqbody.Token,
+		TouserId: reqbody.ToUserId,
+		Content:  reqbody.Content,
+	}
+	res, _ := rpc.SendMessage(ctx, req)
+	if res.StatusCode == -1 {
+		BadBaseResponse(c, res.StatusMsg)
+		return
+	}
+	c.JSON(http.StatusOK, user.SendMessageResponse{
+		StatusMsg:  res.StatusMsg,
 		StatusCode: res.StatusCode,
 		Succed:     true,
 	})
