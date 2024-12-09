@@ -12,6 +12,10 @@ import (
 	"time"
 )
 
+/*
+PS D:\kafka_2.12-3.9.0> .\bin\windows\kafka-topics.bat --delete --topic send-message --bootstrap-server localhost:9092
+PS D:\kafka_2.12-3.9.0> .\bin\windows\kafka-topics.bat --create --topic send-message --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+*/
 var logger *zap.Logger = zaplog.GetLogger()
 
 type SendMessageConsumer struct {
@@ -46,6 +50,18 @@ func NewSendMessageConsumer(brokerList []string) (*SendMessageConsumer, error) {
 }
 func (c *SendMessageConsumer) Listen() {
 	log.Println("listenSendMessage")
+	config := sarama.NewConfig()
+	client, err := sarama.NewClient([]string{"localhost:9092"}, config)
+	if err != nil {
+		log.Fatalf("Error creating Kafka client: %v", err)
+	}
+	defer client.Close()
+	// 刷新元数据
+	err = client.RefreshMetadata("send-message")
+	if err != nil {
+		log.Fatalf("Error refreshing metadata: %v", err)
+	}
+
 	partitionConsumer, err := c.consumer.ConsumePartition("send-message", 0, sarama.OffsetNewest)
 	if err != nil {
 		log.Fatalf("Error consuming partition: %v", err)

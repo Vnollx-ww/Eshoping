@@ -83,6 +83,18 @@ func NewProductStockConsumer(brokerList []string) (*ProductStockConsumer, error)
 
 func (c *UserBalanceAndCostConsumer) ListenBalanceAndCost() {
 	log.Println("listenbalanceandcost")
+	config := sarama.NewConfig()
+	client, err := sarama.NewClient([]string{"localhost:9092"}, config)
+	if err != nil {
+		log.Fatalf("Error creating Kafka client: %v", err)
+	}
+	defer client.Close()
+
+	// 刷新元数据
+	err = client.RefreshMetadata("order-create")
+	if err != nil {
+		log.Fatalf("Error refreshing metadata: %v", err)
+	}
 	partitionConsumer, err := c.consumer.ConsumePartition("order-create", 0, sarama.OffsetNewest)
 	if err != nil {
 		log.Fatalf("Error consuming partition: %v", err)
@@ -106,6 +118,18 @@ func (c *UserBalanceAndCostConsumer) ListenBalanceAndCost() {
 }
 func (c *ProductStockConsumer) ListenStock() {
 	log.Println("listenstockandsales")
+	config := sarama.NewConfig()
+	client, err := sarama.NewClient([]string{"localhost:9092"}, config)
+	if err != nil {
+		log.Fatalf("Error creating Kafka client: %v", err)
+	}
+	defer client.Close()
+
+	// 刷新元数据
+	err = client.RefreshMetadata("order-create")
+	if err != nil {
+		log.Fatalf("Error refreshing metadata: %v", err)
+	}
 	partitionConsumer, err := c.consumer.ConsumePartition("order-create", 0, sarama.OffsetNewest)
 	if err != nil {
 		log.Fatalf("Error consuming partition: %v", err)

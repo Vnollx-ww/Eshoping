@@ -22,7 +22,6 @@ func NewKafkaProducer(brokerList []string) (*KafkaProducer, error) {
 	config.Producer.RequiredAcks = sarama.WaitForLocal
 	config.Producer.Partitioner = sarama.NewHashPartitioner
 	config.Producer.Return.Successes = true
-
 	producer, err := sarama.NewSyncProducer(brokerList, config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Kafka producer: %v", err)

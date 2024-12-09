@@ -92,7 +92,7 @@
 
         /* 聊天气泡 */
         .message {
-            max-width: 70%;
+            max-width: 50%;
             margin-bottom: 15px;
             padding: 12px;
             border-radius: 12px;
@@ -257,6 +257,8 @@
 
 <script>
     // 初始化Emoji面板显示/隐藏
+    let socket = null;
+    var ws;
     const emojiButton = document.getElementById('emojiButton');
     const emojiPanel = document.getElementById('emojiPanel');
     const inputField = document.getElementById('inputField');
@@ -274,8 +276,42 @@
 
     window.onload = function () {
         loadFriendList();
+        connectWebSocket();
     };
+    // 连接 WebSocket
+    function connectWebSocket() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('Token is missing');
+            return;
+        }
+        //?token=${token}
+        const wsUrl = `ws://127.0.0.1:8889/user/ws?token=${token}`;  // 将 token 添加到 WebSocket URL 查询参数中
+        ws = new WebSocket(wsUrl);
+        // WebSocket 连接打开时触发
+        ws.onopen = function () {
+            console.log('WebSocket连接已打开');
+        };
 
+        // 接收到 WebSocket 消息时触发
+        ws.onmessage = function (event) {
+            const message = JSON.parse(event.data);
+            if (message.type === 'message') {
+                // 收到新消息
+                displayIncomingMessage(message);
+            }
+        };
+
+        // WebSocket 连接关闭时触发
+        ws.onclose = function (event) {
+            console.log('WebSocket连接已关闭', event.code, event.reason);
+            console.log(event)
+        };
+        // WebSocket 连接发生错误时触发
+        ws.onerror = function (error) {
+            console.error('WebSocket发生错误:', error);
+        };
+    }
     // 通过 POST 请求获取好友列表
     async function loadFriendList() {
         var token = localStorage.getItem('token');
@@ -441,16 +477,17 @@
             return;
         }
 
-        try {
-            // 向后端发送请求
-            const response = await fetch('/user/sendmessage', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token, touserid, content }),
-            });
+            const messageData = {
+                type: 'message',
+                token: token,
+                touserid: touserid,
+                content: content
+            };
 
-            const data = await response.json();
-            if (response.ok) {
+            // 通过 WebSocket 发送消息
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify(messageData));
+            }
                 // 获取当前时间并格式化
                 const currentTime = new Date();
                 const formattedTime = formatDate(currentTime);
@@ -478,14 +515,27 @@
 
                 // 清空输入框
                 inputField.value = '';
-            } else {
-                alert('发送消息失败: ' + data.message);
-            }
-        }catch (error) {
-            // 如果请求失败，显示错误信息
-            console.error('Error:', error);
-            alert('发送消息时出错，请稍后再试');
-        }
+    }
+    function displayIncomingMessage(message) {
+        const messagesDiv = document.getElementById('messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', 'received');
+
+        // 显示消息内容（处理 Emoji）
+        const messageContentDiv = document.createElement('div');
+        messageContentDiv.innerHTML = parseEmoji(message.content);
+
+        const currentTime = new Date();
+        const messageTimeDiv = document.createElement('div');
+        messageTimeDiv.textContent = formatDate(currentTime);
+        messageTimeDiv.classList.add('message-time');
+
+        messageDiv.appendChild(messageContentDiv);
+        messageDiv.appendChild(messageTimeDiv);
+        messagesDiv.appendChild(messageDiv);
+
+        // 滚动到聊天记录底部
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 </script>
 </body>

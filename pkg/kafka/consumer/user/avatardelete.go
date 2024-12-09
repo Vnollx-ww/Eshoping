@@ -46,6 +46,18 @@ func NewAvatarConsumer(brokerList []string) (*AvatarConsumer, error) {
 }
 func (c *AvatarConsumer) Listen() {
 	log.Println("listenavatar")
+	config := sarama.NewConfig()
+	client, err := sarama.NewClient([]string{"localhost:9092"}, config)
+	if err != nil {
+		log.Fatalf("Error creating Kafka client: %v", err)
+	}
+	defer client.Close()
+
+	// 刷新元数据
+	err = client.RefreshMetadata("avatar-delete")
+	if err != nil {
+		log.Fatalf("Error refreshing metadata: %v", err)
+	}
 	partitionConsumer, err := c.consumer.ConsumePartition("avatar-delete", 0, sarama.OffsetNewest)
 	if err != nil {
 		log.Fatalf("Error consuming partition: %v", err)

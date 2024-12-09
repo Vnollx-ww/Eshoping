@@ -8,7 +8,7 @@ require (
 	github.com/IBM/sarama v1.43.3
 	github.com/apache/thrift v0.16.0
 	github.com/bytedance/gopkg v0.1.1
-	github.com/cloudwego/hertz v0.9.3
+	github.com/cloudwego/hertz v0.9.4-0.20241021100040-3477b0309b81
 	github.com/cloudwego/kitex v0.11.3
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/golang-jwt/jwt/v4 v4.4.2
@@ -71,6 +71,7 @@ require (
 	github.com/hashicorp/serf v0.10.1 // indirect
 	github.com/henrylee2cn/ameda v1.4.10 // indirect
 	github.com/henrylee2cn/goutil v0.0.0-20210127050712-89660552f6f8 // indirect
+	github.com/hertz-contrib/websocket v0.2.0 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
 	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
 	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect

@@ -11,9 +11,7 @@ import (
 
 var (
 	apiConfig     = viper.Init("api")
-	apiServerName = apiConfig.Viper.GetString("server.name")
 	apiServerAddr = fmt.Sprintf("%s:%d", apiConfig.Viper.GetString("server.host"), apiConfig.Viper.GetInt("server.port"))
-	etcdAddress   = fmt.Sprintf("%s:%d", apiConfig.Viper.GetString("Etcd.host"), apiConfig.Viper.GetInt("Etcd.port"))
 )
 
 func LoadHtml(hz *server.Hertz) {
@@ -121,6 +119,7 @@ func registerGroup(hz *server.Hertz) {
 		user.POST("/deletefriend", handler.DelFriend)
 		user.POST("/getmessagelist", handler.GetMessageList)
 		user.POST("/sendmessage", handler.SendMessage)
+		user.GET("/ws", handler.WebSocketConnections)
 	}
 	product := hz.Group("/product")
 	{
@@ -144,7 +143,10 @@ func registerGroup(hz *server.Hertz) {
 }
 
 func main() {
+	//ws :=handler.NewWebSocketServer()
+	//go ws.HandleMessages()
 	hz := server.New(server.WithHostPorts(apiServerAddr))
+	hz.NoHijackConnPool = true
 	LoadHtml(hz)
 	registerGroup(hz)
 	hz.Spin()
