@@ -179,10 +179,13 @@ func DeleteFriend(ctx context.Context, usra *User, usrb *User) error {
 	if err != nil {
 		return err
 	}
+
+	// 检查是否是好友，如果不是，则直接返回
 	_, exists := usrafriend[int64(usrb.ID)]
 	if !exists {
 		return fmt.Errorf("已经不再是好友了，无需再次删除")
 	}
+
 	// 使用数据库事务，确保原子性
 	tx := DB.Begin()
 	defer func() {
@@ -190,12 +193,12 @@ func DeleteFriend(ctx context.Context, usra *User, usrb *User) error {
 			tx.Rollback()
 		}
 	}()
-	// 添加好友关系
-	usrafriend[int64(usrb.ID)] = 1 // 将 usrb 添加到 usra 的好友列表
-	usrbfriend[int64(usra.ID)] = 1 // 将 usra 添加到 usrb 的好友列表
-	delete(usrafriend, int64(usrb.ID))
-	delete(usrbfriend, int64(usra.ID))
-	// 将 map 转换为 JSON 格式
+
+	// 删除好友关系
+	delete(usrafriend, int64(usrb.ID)) // 从 usra 的好友列表中删除 usrb
+	delete(usrbfriend, int64(usra.ID)) // 从 usrb 的好友列表中删除 usra
+
+	// 更新好友字段
 	usraJSON, err := json.Marshal(usrafriend)
 	if err != nil {
 		tx.Rollback()
@@ -204,11 +207,44 @@ func DeleteFriend(ctx context.Context, usra *User, usrb *User) error {
 	usrbJSON, err := json.Marshal(usrbfriend)
 	if err != nil {
 		tx.Rollback()
-		return fmt.Errorf("序列化 用户b 的 Friend 错误: %v", err)
+		return fmt.Errorf("序列化 用户B 的 Friend 错误: %v", err)
 	}
 	usra.Friend = string(usraJSON)
 	usrb.Friend = string(usrbJSON)
-	// 保存 usra 和 usrb
+
+	// 删除 SendMessage 中与对方的聊天记录
+	var sendMessageA map[int64][][2]string
+	var sendMessageB map[int64][][2]string
+	err = json.Unmarshal([]byte(usra.SendMessage), &sendMessageA)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("反序列化 用户A 的 SendMessage 错误: %v", err)
+	}
+	err = json.Unmarshal([]byte(usrb.SendMessage), &sendMessageB)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("反序列化 用户B 的 SendMessage 错误: %v", err)
+	}
+
+	// 删除与对方的聊天记录
+	delete(sendMessageA, int64(usrb.ID)) // 删除与 usrb 的聊天记录
+	delete(sendMessageB, int64(usra.ID)) // 删除与 usra 的聊天记录
+
+	// 更新 SendMessage 字段
+	usraSendMessageJSON, err := json.Marshal(sendMessageA)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("序列化 用户A 的 SendMessage 错误: %v", err)
+	}
+	usrbSendMessageJSON, err := json.Marshal(sendMessageB)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("序列化 用户B 的 SendMessage 错误: %v", err)
+	}
+	usra.SendMessage = string(usraSendMessageJSON)
+	usrb.SendMessage = string(usrbSendMessageJSON)
+
+	// 保存更新后的数据
 	if err := tx.Save(&usra).Error; err != nil {
 		tx.Rollback()
 		return err
@@ -217,6 +253,7 @@ func DeleteFriend(ctx context.Context, usra *User, usrb *User) error {
 		tx.Rollback()
 		return err
 	}
+
 	// 提交事务
 	return tx.Commit().Error
 }
@@ -243,4 +280,12 @@ func SendMessage(ctx context.Context, usr *User, tousr *User, msg string) error 
 		return err
 	}
 	return nil
+}
+func GetUserListByContent(ctx context.Context, content string) ([]*User, error) {
+	var u []*User
+	err := DB.Where("user_name LIKE ?", "%"+content+"%").Find(&u).Error
+	if err != nil {
+		return nil, err
+	}
+	return u, nil
 }

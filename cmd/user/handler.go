@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"github.com/cloudwego/hertz/pkg/common/json"
 	"go.uber.org/zap"
+	"strconv"
 	"time"
 )
 
@@ -108,6 +109,12 @@ func BadSendMessageResponse(s string) *user.SendMessageResponse {
 }
 func GoodSendMessageResponse(s string, flag bool) *user.SendMessageResponse {
 	return &user.SendMessageResponse{StatusCode: 200, StatusMsg: s, Succed: flag}
+}
+func BadGetUserListByContentResponse(s string) *user.GetUserListByContentResponse {
+	return &user.GetUserListByContentResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodGetUserListByContentResponse(s string, u []*user.UserInfo) *user.GetUserListByContentResponse {
+	return &user.GetUserListByContentResponse{StatusCode: 200, StatusMsg: s, Userinfolist: u}
 }
 
 // UserLogin implements the UserServiceImpl interface.
@@ -574,4 +581,40 @@ func (s *UserServiceImpl) SendMessage(ctx context.Context, req *user.SendMessage
 		return BadSendMessageResponse("发送消息创建成功，但消息发送失败"), err
 	}
 	return GoodSendMessageResponse("发送消息成功", true), nil
+}
+
+// GetUserListByContent implements the UserServiceImpl interface.
+func (s *UserServiceImpl) GetUserListByContent(ctx context.Context, req *user.GetUserListByContentRequest) (resp *user.GetUserListByContentResponse, err error) {
+	var u []*user.UserInfo
+	num, err := strconv.Atoi(req.Content)
+	if err == nil {
+		if num > 0 {
+			usr, errr := db.GetUserByID(ctx, int64(num))
+			if errr != nil {
+				logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
+				return BadGetUserListByContentResponse("获取用户信息失败：服务器内部错误"), nil
+			}
+			if usr != nil {
+				userr := &user.UserInfo{
+					Avatar: usr.Avatar,
+					Name:   usr.UserName,
+					Id:     int64(usr.ID),
+				}
+				u = append(u, userr)
+			}
+		}
+	}
+	uu, err := db.GetUserListByContent(ctx, req.Content)
+	if err != nil {
+		logger.Error("搜索用户信息失败：", zap.Error(err))
+		return BadGetUserListByContentResponse("搜索用户信息失败"), nil
+	}
+	for _, uuu := range uu {
+		userr := &user.UserInfo{}
+		userr.Avatar = uuu.Avatar
+		userr.Id = int64(uuu.ID)
+		userr.Name = uuu.UserName
+		u = append(u, userr)
+	}
+	return GoodGetUserListByContentResponse("搜索用户信息成功", u), nil
 }

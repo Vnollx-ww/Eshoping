@@ -18,6 +18,11 @@ struct FriendInfo{
 2:string avatar
 3:i64 user_id
 }
+struct UserInfo{
+1:string name
+2:i64 id
+3:string avatar
+}
 struct UserLoginRequest {
     1: string username;
     2: string password;
@@ -159,6 +164,14 @@ struct GetMessageListResponse{
 2:string status_msg
 3:list<Message> message
 }
+struct GetUserListByContentRequest{
+1:string content
+}
+struct GetUserListByContentResponse{
+1:i32 status_code
+2:string status_msg
+3:list<UserInfo> userinfolist
+}
 //kitex -module Eshop idl/user.thrift
 //kitex -module Eshop -service Eshop.item -use Eshop/kitex_gen ../../idl/user.thrift
 service UserService {
@@ -177,4 +190,5 @@ service UserService {
     DeleteFriendResponse DeleteFriend(1:DeleteFriendRequest req)
     GetMessageListResponse GetMessageList(1: GetMessageListRequest req)
     SendMessageResponse SendMessage(1: SendMessageRequest req)
+    GetUserListByContentResponse GetUserListByContent(1: GetUserListByContentRequest req)
 }

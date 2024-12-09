@@ -105,6 +105,16 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 		logger.Error("订单创建成功，但更新消息发送失败：", zap.Error(err))
 		return BadAddOrderResponse("订单创建成功，但更新消息发送失败"), err
 	}
+	u, err := db.GetUserByID(ctx, pro.UserID)
+	if err != nil {
+		logger.Error("服务器内部错误：", zap.Error(err))
+		return BadAddOrderResponse("服务器内部错误"), err
+	}
+	err = db.UpdateBalance(ctx, u, order.Cost)
+	if err != nil {
+		logger.Error("服务器内部错误：", zap.Error(err))
+		return BadAddOrderResponse("服务器内部错误"), err
+	}
 	return GoodAddOrderResponse("订单创建成功"), nil
 }
 

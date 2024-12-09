@@ -16,8 +16,8 @@ func main() {
 
 	usr, err := db.GetUserByID(context.Background(), 17)
 	tousr, err := db.GetUserByID(context.Background(), 16)
-	err = db.SendMessage(context.Background(), usr, tousr, "哇咔咔!")
+	err = db.AddFriend(context.Background(), usr, tousr)
 	if err != nil {
-		log.Println("发送失败")
+		log.Println("添加失败")
 	}
 }

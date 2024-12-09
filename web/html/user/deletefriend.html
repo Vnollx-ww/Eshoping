@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>好友列表</title>
+    <style>
+        /* 设置背景为白色到浅蓝色渐变 */
+        body {
+            background: linear-gradient(45deg, #a3c2f7, #ffffff); /* 背景渐变白蓝 */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 设置好友列表容器样式 */
+        .friend-list-container {
+            width: 350px; /* 增加宽度 */
+            height: 400px; /* 增加高度 */
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow-y: auto; /* 开启垂直滚动 */
+            padding: 10px;
+        }
+
+        /* 设置好友列表样式 */
+        .friend-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* 每个好友项的样式 */
+        .friend-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .friend-item img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .friend-item span {
+            flex-grow: 1;
+            font-size: 16px;
+        }
+
+        .friend-item button {
+            padding: 5px 10px;
+            background-color: #ff4c4c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .friend-item button:hover {
+            background-color: #ff1a1a;
+        }
+
+        /* 提示暂无好友的样式 */
+        .no-friends {
+            text-align: center;
+            padding: 20px;
+            font-size: 18px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <h1 style="text-align: center; color: #333;">好友列表</h1>
+    <div class="friend-list-container">
+        <ul class="friend-list" id="friend-list"></ul>
+    </div>
+</div>
+
+<script>
+    const token = localStorage.getItem('token'); // 获取实际的 token
+
+    // 获取好友列表
+    function getFriendList() {
+        fetch('/user/getfriendlist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ token })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.friend) {
+                    displayFriendList(data.friend);
+                } else {
+                    alert('加载好友列表失败');
+                }
+            })
+            .catch(error => console.error('获取好友列表出错:', error));
+    }
+
+    // 显示好友列表
+    function displayFriendList(friends) {
+        const friendListContainer = document.getElementById('friend-list');
+        friendListContainer.innerHTML = ''; // 清空现有的好友列表
+
+        // 如果没有好友，显示暂无好友信息
+        if (friends.length === 0) {
+            const noFriendsMessage = document.createElement('li');
+            noFriendsMessage.classList.add('no-friends');
+            noFriendsMessage.textContent = '暂无好友';
+            friendListContainer.appendChild(noFriendsMessage);
+        } else {
+            // 否则显示好友列表
+            friends.forEach(friend => {
+                const friendItem = document.createElement('li');
+                friendItem.classList.add('friend-item');
+                friendItem.innerHTML = `
+                        <img src="${friend.avatar}" alt="${friend.name}">
+                        <span>${friend.name}</span>
+                        <button onclick="deleteFriend('${friend.user_id}')">删除好友</button>
+                    `;
+                friendListContainer.appendChild(friendItem);
+            });
+        }
+    }
+
+    // 删除好友
+   async function deleteFriend(touserid) {
+        const confirmDelete = confirm('你确定要删除这个好友吗？');
+        if (confirmDelete) {
+            try {
+                // 获取 token
+                touserid = parseInt(touserid, 10);
+                // 发送删除好友的请求
+                const response = await fetch('/user/deletefriend', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token, touserid })
+                });
+
+                // 解析返回的 JSON 数据
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (data.status_code===200) {
+                        alert('删除好友成功');
+                        getFriendList(); // 刷新好友列表
+                    } else {
+                        alert('删除好友失败');
+                    }
+                } else {
+                    alert('删除好友请求失败');
+                }
+            } catch (error) {
+                console.error('删除好友出错:', error);
+                alert('删除好友出错');
+            }
+        }
+    }
+
+    // 页面加载时获取好友列表
+    window.onload = getFriendList;
+</script>
+</body>
+</html>

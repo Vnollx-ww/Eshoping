@@ -85,3 +85,6 @@ func GetMessageList(ctx context.Context, req *user.GetMessageListRequest) (*user
 func SendMessage(ctx context.Context, req *user.SendMessageRequest) (*user.SendMessageResponse, error) {
 	return userClient.SendMessage(ctx, req)
 }
+func GetUserListByContent(ctx context.Context, req *user.GetUserListByContentRequest) (*user.GetUserListByContentResponse, error) {
+	return userClient.GetUserListByContent(ctx, req)
+}

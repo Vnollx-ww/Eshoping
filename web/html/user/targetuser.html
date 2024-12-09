@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户搜索</title>
+    <style>
+        /* 整体页面背景渐变 */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(to bottom right, #ffffff, #a9d4f2); /* 白色到浅蓝色渐变 */
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 容器样式 */
+        .container {
+            width: 70%;
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+
+        /* 搜索结果提示样式 */
+        .search-result {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* 用户项样式 */
+        .user-item {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #ddd;
+            padding: 12px 18px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .user-item:hover {
+            background-color: #e9f5fc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-item img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+
+        .user-item .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-item span {
+            margin-right: 15px;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        /* 按钮样式 */
+        .add-friend-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+
+        .add-friend-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* 错误提示 */
+        .error-message {
+            color: red;
+            font-size: 1.1em;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 用户列表容器 -->
+<div class="container">
+    <!-- 搜索结果提示 -->
+    <div id="searchResult" class="search-result"></div>
+
+    <!-- 用户列表显示区域 -->
+    <div id="userList"></div>
+</div>
+
+<script>
+    // 页面加载时执行
+    window.onload = async function() {
+        // 获取 localStorage 中的搜索内容
+        const content = localStorage.getItem("searchQuery");
+
+        const searchResultContainer = document.getElementById("searchResult");
+        if (content) {
+            // 显示搜索结果的提示信息
+            searchResultContainer.textContent = `搜索用户名或用户ID "${content}" 结果为：`;
+
+            try {
+                // 发送请求获取用户列表
+                const response = await fetch("/user/getuserlistbycontent", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ content })
+                });
+
+                // 解析返回的 JSON 数据
+                const data = await response.json();
+                if (Array.isArray(data.userinfolist) && data.userinfolist.length > 0) {
+                    // 渲染用户列表
+                    renderUserList(data.userinfolist);
+                } else {
+                    document.getElementById("userList").innerHTML = "<div class='error-message'>未找到匹配的用户</div>";
+                }
+            } catch (error) {
+                console.error("请求失败:", error);
+                alert("请求失败，请稍后再试");
+            }
+        } else {
+            searchResultContainer.textContent = "没有找到搜索内容";
+            document.getElementById("userList").innerHTML = "";
+        }
+    };
+
+    function renderUserList(users) {
+        const userListContainer = document.getElementById("userList");
+        userListContainer.innerHTML = ""; // 清空旧数据
+        users.forEach(user => {
+            const userDiv = document.createElement("div");
+            userDiv.className = "user-item";
+
+            userDiv.innerHTML = `
+            <div class="user-info">
+                <img src="${user.avatar}" alt="${user.name}">
+                <span>${user.name} (用户ID:${user.id})</span>
+            </div>
+            <button class="add-friend-btn" onclick="addFriend('${user.name}')">添加好友</button>
+        `;
+
+            userListContainer.appendChild(userDiv);
+        });
+    }
+
+    // 添加好友按钮的点击事件处理
+    function addFriend(username) {
+        if (username === localStorage.getItem('objectname')) {
+            alert("你不能添加自己为好友！");
+            return;
+        }
+        alert(`你已成功发送添加好友请求给${username}`);
+        // 你可以在这里添加处理添加好友的逻辑，例如发送请求到后台
+    }
+
+</script>
+</body>
+</html>

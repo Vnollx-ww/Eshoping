@@ -182,8 +182,11 @@
         <button id="updateaddress">修改收货地址</button>
         <button id="updateavatar">修改头像</button>
         <button id="addproduct">上架商品</button>
+        <button id="updatestock">修改商品库存</button>
+        <button id="updateprice">修改商品价格</button>
         <button id="deleteproduct">下架商品</button>
         <button id="fetchOrderListInfo">查看购买记录</button>
+        <button id="deletefriend">删除好友</button>
         <button id="exit">退出登录</button>
     </div>
 </div>
@@ -260,6 +263,15 @@
     });
     document.getElementById('deleteproduct').addEventListener('click', function() {
         window.location.href = "deleteproduct";
+    });
+    document.getElementById('deletefriend').addEventListener('click', function() {
+        window.location.href = "deletefriend";
+    });
+    document.getElementById('updatestock').addEventListener('click', function() {
+        window.location.href = "updatestock";
+    });
+    document.getElementById('updateprice').addEventListener('click', function() {
+        window.location.href = "updateprice";
     });
     document.getElementById('exit').addEventListener('click', function() {
         localStorage.removeItem('token')

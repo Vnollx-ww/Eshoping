@@ -52,7 +52,7 @@
             color: white;
             font-size: 16px;
             font-weight: normal;
-            margin-left: -60px;  /* 向左移动一些 */
+            margin-left: 220px;  /* 向右移动一些 */
         }
 
         /* 用户头像样式 */
@@ -309,8 +309,16 @@
         <div class="nav-center">
             <h1 style="color: black">VNOLLX-商城购物系统</h1>
         </div>
+        <!-- 在标题和头像之间添加搜索框，并设置间距 -->
+        <div class="nav-search" style="display: inline-block; vertical-align: middle; margin-right: 40px;">
+            <input id="searchInput" type="text" placeholder="搜索用户" style="padding: 5px; font-size: 14px; border-radius: 5px;">
+            <button id="searchButton" type="button" style="padding: 5px 10px; font-size: 14px; background-color: #007BFF; color: white; border: none; border-radius: 5px;">
+                搜索
+            </button>
+        </div>
 
-        <div class="nav-right">
+
+        <div class="nav-right" style="display: inline-block;">
             <img src="https://via.placeholder.com/40" alt="User Avatar" id="user-avatar">
         </div>
     </nav>
@@ -366,6 +374,17 @@
         }
         loadProductList();  // 页面加载时自动调用商品加载函数
     };
+    document.getElementById("searchButton").addEventListener("click", function() {
+        var searchQuery = document.getElementById("searchInput").value.trim();
+        if (searchQuery) {
+            // 将输入框的内容存到 localStorage
+            localStorage.setItem("searchQuery", searchQuery);
+            // 跳转到 targetuser 页面
+            window.location.href = "targetuser";
+        } else {
+            alert("请输入搜索内容");
+        }
+    });
     document.getElementById('sortSelect').addEventListener('change', function() {
         loadProductList();  // 重新加载商品列表并排序
     });
@@ -448,7 +467,7 @@
 
                         // 将商品容器添加到商品列表
                         div.appendChild(productDiv);
-                        loadSellerInfo(product.user_id, productSeller);
+                        loadSellerInfo(product.user_id, productSeller,product.id);
                     });
                 } else {
                     div.innerHTML = "没有找到任何商品。";
@@ -460,7 +479,7 @@
             console.error("加载商品列表失败:", error);
         }
     }
-    async function loadSellerInfo(sellerId, sellerElement) {
+    async function loadSellerInfo(sellerId, sellerElement,pid) {
         try {
             // 请求获取商家信息
             var userid=parseInt(sellerId)
@@ -476,6 +495,8 @@
                 const data = await response.json();
                 if (data && data.user.name) {
                     sellerElement.textContent = `商家：${data.user.name}`;
+                    var ppid=`${pid}`
+                    localStorage.setItem(ppid,data.user.name)
                 } else {
                     sellerElement.textContent = "商家：未知";
                 }
@@ -518,17 +539,17 @@
         // 定义购买按钮点击事件
         buyBtnClickListener = async function () {
             try {
+                var pid=`${product.id}`
+                if(localStorage.getItem('objectname')===localStorage.getItem(pid)){
+                    alert("你不能购买自己的商品！")
+                    return
+                }
                 var Token = localStorage.getItem("token")
                 var ProductName = product.name
                 let quantity = parseInt(quantityInput.value) || 1;
                 var Number = quantity
                 if (Number > product.stock) {
                     alert("商品库存不足")
-                    return
-                }
-                var s=`商家：${localStorage.getItem('objectname')}`
-                if(s==productSeller.textContent){
-                    alert("你不能购买自己的商品！")
                     return
                 }
                 var Cost = Number * product.price

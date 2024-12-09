@@ -246,12 +246,18 @@
         <button id="sendButton" onclick="sendMessage()">发送</button>
     </div>
     <div id="emojiPanel" style="display: none;">
-        <span class="emoji" onclick="insertEmoji('😊')">😊</span>
-        <span class="emoji" onclick="insertEmoji('😂')">😂</span>
         <span class="emoji" onclick="insertEmoji('❤️')">❤️</span>
+        <span class="emoji" onclick="insertEmoji('😊')">😊</span>
+        <span class="emoji" onclick="insertEmoji('😎')">😎</span>
+        <span class="emoji" onclick="insertEmoji('😂')">😂</span>
         <span class="emoji" onclick="insertEmoji('👍')">👍</span>
-        <span class="emoji" onclick="insertEmoji('😍')">😍</span>
-        <!-- 你可以添加更多 Emoji -->
+        <span class="emoji" onclick="insertEmoji('⭐')">⭐</span>
+        <span class="emoji" onclick="insertEmoji('🔥')">🔥</span>
+        <span class="emoji" onclick="insertEmoji('🚀')">🚀</span>
+        <span class="emoji" onclick="insertEmoji('👋')">👋</span>
+        <span class="emoji" onclick="insertEmoji('😢')">😢</span>
+        <span class="emoji" onclick="insertEmoji('👽')">👽</span>
+        <span class="emoji" onclick="insertEmoji('👌')">👌</span>
     </div>
 </div>
 
@@ -262,6 +268,24 @@
     const emojiButton = document.getElementById('emojiButton');
     const emojiPanel = document.getElementById('emojiPanel');
     const inputField = document.getElementById('inputField');
+    const emojiMap = {
+        ':heart:': '❤️',
+        ':smile:': '😊',
+        ':cool:': '😎',
+        ':laughing:': '😂',
+        ':thumbs_up:': '👍',
+        ':star:': '⭐',
+        ':fire:': '🔥',
+        ':rocket:': '🚀',
+        ':wave:': '👋',
+        ':cry:': '😢',
+        ':alien:': '👽',
+        ':ok_hand:': '👌',
+        // ... 你可以添加更多 Emoji
+    };
+    const reverseEmojiMap = Object.fromEntries(
+        Object.entries(emojiMap).map(([key, value]) => [value, key])
+    );
 
     // 显示/隐藏 Emoji 面板
     emojiButton.addEventListener('click', () => {
@@ -360,6 +384,24 @@
     }
 
     let currentFriend = null;
+    function getAvatar(username) {
+        console.log(username);
+        const encodedUsername = encodeURIComponent(username);  // 对用户名进行编码
+        return `http://localhost:9000/user/UserName=${encodedUsername}.jpg`;
+    }
+    function parseEmoji(content) {
+        // 使用正则表达式匹配所有的emoji字符
+        return content.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{2300}-\u{23FF}\u{2B50}\u{2B06}\u{2194}\u{1F004}\u{1F0CF}]/gu, (match) => {
+            // 查找表情字符对应的名称
+            return reverseEmojiMap[match] || match;  // 如果没有找到对应的emoji，返回原始字符
+        });
+    }
+    function reparseEmoji(content){
+        return content.replace(/:([a-z_]+:)/g, (match, emojiName) => {
+            // 查找emojiMap中的对应字符
+            return emojiMap[match] || match;  // 如果没有匹配到，则返回原始字符串
+        });
+    }
 
     // 显示聊天记录
     async function showChat(friend, id) {
@@ -409,9 +451,9 @@
                     messageDiv.classList.add('sent');
                 }
 
-                // 显示消息内容（处理 Emoji）
+                // 显示消息内容
                 const messageContentDiv = document.createElement('div');
-                messageContentDiv.innerHTML = parseEmoji(message.content);  // 解析并显示 Emoji
+                messageContentDiv.innerHTML = reparseEmoji(message.content);
 
                 const messageTimeDiv = document.createElement('div');
                 messageTimeDiv.textContent = message.create_time;
@@ -430,21 +472,6 @@
             document.getElementById('messages').innerHTML = '加载消息失败，请稍后重试。';
         }
     }
-    function parseEmoji(text) {
-        // 首先解码可能的 URL 编码
-        text = decodeURIComponent(text);
-
-        const emojiMap = {
-            '😊': '😊',
-            '😂': '😂',
-            '❤️': '❤️',
-            '👍': '👍',
-            '😍': '😍',
-        };
-
-        // 将文本中的 Emoji 替换为实际的图标
-        return text.replace(/([😊😂❤️👍😍])/g, (match) => emojiMap[match] || match);
-    }
     function formatDate(date) {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');  // 月份从0开始，所以要加1
@@ -460,7 +487,7 @@
         const inputField = document.getElementById('inputField');
         const content = inputField.value.trim();
         if (content === '') return;
-
+        console.log(content)
         // 获取用户的 token (假设 token 存储在 localStorage 中)
         const token = localStorage.getItem('token');
 
@@ -476,54 +503,54 @@
             alert('未选择有效的好友，请重试。');
             return;
         }
+        console.log(parseEmoji(content))
+        const messageData = {
+            type: 'message',
+            token: token,
+            touserid: touserid,
+            content: parseEmoji(content)
+        };
 
-            const messageData = {
-                type: 'message',
-                token: token,
-                touserid: touserid,
-                content: content
-            };
+        // 通过 WebSocket 发送消息
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify(messageData));
+        }
+        // 获取当前时间并格式化
+        const currentTime = new Date();
+        const formattedTime = formatDate(currentTime);
 
-            // 通过 WebSocket 发送消息
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify(messageData));
-            }
-                // 获取当前时间并格式化
-                const currentTime = new Date();
-                const formattedTime = formatDate(currentTime);
+        // 更新聊天记录
+        const messagesDiv = document.getElementById('messages');
+        const newMessageDiv = document.createElement('div');
+        newMessageDiv.classList.add('message', 'sent');
 
-                // 更新聊天记录
-                const messagesDiv = document.getElementById('messages');
-                const newMessageDiv = document.createElement('div');
-                newMessageDiv.classList.add('message', 'sent');
+        // 显示消息内容
+        const messageContentDiv = document.createElement('div');
+        messageContentDiv.innerHTML = content;
 
-                // 显示消息内容
-                const messageContentDiv = document.createElement('div');
-                messageContentDiv.innerHTML = parseEmoji(content);  // 解析并显示 Emoji
+        // 显示消息时间
+        const messageTimeDiv = document.createElement('div');
+        messageTimeDiv.textContent = formattedTime;
+        messageTimeDiv.classList.add('message-time');
 
-                // 显示消息时间
-                const messageTimeDiv = document.createElement('div');
-                messageTimeDiv.textContent = formattedTime;
-                messageTimeDiv.classList.add('message-time');
+        newMessageDiv.appendChild(messageContentDiv);
+        newMessageDiv.appendChild(messageTimeDiv);
+        messagesDiv.appendChild(newMessageDiv);
 
-                newMessageDiv.appendChild(messageContentDiv);
-                newMessageDiv.appendChild(messageTimeDiv);
-                messagesDiv.appendChild(newMessageDiv);
+        // 滚动到底部
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-                // 滚动到底部
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-                // 清空输入框
-                inputField.value = '';
+        // 清空输入框
+        inputField.value = '';
     }
     function displayIncomingMessage(message) {
         const messagesDiv = document.getElementById('messages');
         const messageDiv = document.createElement('div');
         messageDiv.classList.add('message', 'received');
 
-        // 显示消息内容（处理 Emoji）
+        // 显示消息内容
         const messageContentDiv = document.createElement('div');
-        messageContentDiv.innerHTML = parseEmoji(message.content);
+        messageContentDiv.innerHTML = reparseEmoji(message.content);
 
         const currentTime = new Date();
         const messageTimeDiv = document.createElement('div');

@@ -83,20 +83,28 @@ func LoadHtml(hz *server.Hertz) {
 		//c.File("/app/web/html/user/deleteproduct.html")
 	})
 	hz.GET("/updateprice", func(ctx context.Context, c *app.RequestContext) {
-		c.File("D:/GolandProgram/Eshoping/web/html/admin/updateprice.html")
-		//c.File("/app/web/html/admin/updateprice.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/updateprice.html")
+		//c.File("/app/web/html/user/updateprice.html")
 	})
 	hz.GET("/updatestock", func(ctx context.Context, c *app.RequestContext) {
-		c.File("D:/GolandProgram/Eshoping/web/html/admin/updatestock.html")
-		//c.File("/app/web/html/admin/updatestock.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/updatestock.html")
+		//c.File("/app/web/html/user/updatestock.html")
 	})
-	hz.GET("getorderlistbystate", func(ctx context.Context, c *app.RequestContext) {
+	hz.GET("/getorderlistbystate", func(ctx context.Context, c *app.RequestContext) {
 		//c.File("/app/web/html/admin/getorderlistbystate.html")
 		c.File("D:/GolandProgram/Eshoping/web/html/admin/getorderlistbystate.html")
 	})
-	hz.GET("friend", func(ctx context.Context, c *app.RequestContext) {
+	hz.GET("/friend", func(ctx context.Context, c *app.RequestContext) {
 		//c.File("/app/web/html/user/friend.html")
 		c.File("D:/GolandProgram/Eshoping/web/html/user/friend.html")
+	})
+	hz.GET("/targetuser", func(ctx context.Context, c *app.RequestContext) {
+		//c.File("/app/web/html/user/target.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/targetuser.html")
+	})
+	hz.GET("/deletefriend", func(ctx context.Context, c *app.RequestContext) {
+		//c.File("/app/web/html/user/deletefriend.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/deletefriend.html")
 	})
 }
 func registerGroup(hz *server.Hertz) {
@@ -120,6 +128,7 @@ func registerGroup(hz *server.Hertz) {
 		user.POST("/getmessagelist", handler.GetMessageList)
 		user.POST("/sendmessage", handler.SendMessage)
 		user.GET("/ws", handler.WebSocketConnections)
+		user.POST("/getuserlistbycontent", handler.GetUserListByContent)
 	}
 	product := hz.Group("/product")
 	{

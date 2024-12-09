@@ -468,3 +468,26 @@ func SendMessage(ctx context.Context, c *app.RequestContext) {
 		Succed:     true,
 	})
 }
+func GetUserListByContent(ctx context.Context, c *app.RequestContext) {
+	var reqbody struct {
+		Content string
+	}
+	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
+		BadBaseResponse(c, "无效的请求格式")
+		return
+	}
+	req := &user.GetUserListByContentRequest{
+		Content: reqbody.Content,
+	}
+	res, _ := rpc.GetUserListByContent(ctx, req)
+	if res.StatusCode == -1 {
+		BadBaseResponse(c, res.StatusMsg)
+		return
+	}
+	c.JSON(http.StatusOK, user.GetUserListByContentResponse{
+		StatusMsg:    res.StatusMsg,
+		StatusCode:   res.StatusCode,
+		Userinfolist: res.Userinfolist,
+	})
+}

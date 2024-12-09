@@ -26,6 +26,7 @@ type Client interface {
 	DeleteFriend(ctx context.Context, req *user.DeleteFriendRequest, callOptions ...callopt.Option) (r *user.DeleteFriendResponse, err error)
 	GetMessageList(ctx context.Context, req *user.GetMessageListRequest, callOptions ...callopt.Option) (r *user.GetMessageListResponse, err error)
 	SendMessage(ctx context.Context, req *user.SendMessageRequest, callOptions ...callopt.Option) (r *user.SendMessageResponse, err error)
+	GetUserListByContent(ctx context.Context, req *user.GetUserListByContentRequest, callOptions ...callopt.Option) (r *user.GetUserListByContentResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -130,4 +131,9 @@ func (p *kUserServiceClient) GetMessageList(ctx context.Context, req *user.GetMe
 func (p *kUserServiceClient) SendMessage(ctx context.Context, req *user.SendMessageRequest, callOptions ...callopt.Option) (r *user.SendMessageResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.SendMessage(ctx, req)
+}
+
+func (p *kUserServiceClient) GetUserListByContent(ctx context.Context, req *user.GetUserListByContentRequest, callOptions ...callopt.Option) (r *user.GetUserListByContentResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetUserListByContent(ctx, req)
 }

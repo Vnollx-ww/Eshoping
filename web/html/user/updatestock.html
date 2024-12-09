@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>更新价格</title>
+    <title>更新库存</title>
     <style>
         /* 基础样式 */
         body {
@@ -39,7 +39,7 @@
         }
 
         /* 新价格输入框 */
-        .new-price-input {
+        .new-stock-input {
             padding: 8px;
             font-size: 16px;
             border-radius: 4px;
@@ -111,8 +111,13 @@
     // 函数用于加载商品列表
     async function loadProductList() {
         try {
-            const response = await fetch("/product/getproductlistinfo", {
-                method: 'GET',
+            var token=localStorage.getItem('token')
+            const response = await fetch("/product/getproductlistinfobyuser", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ token})
             });
 
             const data = await response.json();
@@ -143,44 +148,43 @@
                         priceSpan.classList.add("product-price");
 
                         // 创建输入框用于输入新的价格
-                        var newPriceInput = document.createElement("input");
-                        newPriceInput.type = "number";
-                        newPriceInput.placeholder = "输入新价格";
-                        newPriceInput.classList.add("new-price-input");
+                        var newStockInput = document.createElement("input");
+                        newStockInput.type = "number";
+                        newStockInput.placeholder = "输入添加量";
+                        newStockInput.classList.add("new-stock-input");
 
                         // 创建修改价格按钮
-                        var updatePriceButton = document.createElement("button");
-                        updatePriceButton.classList.add("delete-button");
-                        updatePriceButton.textContent = "修改价格";
+                        var updateStockButton = document.createElement("button");
+                        updateStockButton.classList.add("delete-button");
+                        updateStockButton.textContent = "添加库存";
 
                         // 修改价格按钮的点击事件
-                        updatePriceButton.addEventListener("click", async function () {
-                            const newPrice = parseInt(newPriceInput.value.trim(), 10);
+                        updateStockButton.addEventListener("click", async function () {
+                            const newStock = parseInt(newStockInput.value.trim(), 10);
 
                             // 确保新价格是有效的整数
-                            if (isNaN(newPrice) || newPrice <= 0) {
-                                alert("请输入有效的价格！");
+                            if (isNaN(newStock) || newStock <= 0) {
+                                alert("请输入有效的库存添加量！");
                                 return;
                             }
-
                             // 显示确认对话框
-                            const userConfirmed = confirm(`确定将商品 ${product.name} 的价格修改为 ${newPrice} 吗？`);
+                            const userConfirmed = confirm(`确定将商品 ${product.name} 的库存添加至 ${product.stock+newStock} 吗？`);
                             if (userConfirmed) {
                                 try {
                                     var productid = product.id;
 
-                                    var price=parseInt(newPrice,10)
+                                    var addstock=parseInt(newStock,10)
                                     // 发送修改价格请求
-                                    const response = await fetch("/product/updateprice", {
+                                    const response = await fetch("/product/updatestock", {
                                         method: 'POST',
                                         headers: {
                                             'Content-Type': 'application/json'
                                         },
-                                        body: JSON.stringify({ productid, price })
+                                        body: JSON.stringify({ productid, addstock })
                                     });
                                     const data = await response.json();
                                     if (response.ok) {
-                                        alert("修改成功");
+                                        alert("添加成功");
                                         loadProductList();  // 修改成功后刷新商品列表
                                     } else {
                                         alert(data.status_msg);
@@ -197,8 +201,8 @@
                         productDiv.appendChild(proSpan);
                         productDiv.appendChild(stockSpan);
                         productDiv.appendChild(priceSpan);
-                        productDiv.appendChild(newPriceInput); // 添加新价格输入框
-                        productDiv.appendChild(updatePriceButton);
+                        productDiv.appendChild(newStockInput); // 添加新价格输入框
+                        productDiv.appendChild(updateStockButton);
 
                         // 添加商品容器到#productinfo中
                         div.appendChild(productDiv);

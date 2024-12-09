@@ -34,6 +34,7 @@ func NewServiceInfo() *kitex.ServiceInfo {
 		"DeleteFriend":         kitex.NewMethodInfo(deleteFriendHandler, newUserServiceDeleteFriendArgs, newUserServiceDeleteFriendResult, false),
 		"GetMessageList":       kitex.NewMethodInfo(getMessageListHandler, newUserServiceGetMessageListArgs, newUserServiceGetMessageListResult, false),
 		"SendMessage":          kitex.NewMethodInfo(sendMessageHandler, newUserServiceSendMessageArgs, newUserServiceSendMessageResult, false),
+		"GetUserListByContent": kitex.NewMethodInfo(getUserListByContentHandler, newUserServiceGetUserListByContentArgs, newUserServiceGetUserListByContentResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName":     "user",
@@ -320,6 +321,24 @@ func newUserServiceSendMessageResult() interface{} {
 	return user.NewUserServiceSendMessageResult()
 }
 
+func getUserListByContentHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceGetUserListByContentArgs)
+	realResult := result.(*user.UserServiceGetUserListByContentResult)
+	success, err := handler.(user.UserService).GetUserListByContent(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceGetUserListByContentArgs() interface{} {
+	return user.NewUserServiceGetUserListByContentArgs()
+}
+
+func newUserServiceGetUserListByContentResult() interface{} {
+	return user.NewUserServiceGetUserListByContentResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -475,6 +494,16 @@ func (p *kClient) SendMessage(ctx context.Context, req *user.SendMessageRequest)
 	_args.Req = req
 	var _result user.UserServiceSendMessageResult
 	if err = p.c.Call(ctx, "SendMessage", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetUserListByContent(ctx context.Context, req *user.GetUserListByContentRequest) (r *user.GetUserListByContentResponse, err error) {
+	var _args user.UserServiceGetUserListByContentArgs
+	_args.Req = req
+	var _result user.UserServiceGetUserListByContentResult
+	if err = p.c.Call(ctx, "GetUserListByContent", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
