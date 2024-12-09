@@ -484,6 +484,10 @@
     }
     let chats = {};
     async function sendMessage() {
+        if(currentFriend===null){
+            alert("请选择好友！")
+            return 
+        }
         const inputField = document.getElementById('inputField');
         const content = inputField.value.trim();
         if (content === '') return;
