@@ -2,12 +2,14 @@ package main
 
 import (
 	"Eshop/dal/db"
+	"Eshop/dal/rs"
 	"Eshop/kitex_gen/orderlist"
 	"Eshop/kitex_gen/product/productservice"
 	"Eshop/kitex_gen/user/userservice"
 	order2 "Eshop/pkg/kafka/producer/order"
 	"Eshop/pkg/middlerware"
 	"context"
+	"fmt"
 	"go.uber.org/zap"
 	"log"
 )
@@ -115,6 +117,11 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 		logger.Error("服务器内部错误：", zap.Error(err))
 		return BadAddOrderResponse("服务器内部错误"), err
 	}
+	cacheKey := fmt.Sprintf("userinfo:%d", pro.UserID)
+	err = rs.DelKey(ctx, cacheKey) // 删除缓存
+	if err != nil {
+		logger.Error("删除缓存失败：", zap.Error(err))
+	}
 	return GoodAddOrderResponse("订单创建成功"), nil
 }
 
@@ -135,30 +142,23 @@ func (s *OrderListServiceImpl) GetOrderListByUserID(ctx context.Context, req *or
 		logger.Error("token解析失败：", zap.Error(err))
 		return BadGetOrderListByUserIDResponse("token解析失败"), nil
 	}
-	pro, err := db.GetProductListInfoByUser(ctx, mc.UserId)
+	var or []*orderlist.Order
+	orders, err := db.GetOrderListByUserID(ctx, mc.UserId)
 	if err != nil {
 		logger.Error("用户订单列表获取失败：", zap.Error(err))
 		return BadGetOrderListByUserIDResponse("用户订单列表获取失败"), nil
 	}
-	var or []*orderlist.Order
-	for _, p := range pro {
-		orders, err := db.GetOrderListByProductName(ctx, p.ProductName)
-		if err != nil {
-			logger.Error("用户订单列表获取失败：", zap.Error(err))
-			return BadGetOrderListByUserIDResponse("用户订单列表获取失败"), nil
-		}
-		for _, order := range orders {
-			var ord orderlist.Order
-			ord.OrderId = int64(order.ID)
-			ord.UserId = order.UserID
-			ord.Number = order.Number
-			ord.Cost = order.Cost
-			ord.ProductName = order.ProductName
-			ord.Address = order.Address
-			ord.Isdeliver = order.State
-			ord.CreateTime = order.CreatedAt.Format("2006-01-02 15:04:05")
-			or = append(or, &ord)
-		}
+	for _, order := range orders {
+		var ord orderlist.Order
+		ord.OrderId = int64(order.ID)
+		ord.UserId = order.UserID
+		ord.Number = order.Number
+		ord.Cost = order.Cost
+		ord.ProductName = order.ProductName
+		ord.Address = order.Address
+		ord.Isdeliver = order.State
+		ord.CreateTime = order.CreatedAt.Format("2006-01-02 15:04:05")
+		or = append(or, &ord)
 	}
 	return GoodGetOrderListByUserIDResponse("用户订单列表获取成功", or), nil
 }

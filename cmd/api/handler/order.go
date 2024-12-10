@@ -6,6 +6,7 @@ import (
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	"go.uber.org/zap"
+	"log"
 	"net/http"
 )
 
@@ -85,6 +86,7 @@ func GetOrderListByUserID(ctx context.Context, c *app.RequestContext) {
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
 	}
+	log.Println(res.Orderlist)
 	c.JSON(http.StatusOK, orderlist.GetOrderListByUserIDResponse{
 		StatusCode: http.StatusOK,
 		StatusMsg:  res.StatusMsg,

@@ -271,10 +271,10 @@ func (s *UserServiceImpl) UpdatePassword(ctx context.Context, req *user.UpdatePa
 	if usr == nil {
 		return BadUpdatePasswordResponse("用户不存在"), nil
 	}
-	if usr.Password != req.Oldpassword {
+	if usr.Password != middlerware.MD5Encrypt(req.Oldpassword) {
 		return BadUpdatePasswordResponse("用户旧密码错误"), nil
 	}
-	err = db.UpdatePassword(ctx, usr, req.Newpassword_)
+	err = db.UpdatePassword(ctx, usr, middlerware.MD5Encrypt(req.Newpassword_))
 	if err != nil {
 		logger.Error("修改密码失败：", zap.Error(err))
 		return BadUpdatePasswordResponse("修改密码失败"), nil
