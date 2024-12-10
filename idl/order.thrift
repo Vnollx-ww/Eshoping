@@ -56,6 +56,7 @@ struct GetOrderListByProductNameResponse{
 }
 struct GetOrderListByStateRequest{
 1:bool state
+2:string token
 }
 struct GetOrderListByStateResponse{
 1:i32 status_code

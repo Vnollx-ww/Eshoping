@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>待处理订单列表</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #ffffff, #a2c8ff);
+        }
+        #orderlist {
+            width: 90%;
+            max-width: 450px;
+            padding: 25px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            background-color: #f0f4f8;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+        #orderlist:hover {
+            transform: scale(1.02);
+        }
+        button {
+            margin: 20px 0;
+            padding: 14px 22px;
+            background: linear-gradient(135deg, deepskyblue, dodgerblue);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            background: linear-gradient(135deg, dodgerblue, deepskyblue);
+            transform: translateY(-2px);
+        }
+        #orderinfo {
+            width: 100%;
+            margin-top: 25px;
+            max-height: 450px;
+            overflow-y: auto;
+            padding-right: 10px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+        }
+        .order {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 18px;
+            margin: 12px 0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border-left: 4px solid #007BFF;
+            transition: transform 0.2s ease;
+            position: relative; /* 为了定位右上角的状态标签 */
+        }
+        .order:hover {
+            transform: scale(1.02);
+        }
+        .order span {
+            font-size: 14px;
+            color: #333;
+        }
+        .order span:first-child {
+            font-weight: bold;
+            color: #000;
+        }
+        .order span:nth-child(odd) {
+            color: #666;
+        }
+        .order span:nth-child(even) {
+            color: #007BFF;
+        }
+        .order span {
+            display: block;
+            margin-bottom: 8px;
+        }
+        .order .order-id {
+            font-weight: bold;
+            color: #333;
+        }
+        .order .order-user,
+        .order .order-product,
+        .order .order-number,
+        .order .order-cost,
+        .order .order-time {
+            color: #555;
+        }
+
+        @media (max-width: 600px) {
+            #orderlist {
+                width: 95%;
+                padding: 20px;
+            }
+            button {
+                width: 100%;
+                font-size: 14px;
+                padding: 12px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="orderlist">
+    <button id="getorderlistbystate">查询待处理订单</button>
+    <div id="orderinfo"></div>
+</div>
+</body>
+<script>
+    window.onload = async function() {
+        const token = localStorage.getItem("token");
+        if(token===null){
+            alert("请先登录！");
+            setTimeout(() => {
+                window.location.href = "login"; // 重定向到商品管理页面
+            }, 1000);
+            return
+        }
+    }
+    async function fetchOrderList() {
+        var state = false;
+        var token=localStorage.getItem('token')
+        try {
+            const response = await fetch("/order/orderlistbystate", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ state ,token})
+            });
+            var data = await response.json();
+            var div = document.getElementById("orderinfo");
+
+            if (response.ok) {
+                div.innerHTML = '';
+                if (Array.isArray(data.orderlist) && data.orderlist.length > 0) {
+                    data.orderlist.forEach(order => {
+                        var orderDiv = document.createElement("div");
+                        orderDiv.classList.add("order");
+
+                        var orderSpan = document.createElement("span");
+                        orderSpan.textContent = `订单ID: ${order.order_id}`;
+                        orderSpan.classList.add("order-id");
+
+                        var userSpan = document.createElement("span");
+                        userSpan.textContent = `用户ID: ${order.user_id}`;
+                        userSpan.classList.add("order-user");
+
+                        var productSpan = document.createElement("span");
+                        productSpan.textContent = `商品: ${order.product_name}`;
+                        productSpan.classList.add("order-product");
+
+                        var numberSpan = document.createElement("span");
+                        numberSpan.textContent = `数量: ${order.number}`;
+                        numberSpan.classList.add("order-number");
+
+                        var costSpan = document.createElement("span");
+                        costSpan.textContent = `价格: ¥${order.cost}`;
+                        costSpan.classList.add("order-cost");
+
+                        var addressSpan = document.createElement("span");
+                        addressSpan.textContent = `收获地址: ${order.address}`;
+                        addressSpan.classList.add("order-address");
+
+                        var createtimeSpan = document.createElement("span");
+                        createtimeSpan.textContent = `创建时间: ${order.create_time}`;
+                        createtimeSpan.classList.add("order-time");
+
+                        // 发货按钮
+                        var shipButton = document.createElement("button");
+                        shipButton.textContent = "发货";
+                        shipButton.style.marginTop = '10px';
+                        shipButton.addEventListener("click", async function () {
+                            var orderid = order.order_id;
+                            try {
+                                const response = await fetch("/order/updatestate", {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ orderid })
+                                });
+                                const data = await response.json();
+                                if (response.ok) {
+                                    alert("发货成功");
+                                    fetchOrderList(); // 刷新订单列表
+                                } else {
+                                    alert(data.status_msg);
+                                }
+                            } catch (error) {
+                                console.error("发生错误:", error);
+                                showError("发生错误，请重试");
+                            }
+                        });
+
+                        orderDiv.appendChild(orderSpan);
+                        orderDiv.appendChild(userSpan);
+                        orderDiv.appendChild(productSpan);
+                        orderDiv.appendChild(numberSpan);
+                        orderDiv.appendChild(costSpan);
+                        orderDiv.appendChild(addressSpan);
+                        orderDiv.appendChild(createtimeSpan);
+                        orderDiv.appendChild(shipButton); // 添加发货按钮
+
+                        div.appendChild(orderDiv);
+                    });
+                } else {
+                    div.innerHTML = "<p>暂无需要处理的订单</p>";
+                }
+            } else {
+                div.innerHTML = "<p>获取订单失败</p>";
+            }
+        } catch (error) {
+            console.error("发生错误:", error);
+            showError("发生错误，请重试");
+        }
+    }
+
+    document.getElementById("getorderlistbystate").addEventListener("click", fetchOrderList);
+
+    function showError(message) {
+        alert(message);
+    }
+</script>
+
+</html>

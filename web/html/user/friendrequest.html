@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>好友申请列表</title>
+    <style>
+        /* 设置背景颜色为白色到浅蓝色的渐变 */
+        body {
+            background: linear-gradient(45deg, #a3c2f7, #ffffff);
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            padding: 20px 0;
+        }
+
+        /* 好友申请项的容器 */
+        .friend-request {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            width: 70%; /* 设置宽度为70% */
+            margin: 0 auto; /* 使元素居中 */
+        }
+
+
+        .friend-request:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+        }
+
+        /* 头像样式 */
+        .friend-request img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-right: 15px;
+            border: 2px solid #ddd;
+        }
+
+        .friend-request-info {
+            flex-grow: 1;
+            color: #333;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .buttons button {
+            padding: 8px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .accept-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .reject-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .accept-btn:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .reject-btn:hover {
+            background-color: #e53935;
+            transform: translateY(-2px);
+        }
+
+        /* 样式：暂无任何好友申请信息 */
+        .no-request-message {
+            text-align: center;
+            font-size: 20px;
+            color: #888;
+            margin-top: 50px;
+            font-weight: bold;
+        }
+
+        /* 设置响应式布局，使页面适应不同设备 */
+        @media (max-width: 768px) {
+            .friend-request {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .friend-request img {
+                margin-bottom: 10px;
+            }
+
+            .buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .buttons button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h2>好友申请列表</h2>
+
+<!-- 好友申请列表 -->
+<div id="friendRequests"></div>
+
+<script>
+    // 假设你已经通过某种方式获得了token，比如从localStorage中获取
+    const token = localStorage.getItem('token');  // 假设token存储在localStorage中
+
+    if (!token) {
+        alert('请先登录');
+        // 可以跳转到登录页面或者做其他处理
+        window.location.href = '/login';
+    }
+
+    // 通过 JavaScript 获取好友申请列表并显示
+    window.onload = async function() {
+        try {
+            // 发起 POST 请求到后端接口 /user/getfriendapplicationlist，带上token
+            const response = await fetch('/user/getfriendapplicationlist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ token })
+            });
+
+            const data = await response.json();  // 假设返回的是 JSON 格式
+
+            // 如果没有任何好友申请，显示“暂无任何好友申请”
+            if (data.friendapplicaiton.length === 0) {
+                const friendRequestsContainer = document.getElementById('friendRequests');
+                const noRequestDiv = document.createElement('div');
+                noRequestDiv.className = 'no-request-message';
+                noRequestDiv.textContent = '暂无任何好友申请';
+                friendRequestsContainer.appendChild(noRequestDiv);
+                return; // 如果没有好友申请，终止后续代码执行
+            }
+
+            // 获取返回的好友申请数组
+            const friendApplications = data.friendapplicaiton;
+            // 获取显示好友申请的容器
+            const friendRequestsContainer = document.getElementById('friendRequests');
+
+            // 遍历每个好友申请，创建对应的 HTML
+            friendApplications.forEach(application => {
+                const { avatar, userid, name } = application;
+
+                // 创建一个新的申请项
+                const requestDiv = document.createElement('div');
+                requestDiv.className = 'friend-request';
+
+                // 创建头像
+                const avatarImg = document.createElement('img');
+                avatarImg.src = avatar;
+                avatarImg.alt = name;
+
+                // 创建申请信息区域
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'friend-request-info';
+                infoDiv.innerHTML = `<strong>${name}</strong><br>用户ID: ${userid}`;
+
+                // 创建按钮区域
+                const buttonsDiv = document.createElement('div');
+                buttonsDiv.className = 'buttons';
+
+                // 创建同意按钮
+                const acceptBtn = document.createElement('button');
+                acceptBtn.className = 'accept-btn';
+                acceptBtn.textContent = '同意';
+                acceptBtn.onclick = function() {
+                    handleResponse(userid, 'accept',name);
+                };
+
+                // 创建拒绝按钮
+                const rejectBtn = document.createElement('button');
+                rejectBtn.className = 'reject-btn';
+                rejectBtn.textContent = '拒绝';
+                rejectBtn.onclick = function() {
+                    handleResponse(userid, 'reject',name);
+                };
+
+                // 将按钮添加到按钮区域
+                buttonsDiv.appendChild(acceptBtn);
+                buttonsDiv.appendChild(rejectBtn);
+
+                // 将头像、信息和按钮区域添加到请求项中
+                requestDiv.appendChild(avatarImg);
+                requestDiv.appendChild(infoDiv);
+                requestDiv.appendChild(buttonsDiv);
+
+                // 将请求项添加到显示区域
+                friendRequestsContainer.appendChild(requestDiv);
+            });
+        } catch (error) {
+            console.error('获取好友申请列表失败:', error);
+        }
+    };
+
+    // 处理同意或拒绝按钮点击事件
+    async function handleResponse(touserid, action,name) {
+        if(action==='accept'){
+            try {
+                // 发起 POST 请求到后端接口 /user/respondfriendrequest，带上token
+                const response = await fetch('/user/addfriend', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token, touserid })
+                });
+
+                const data = await response.json();  // 解析返回的 JSON 数据
+
+                if (data.status_code) {
+                    alert(`你已和${name}成为好友！`);
+                    // 刷新页面或移除该申请
+                    window.location.reload();  // 可以根据实际需求刷新或移除对应申请
+                } else {
+                    alert(`操作失败: ${data.message}`);
+                }
+            } catch (error) {
+                console.error('操作失败:', error);
+            }
+        }
+        else if(action==='reject'){
+            try {
+                // 发起 POST 请求到后端接口 /user/respondfriendrequest，带上token
+                const response = await fetch('/user/rejectfriendapplication', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token, touserid })
+                });
+
+                const data = await response.json();  // 解析返回的 JSON 数据
+
+                if (data.status_code) {
+                    alert(`你已拒绝和${name}成为好友！`);
+                    // 刷新页面或移除该申请
+                    window.location.reload();  // 可以根据实际需求刷新或移除对应申请
+                } else {
+                    alert(`操作失败: ${data.message}`);
+                }
+            } catch (error) {
+                console.error('操作失败:', error);
+            }
+        }
+    }
+</script>
+</body>
+</html>

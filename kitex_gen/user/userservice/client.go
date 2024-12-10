@@ -27,6 +27,9 @@ type Client interface {
 	GetMessageList(ctx context.Context, req *user.GetMessageListRequest, callOptions ...callopt.Option) (r *user.GetMessageListResponse, err error)
 	SendMessage(ctx context.Context, req *user.SendMessageRequest, callOptions ...callopt.Option) (r *user.SendMessageResponse, err error)
 	GetUserListByContent(ctx context.Context, req *user.GetUserListByContentRequest, callOptions ...callopt.Option) (r *user.GetUserListByContentResponse, err error)
+	SendFriendApplication(ctx context.Context, req *user.SendFriendApplicationRequest, callOptions ...callopt.Option) (r *user.SendFriendApplicationResponse, err error)
+	GetFriendApplicationList(ctx context.Context, req *user.GetFriendApplicationListRequest, callOptions ...callopt.Option) (r *user.GetFriendApplicationListResponse, err error)
+	RejectFriendApplication(ctx context.Context, req *user.RejectFriendApplicationRequest, callOptions ...callopt.Option) (r *user.RejectFriendApplicationResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -136,4 +139,19 @@ func (p *kUserServiceClient) SendMessage(ctx context.Context, req *user.SendMess
 func (p *kUserServiceClient) GetUserListByContent(ctx context.Context, req *user.GetUserListByContentRequest, callOptions ...callopt.Option) (r *user.GetUserListByContentResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.GetUserListByContent(ctx, req)
+}
+
+func (p *kUserServiceClient) SendFriendApplication(ctx context.Context, req *user.SendFriendApplicationRequest, callOptions ...callopt.Option) (r *user.SendFriendApplicationResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.SendFriendApplication(ctx, req)
+}
+
+func (p *kUserServiceClient) GetFriendApplicationList(ctx context.Context, req *user.GetFriendApplicationListRequest, callOptions ...callopt.Option) (r *user.GetFriendApplicationListResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetFriendApplicationList(ctx, req)
+}
+
+func (p *kUserServiceClient) RejectFriendApplication(ctx context.Context, req *user.RejectFriendApplicationRequest, callOptions ...callopt.Option) (r *user.RejectFriendApplicationResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.RejectFriendApplication(ctx, req)
 }

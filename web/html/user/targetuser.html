@@ -113,6 +113,14 @@
 <script>
     // 页面加载时执行
     window.onload = async function() {
+            const token = localStorage.getItem("token");
+            if(token===null){
+                alert("请先登录！");
+                setTimeout(() => {
+                    window.location.href = "login"; // 重定向到商品管理页面
+                }, 1000);
+                return
+            }
         // 获取 localStorage 中的搜索内容
         const content = localStorage.getItem("searchQuery");
 
@@ -161,7 +169,7 @@
                 <img src="${user.avatar}" alt="${user.name}">
                 <span>${user.name} (用户ID:${user.id})</span>
             </div>
-            <button class="add-friend-btn" onclick="addFriend('${user.name}')">添加好友</button>
+            <button class="add-friend-btn" onclick="addFriend('${user.name}',${user.id})">添加好友</button>
         `;
 
             userListContainer.appendChild(userDiv);
@@ -169,13 +177,35 @@
     }
 
     // 添加好友按钮的点击事件处理
-    function addFriend(username) {
+    async function addFriend(username,touserid) {
         if (username === localStorage.getItem('objectname')) {
             alert("你不能添加自己为好友！");
             return;
         }
-        alert(`你已成功发送添加好友请求给${username}`);
-        // 你可以在这里添加处理添加好友的逻辑，例如发送请求到后台
+
+        try {
+            const token=localStorage.getItem('token')
+            touserid=parseInt(touserid,10)
+            // 发送请求获取用户列表
+            const response = await fetch("/user/sendfriendapplication", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({token,touserid})
+            });
+            // 解析返回的 JSON 数据
+            const data = await response.json();
+            if(response.ok){
+                alert(`你已成功发送添加好友请求给${username}`);
+            }
+            else{
+                alert(data.status_msg)
+            }
+        } catch (error) {
+            console.error("请求失败:", error);
+            alert("请求失败，请稍后再试");
+        }
     }
 
 </script>

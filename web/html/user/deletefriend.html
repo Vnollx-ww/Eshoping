@@ -57,7 +57,7 @@
 
         .friend-item button {
             padding: 5px 10px;
-            background-color: #ff4c4c;
+            background-color: #4CAF50; /* 绿色 */
             color: white;
             border: none;
             border-radius: 5px;
@@ -65,7 +65,7 @@
         }
 
         .friend-item button:hover {
-            background-color: #ff1a1a;
+            background-color: #45a049;
         }
 
         /* 提示暂无好友的样式 */
@@ -74,6 +74,14 @@
             padding: 20px;
             font-size: 18px;
             color: #888;
+        }
+
+        /* 设置响应式布局，使页面适应不同设备 */
+        @media (max-width: 768px) {
+            .friend-list-container {
+                width: 90%; /* 宽度自适应 */
+                height: auto;
+            }
         }
     </style>
 </head>
@@ -86,8 +94,17 @@
 </div>
 
 <script>
+    window.onload = async function() {
+        const token = localStorage.getItem("token");
+        if(token===null){
+            alert("请先登录！");
+            setTimeout(() => {
+                window.location.href = "login"; // 重定向到商品管理页面
+            }, 1000);
+            return
+        }
+    }
     const token = localStorage.getItem('token'); // 获取实际的 token
-
     // 获取好友列表
     function getFriendList() {
         fetch('/user/getfriendlist', {

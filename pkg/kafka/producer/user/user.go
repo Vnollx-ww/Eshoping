@@ -59,3 +59,18 @@ func (k *KafkaProducer) SendSendMessageEvent(Token string, Content string, Touse
 	log.Println("发送发送消息到kafka成功")
 	return nil
 }
+func (k *KafkaProducer) SendFriendApplicationEvent(userId int64, TouserId int64) error {
+	message := &user.SendFriendApplicationMessage{UserID: userId, ToUserId: TouserId}
+	msgBytes, err := json.Marshal(message)
+	msg := &sarama.ProducerMessage{
+		Topic: "send-friendapplication",
+		Value: sarama.StringEncoder(msgBytes),
+	}
+	_, _, err = k.producer.SendMessage(msg)
+	if err != nil {
+		log.Printf("发送好友请求到kafka失败: %v", err)
+		return err
+	}
+	log.Println("发送好友请求到kafka成功")
+	return nil
+}

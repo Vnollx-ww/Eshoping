@@ -47,7 +47,7 @@ func NewAvatarConsumer(brokerList []string) (*AvatarConsumer, error) {
 func (c *AvatarConsumer) Listen() {
 	log.Println("listenavatar")
 	config := sarama.NewConfig()
-	client, err := sarama.NewClient([]string{"localhost:9092"}, config)
+	client, err := sarama.NewClient([]string{kafkaAddr}, config)
 	if err != nil {
 		log.Fatalf("Error creating Kafka client: %v", err)
 	}

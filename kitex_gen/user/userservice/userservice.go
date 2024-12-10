@@ -19,22 +19,25 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "UserService"
 	handlerType := (*user.UserService)(nil)
 	methods := map[string]kitex.MethodInfo{
-		"UserLogin":            kitex.NewMethodInfo(userLoginHandler, newUserServiceUserLoginArgs, newUserServiceUserLoginResult, false),
-		"UserRegiter":          kitex.NewMethodInfo(userRegiterHandler, newUserServiceUserRegiterArgs, newUserServiceUserRegiterResult, false),
-		"GetUserInfo":          kitex.NewMethodInfo(getUserInfoHandler, newUserServiceGetUserInfoArgs, newUserServiceGetUserInfoResult, false),
-		"GetUserInfoByUserID":  kitex.NewMethodInfo(getUserInfoByUserIDHandler, newUserServiceGetUserInfoByUserIDArgs, newUserServiceGetUserInfoByUserIDResult, false),
-		"UpdateName":           kitex.NewMethodInfo(updateNameHandler, newUserServiceUpdateNameArgs, newUserServiceUpdateNameResult, false),
-		"UpdatePassword":       kitex.NewMethodInfo(updatePasswordHandler, newUserServiceUpdatePasswordArgs, newUserServiceUpdatePasswordResult, false),
-		"UpdateCost":           kitex.NewMethodInfo(updateCostHandler, newUserServiceUpdateCostArgs, newUserServiceUpdateCostResult, false),
-		"UpdateBalance":        kitex.NewMethodInfo(updateBalanceHandler, newUserServiceUpdateBalanceArgs, newUserServiceUpdateBalanceResult, false),
-		"UpdateBalanceAndCost": kitex.NewMethodInfo(updateBalanceAndCostHandler, newUserServiceUpdateBalanceAndCostArgs, newUserServiceUpdateBalanceAndCostResult, false),
-		"UpdateAddress":        kitex.NewMethodInfo(updateAddressHandler, newUserServiceUpdateAddressArgs, newUserServiceUpdateAddressResult, false),
-		"GetFriendList":        kitex.NewMethodInfo(getFriendListHandler, newUserServiceGetFriendListArgs, newUserServiceGetFriendListResult, false),
-		"AddFriend":            kitex.NewMethodInfo(addFriendHandler, newUserServiceAddFriendArgs, newUserServiceAddFriendResult, false),
-		"DeleteFriend":         kitex.NewMethodInfo(deleteFriendHandler, newUserServiceDeleteFriendArgs, newUserServiceDeleteFriendResult, false),
-		"GetMessageList":       kitex.NewMethodInfo(getMessageListHandler, newUserServiceGetMessageListArgs, newUserServiceGetMessageListResult, false),
-		"SendMessage":          kitex.NewMethodInfo(sendMessageHandler, newUserServiceSendMessageArgs, newUserServiceSendMessageResult, false),
-		"GetUserListByContent": kitex.NewMethodInfo(getUserListByContentHandler, newUserServiceGetUserListByContentArgs, newUserServiceGetUserListByContentResult, false),
+		"UserLogin":                kitex.NewMethodInfo(userLoginHandler, newUserServiceUserLoginArgs, newUserServiceUserLoginResult, false),
+		"UserRegiter":              kitex.NewMethodInfo(userRegiterHandler, newUserServiceUserRegiterArgs, newUserServiceUserRegiterResult, false),
+		"GetUserInfo":              kitex.NewMethodInfo(getUserInfoHandler, newUserServiceGetUserInfoArgs, newUserServiceGetUserInfoResult, false),
+		"GetUserInfoByUserID":      kitex.NewMethodInfo(getUserInfoByUserIDHandler, newUserServiceGetUserInfoByUserIDArgs, newUserServiceGetUserInfoByUserIDResult, false),
+		"UpdateName":               kitex.NewMethodInfo(updateNameHandler, newUserServiceUpdateNameArgs, newUserServiceUpdateNameResult, false),
+		"UpdatePassword":           kitex.NewMethodInfo(updatePasswordHandler, newUserServiceUpdatePasswordArgs, newUserServiceUpdatePasswordResult, false),
+		"UpdateCost":               kitex.NewMethodInfo(updateCostHandler, newUserServiceUpdateCostArgs, newUserServiceUpdateCostResult, false),
+		"UpdateBalance":            kitex.NewMethodInfo(updateBalanceHandler, newUserServiceUpdateBalanceArgs, newUserServiceUpdateBalanceResult, false),
+		"UpdateBalanceAndCost":     kitex.NewMethodInfo(updateBalanceAndCostHandler, newUserServiceUpdateBalanceAndCostArgs, newUserServiceUpdateBalanceAndCostResult, false),
+		"UpdateAddress":            kitex.NewMethodInfo(updateAddressHandler, newUserServiceUpdateAddressArgs, newUserServiceUpdateAddressResult, false),
+		"GetFriendList":            kitex.NewMethodInfo(getFriendListHandler, newUserServiceGetFriendListArgs, newUserServiceGetFriendListResult, false),
+		"AddFriend":                kitex.NewMethodInfo(addFriendHandler, newUserServiceAddFriendArgs, newUserServiceAddFriendResult, false),
+		"DeleteFriend":             kitex.NewMethodInfo(deleteFriendHandler, newUserServiceDeleteFriendArgs, newUserServiceDeleteFriendResult, false),
+		"GetMessageList":           kitex.NewMethodInfo(getMessageListHandler, newUserServiceGetMessageListArgs, newUserServiceGetMessageListResult, false),
+		"SendMessage":              kitex.NewMethodInfo(sendMessageHandler, newUserServiceSendMessageArgs, newUserServiceSendMessageResult, false),
+		"GetUserListByContent":     kitex.NewMethodInfo(getUserListByContentHandler, newUserServiceGetUserListByContentArgs, newUserServiceGetUserListByContentResult, false),
+		"SendFriendApplication":    kitex.NewMethodInfo(sendFriendApplicationHandler, newUserServiceSendFriendApplicationArgs, newUserServiceSendFriendApplicationResult, false),
+		"GetFriendApplicationList": kitex.NewMethodInfo(getFriendApplicationListHandler, newUserServiceGetFriendApplicationListArgs, newUserServiceGetFriendApplicationListResult, false),
+		"RejectFriendApplication":  kitex.NewMethodInfo(rejectFriendApplicationHandler, newUserServiceRejectFriendApplicationArgs, newUserServiceRejectFriendApplicationResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName":     "user",
@@ -339,6 +342,60 @@ func newUserServiceGetUserListByContentResult() interface{} {
 	return user.NewUserServiceGetUserListByContentResult()
 }
 
+func sendFriendApplicationHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceSendFriendApplicationArgs)
+	realResult := result.(*user.UserServiceSendFriendApplicationResult)
+	success, err := handler.(user.UserService).SendFriendApplication(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceSendFriendApplicationArgs() interface{} {
+	return user.NewUserServiceSendFriendApplicationArgs()
+}
+
+func newUserServiceSendFriendApplicationResult() interface{} {
+	return user.NewUserServiceSendFriendApplicationResult()
+}
+
+func getFriendApplicationListHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceGetFriendApplicationListArgs)
+	realResult := result.(*user.UserServiceGetFriendApplicationListResult)
+	success, err := handler.(user.UserService).GetFriendApplicationList(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceGetFriendApplicationListArgs() interface{} {
+	return user.NewUserServiceGetFriendApplicationListArgs()
+}
+
+func newUserServiceGetFriendApplicationListResult() interface{} {
+	return user.NewUserServiceGetFriendApplicationListResult()
+}
+
+func rejectFriendApplicationHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceRejectFriendApplicationArgs)
+	realResult := result.(*user.UserServiceRejectFriendApplicationResult)
+	success, err := handler.(user.UserService).RejectFriendApplication(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceRejectFriendApplicationArgs() interface{} {
+	return user.NewUserServiceRejectFriendApplicationArgs()
+}
+
+func newUserServiceRejectFriendApplicationResult() interface{} {
+	return user.NewUserServiceRejectFriendApplicationResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -504,6 +561,36 @@ func (p *kClient) GetUserListByContent(ctx context.Context, req *user.GetUserLis
 	_args.Req = req
 	var _result user.UserServiceGetUserListByContentResult
 	if err = p.c.Call(ctx, "GetUserListByContent", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) SendFriendApplication(ctx context.Context, req *user.SendFriendApplicationRequest) (r *user.SendFriendApplicationResponse, err error) {
+	var _args user.UserServiceSendFriendApplicationArgs
+	_args.Req = req
+	var _result user.UserServiceSendFriendApplicationResult
+	if err = p.c.Call(ctx, "SendFriendApplication", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetFriendApplicationList(ctx context.Context, req *user.GetFriendApplicationListRequest) (r *user.GetFriendApplicationListResponse, err error) {
+	var _args user.UserServiceGetFriendApplicationListArgs
+	_args.Req = req
+	var _result user.UserServiceGetFriendApplicationListResult
+	if err = p.c.Call(ctx, "GetFriendApplicationList", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) RejectFriendApplication(ctx context.Context, req *user.RejectFriendApplicationRequest) (r *user.RejectFriendApplicationResponse, err error) {
+	var _args user.UserServiceRejectFriendApplicationArgs
+	_args.Req = req
+	var _result user.UserServiceRejectFriendApplicationResult
+	if err = p.c.Call(ctx, "RejectFriendApplication", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

@@ -88,3 +88,12 @@ func SendMessage(ctx context.Context, req *user.SendMessageRequest) (*user.SendM
 func GetUserListByContent(ctx context.Context, req *user.GetUserListByContentRequest) (*user.GetUserListByContentResponse, error) {
 	return userClient.GetUserListByContent(ctx, req)
 }
+func SendFriendApplication(ctx context.Context, req *user.SendFriendApplicationRequest) (*user.SendFriendApplicationResponse, error) {
+	return userClient.SendFriendApplication(ctx, req)
+}
+func GetFriendApplicationList(ctx context.Context, req *user.GetFriendApplicationListRequest) (*user.GetFriendApplicationListResponse, error) {
+	return userClient.GetFriendApplicationList(ctx, req)
+}
+func RejectFriendApplication(ctx context.Context, req *user.RejectFriendApplicationRequest) (*user.RejectFriendApplicationResponse, error) {
+	return userClient.RejectFriendApplication(ctx, req)
+}

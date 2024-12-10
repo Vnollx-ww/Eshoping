@@ -118,6 +118,7 @@ func GetOrderListByProductName(ctx context.Context, c *app.RequestContext) {
 func GetOrderListByState(ctx context.Context, c *app.RequestContext) {
 	var reqbody struct {
 		state bool
+		Token string
 	}
 	if err := c.Bind(&reqbody); err != nil {
 		logger.Error("前后端数据绑定错误", zap.Error(err))
@@ -126,6 +127,7 @@ func GetOrderListByState(ctx context.Context, c *app.RequestContext) {
 	}
 	req := &orderlist.GetOrderListByStateRequest{
 		State: reqbody.state,
+		Token: reqbody.Token,
 	}
 	res, _ := rpc.GetOrderListByState(ctx, req)
 	if res.StatusCode == -1 {

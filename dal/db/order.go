@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"github.com/jinzhu/gorm"
+	"time"
 )
 
 type Order struct {
@@ -16,6 +17,9 @@ type Order struct {
 }
 
 func CreateOrder(ctx context.Context, order *Order) error {
+	s := time.Now().Format("2006-01-02 15:04:05")
+	layout := "2006-01-02 15:04:05"
+	order.CreatedAt, _ = time.Parse(layout, s)
 	err := DB.Create(order).Error
 	return err
 }
@@ -60,9 +64,9 @@ func GetOrderListByProductName(ctx context.Context, productName string) ([]*Orde
 	}
 	return orders, nil
 }
-func GetOrderListByState(ctx context.Context, state bool) ([]*Order, error) {
+func GetOrderListByState(ctx context.Context, state bool, productname string) ([]*Order, error) {
 	var orders []*Order
-	result := DB.Where("state = ?", state).Find(&orders)
+	result := DB.Where("state = ? AND product_name = ?", state, productname).Find(&orders)
 	if result.Error != nil {
 		return nil, result.Error
 	}

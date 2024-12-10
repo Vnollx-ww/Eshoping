@@ -10,14 +10,15 @@ import (
 
 type User struct {
 	gorm.Model
-	UserName    string `gorm:"unique;varchar(40);not null" json:"name,omitempty"`
-	Password    string `gorm:"type:varchar(256);not null" json:"password,omitempty"`
-	Balance     int64  `gorm:"default:0" json:"balance,omitempty"`
-	Cost        int64  `gorm:"default:0" json:"cost,omitempty"`
-	Address     string `gorm:"varchar(256);not null" json:"address,omitempty"`
-	Avatar      string `gorm:"varchar(256);not null" json:"avatar,omitempty"`
-	Friend      string `gorm:"type:json" json:"friend,omitempty"`
-	SendMessage string `gorm:"type:json" json:"send_message,omitempty"` // 设置默认值为空 JSON 对象
+	UserName              string `gorm:"unique;varchar(40);not null" json:"name,omitempty"`
+	Password              string `gorm:"type:varchar(256);not null" json:"password,omitempty"`
+	Balance               int64  `gorm:"default:0" json:"balance,omitempty"`
+	Cost                  int64  `gorm:"default:0" json:"cost,omitempty"`
+	Address               string `gorm:"varchar(256);not null" json:"address,omitempty"`
+	Avatar                string `gorm:"varchar(256);not null" json:"avatar,omitempty"`
+	Friend                string `gorm:"type:json" json:"friend,omitempty"`
+	SendMessage           string `gorm:"type:json" json:"send_message,omitempty"` // 设置默认值为空 JSON 对象
+	SendFriendApplication string `gorm:"type:json" json:"send_friend_application,omitempty"`
 }
 
 func CreateUser(ctx context.Context, usr *User) error {
@@ -253,7 +254,6 @@ func DeleteFriend(ctx context.Context, usra *User, usrb *User) error {
 		tx.Rollback()
 		return err
 	}
-
 	// 提交事务
 	return tx.Commit().Error
 }
@@ -288,4 +288,64 @@ func GetUserListByContent(ctx context.Context, content string) ([]*User, error) 
 		return nil, err
 	}
 	return u, nil
+}
+func SendFriendApplication(ctx context.Context, usr *User, tousr *User) error {
+	// 1. 反序列化 SendFriendApplication 字段为 map[int64]bool
+	var sendFriendApplicationMap map[int64]bool
+	err := json.Unmarshal([]byte(tousr.SendFriendApplication), &sendFriendApplicationMap)
+	if err != nil {
+		return err
+	}
+	_, ok := sendFriendApplicationMap[int64(usr.ID)]
+	if ok {
+		delete(sendFriendApplicationMap, int64(usr.ID))
+	}
+	// 2. 将当前用户的请求状态设置为 true，表示已发送请求
+	sendFriendApplicationMap[int64(usr.ID)] = true
+	// 3. 将 map 序列化回 JSON 字符串
+	updatedData, err := json.Marshal(sendFriendApplicationMap)
+	if err != nil {
+		return err
+	}
+	// 4. 更新 usr 的 SendFriendApplication 字段
+	tousr.SendFriendApplication = string(updatedData)
+	// 假设有一个 `db.Save` 方法来更新数据库
+	if err := DB.Save(tousr).Error; err != nil {
+		return err
+	}
+	return nil
+}
+func DeleteFriendApplication(ctx context.Context, usr *User, tousr *User) error {
+	var sendFriendApplication map[int64]bool
+	err := json.Unmarshal([]byte(tousr.SendFriendApplication), &sendFriendApplication)
+	if err != nil {
+		return err
+	}
+	// 删除 userb.ID 这一键
+	delete(sendFriendApplication, int64(usr.ID))
+	// 将更新后的 map 序列化回 JSON
+	updatedSendFriendApplicationJSON, err := json.Marshal(sendFriendApplication)
+	if err != nil {
+		return err
+	}
+	// 更新 usra.SendFriendApplication
+	tousr.SendFriendApplication = string(updatedSendFriendApplicationJSON)
+	err = DB.Save(tousr).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func IsFriendJudge(ctx context.Context, usr *User, ID int64) (bool, error) {
+	var usrfriend map[int64]int
+	err := json.Unmarshal([]byte(usr.Friend), &usrfriend)
+	if err != nil {
+		return false, err
+	}
+	_, ok := usrfriend[ID]
+	if ok {
+		return true, nil
+	} else {
+		return false, nil
+	}
 }

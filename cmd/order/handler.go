@@ -135,23 +135,30 @@ func (s *OrderListServiceImpl) GetOrderListByUserID(ctx context.Context, req *or
 		logger.Error("token解析失败：", zap.Error(err))
 		return BadGetOrderListByUserIDResponse("token解析失败"), nil
 	}
-	orders, er := db.GetOrderListByUserID(ctx, mc.UserId)
-	if er != nil {
+	pro, err := db.GetProductListInfoByUser(ctx, mc.UserId)
+	if err != nil {
 		logger.Error("用户订单列表获取失败：", zap.Error(err))
 		return BadGetOrderListByUserIDResponse("用户订单列表获取失败"), nil
 	}
 	var or []*orderlist.Order
-	for _, order := range orders {
-		var ord orderlist.Order
-		ord.OrderId = int64(order.ID)
-		ord.UserId = order.UserID
-		ord.Number = order.Number
-		ord.Cost = order.Cost
-		ord.ProductName = order.ProductName
-		ord.Address = order.Address
-		ord.Isdeliver = order.State
-		ord.CreateTime = order.CreatedAt.Format("2006-01-02 15:04:05")
-		or = append(or, &ord)
+	for _, p := range pro {
+		orders, err := db.GetOrderListByProductName(ctx, p.ProductName)
+		if err != nil {
+			logger.Error("用户订单列表获取失败：", zap.Error(err))
+			return BadGetOrderListByUserIDResponse("用户订单列表获取失败"), nil
+		}
+		for _, order := range orders {
+			var ord orderlist.Order
+			ord.OrderId = int64(order.ID)
+			ord.UserId = order.UserID
+			ord.Number = order.Number
+			ord.Cost = order.Cost
+			ord.ProductName = order.ProductName
+			ord.Address = order.Address
+			ord.Isdeliver = order.State
+			ord.CreateTime = order.CreatedAt.Format("2006-01-02 15:04:05")
+			or = append(or, &ord)
+		}
 	}
 	return GoodGetOrderListByUserIDResponse("用户订单列表获取成功", or), nil
 }
@@ -181,23 +188,35 @@ func (s *OrderListServiceImpl) GetOrderListByProductNameID(ctx context.Context, 
 
 // GetOrderListByState implements the OrderListServiceImpl interface.
 func (s *OrderListServiceImpl) GetOrderListByState(ctx context.Context, req *orderlist.GetOrderListByStateRequest) (resp *orderlist.GetOrderListByStateResponse, err error) {
-	orders, err := db.GetOrderListByState(ctx, req.State)
+	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
-		logger.Error("未发货订单列表获取失败：", zap.Error(err))
-		return BadGetOrderListByStateResponse("未发货订单列表获取失败"), nil
+		logger.Error("token解析失败：", zap.Error(err))
+		return BadGetOrderListByStateResponse("token解析失败"), nil
+	}
+	pro, err := db.GetProductListInfoByUser(ctx, mc.UserId)
+	if err != nil {
+		logger.Error("订单未发货列表获取失败：", zap.Error(err))
+		return BadGetOrderListByStateResponse("订单未发货列表获取成功失败"), nil
 	}
 	var or []*orderlist.Order
-	for _, order := range orders {
-		var ord orderlist.Order
-		ord.OrderId = int64(order.ID)
-		ord.UserId = order.UserID
-		ord.Number = order.Number
-		ord.Cost = order.Cost
-		ord.ProductName = order.ProductName
-		ord.Address = order.Address
-		ord.Isdeliver = order.State
-		ord.CreateTime = order.CreatedAt.Format("2006-01-02 15:04:05")
-		or = append(or, &ord)
+	for _, p := range pro {
+		orders, err := db.GetOrderListByState(ctx, req.State, p.ProductName)
+		if err != nil {
+			logger.Error("用户订单列表获取失败：", zap.Error(err))
+			return BadGetOrderListByStateResponse("用户订单列表获取失败"), nil
+		}
+		for _, order := range orders {
+			var ord orderlist.Order
+			ord.OrderId = int64(order.ID)
+			ord.UserId = order.UserID
+			ord.Number = order.Number
+			ord.Cost = order.Cost
+			ord.ProductName = order.ProductName
+			ord.Address = order.Address
+			ord.Isdeliver = order.State
+			ord.CreateTime = order.CreatedAt.Format("2006-01-02 15:04:05")
+			or = append(or, &ord)
+		}
 	}
 	return GoodGetOrderListByStateResponse("订单未发货列表获取成功", or), nil
 }

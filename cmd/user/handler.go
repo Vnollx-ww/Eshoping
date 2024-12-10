@@ -116,6 +116,24 @@ func BadGetUserListByContentResponse(s string) *user.GetUserListByContentRespons
 func GoodGetUserListByContentResponse(s string, u []*user.UserInfo) *user.GetUserListByContentResponse {
 	return &user.GetUserListByContentResponse{StatusCode: 200, StatusMsg: s, Userinfolist: u}
 }
+func BadSendFriendApplicationResponse(s string) *user.SendFriendApplicationResponse {
+	return &user.SendFriendApplicationResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodSendFriendApplicationResponse(s string, flag bool) *user.SendFriendApplicationResponse {
+	return &user.SendFriendApplicationResponse{StatusCode: 200, StatusMsg: s, Succed: flag}
+}
+func BadGetFriendApplicationListResponse(s string) *user.GetFriendApplicationListResponse {
+	return &user.GetFriendApplicationListResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodGetFriendApplicationListResponse(s string, f []*user.FriendApplication) *user.GetFriendApplicationListResponse {
+	return &user.GetFriendApplicationListResponse{StatusCode: 200, StatusMsg: s, Friendapplicaiton: f}
+}
+func BadRejectFriendApplicationResponse(s string) *user.RejectFriendApplicationResponse {
+	return &user.RejectFriendApplicationResponse{StatusCode: -1, StatusMsg: s}
+}
+func GoodRejectFriendApplicationResponse(s string, flag bool) *user.RejectFriendApplicationResponse {
+	return &user.RejectFriendApplicationResponse{StatusCode: 200, StatusMsg: s, Succed: flag}
+}
 
 // UserLogin implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UserLogin(ctx context.Context, req *user.UserLoginRequest) (resp *user.UserLoginResponse, err error) {
@@ -154,6 +172,7 @@ func (s *UserServiceImpl) UserRegiter(ctx context.Context, req *user.UserRegiste
 	usr = &db.User{UserName: req.Username, Password: encryptedPassword, Address: req.Address, Avatar: req.Avatar} // 设置为 NULL}
 	usr.SendMessage = "{}"
 	usr.Friend = "{}"
+	usr.SendFriendApplication = "{}"
 	err = db.CreateUser(ctx, usr)
 	if err != nil {
 		logger.Error("注册失败：", zap.Error(err))
@@ -479,6 +498,11 @@ func (s *UserServiceImpl) AddFriend(ctx context.Context, req *user.AddFriendRequ
 		logger.Error("好友添加失败：", zap.Error(err))
 		return BadAddFriendResponse("好友添加失败"), nil
 	}
+	err = db.DeleteFriendApplication(ctx, usrb, usra)
+	if err != nil {
+		logger.Error("好友请求删除失败：", zap.Error(err))
+		return BadAddFriendResponse("好友请求删除失败"), nil
+	}
 	err = rs.DelKey(ctx, cacheKey+fmt.Sprintf("%d", mc.UserId)) // 删除缓存
 	if err != nil {
 		logger.Error("删除缓存失败：", zap.Error(err))
@@ -617,4 +641,96 @@ func (s *UserServiceImpl) GetUserListByContent(ctx context.Context, req *user.Ge
 		u = append(u, userr)
 	}
 	return GoodGetUserListByContentResponse("搜索用户信息成功", u), nil
+}
+
+// SendFriendApplication implements the UserServiceImpl interface.
+func (s *UserServiceImpl) SendFriendApplication(ctx context.Context, req *user.SendFriendApplicationRequest) (resp *user.SendFriendApplicationResponse, err error) {
+	mc, err := middlerware.ParseToken(req.Token)
+	if err != nil {
+		logger.Error("token解析失败：", zap.Error(err))
+		return BadSendFriendApplicationResponse("token解析失败"), nil
+	}
+	usr, err := db.GetUserByID(ctx, mc.UserId)
+	if err != nil {
+		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
+		return BadSendFriendApplicationResponse("获取用户信息失败：服务器内部错误"), nil
+	}
+	ok, err := db.IsFriendJudge(ctx, usr, req.Touserid)
+	if err != nil {
+		logger.Error("查询好友列表失败，服务器内部错误：", zap.Error(err))
+		return BadSendFriendApplicationResponse("查询好友列表失败：服务器内部错误"), nil
+	}
+	if ok == true {
+		return BadSendFriendApplicationResponse("已是好友，无需再次添加！"), nil
+	}
+	kafkaProducer, err := user2.NewKafkaProducer([]string{kafkaAddr}) //初始化kafka生产者
+	if err != nil {
+		logger.Error("kafka生产者创建失败：", zap.Error(err))
+		return BadSendFriendApplicationResponse("Kafka生产者创建失败"), err
+	}
+	err = kafkaProducer.SendFriendApplicationEvent(mc.UserId, req.Touserid)
+	if err != nil {
+		logger.Error("好友请求创建成功，但消息发送失败：", zap.Error(err))
+		return BadSendFriendApplicationResponse("好友请求创建成功，但消息发送失败"), err
+	}
+	return GoodSendFriendApplicationResponse("发送好友请求成功", true), nil
+}
+
+// GetFriendApplicationList implements the UserServiceImpl interface.
+func (s *UserServiceImpl) GetFriendApplicationList(ctx context.Context, req *user.GetFriendApplicationListRequest) (resp *user.GetFriendApplicationListResponse, err error) {
+	mc, err := middlerware.ParseToken(req.Token)
+	if err != nil {
+		logger.Error("token解析失败：", zap.Error(err))
+		return BadGetFriendApplicationListResponse("token解析失败"), nil
+	}
+	usr, err := db.GetUserByID(ctx, mc.UserId)
+	if err != nil {
+		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
+		return BadGetFriendApplicationListResponse("获取用户信息失败：服务器内部错误"), nil
+	}
+	var fa map[int64]bool
+	fa = make(map[int64]bool)
+	err = json.Unmarshal([]byte(usr.SendFriendApplication), &fa)
+	if err != nil {
+		return BadGetFriendApplicationListResponse("好友请求列表反序列化失败"), nil
+	}
+	var f []*user.FriendApplication
+	for usrid, _ := range fa {
+		usr, err = db.GetUserByID(ctx, usrid)
+		if err != nil {
+			logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
+			return BadGetFriendApplicationListResponse("获取用户信息失败：服务器内部错误"), nil
+		}
+		f = append(f, &user.FriendApplication{
+			Userid: usrid,
+			Avatar: usr.Avatar,
+			Name:   usr.UserName,
+		})
+	}
+	return GoodGetFriendApplicationListResponse("获取好友请求列表成功", f), nil
+}
+
+// RejectFriendApplication implements the UserServiceImpl interface.
+func (s *UserServiceImpl) RejectFriendApplication(ctx context.Context, req *user.RejectFriendApplicationRequest) (resp *user.RejectFriendApplicationResponse, err error) {
+	mc, err := middlerware.ParseToken(req.Token)
+	if err != nil {
+		logger.Error("token解析失败：", zap.Error(err))
+		return BadRejectFriendApplicationResponse("token解析失败"), nil
+	}
+	tousr, err := db.GetUserByID(ctx, mc.UserId)
+	if err != nil {
+		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
+		return BadRejectFriendApplicationResponse("获取用户信息失败：服务器内部错误"), nil
+	}
+	usr, err := db.GetUserByID(ctx, req.Touserid)
+	if err != nil {
+		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
+		return BadRejectFriendApplicationResponse("获取用户信息失败：服务器内部错误"), nil
+	}
+	err = db.DeleteFriendApplication(ctx, usr, tousr)
+	if err != nil {
+		logger.Error("好友请求删除失败：", zap.Error(err))
+		return BadRejectFriendApplicationResponse("好友请求删除失败"), nil
+	}
+	return GoodRejectFriendApplicationResponse("好友请求删除成功", true), nil
 }

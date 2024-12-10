@@ -299,6 +299,14 @@
     }
 
     window.onload = function () {
+            const token = localStorage.getItem("token");
+            if(token===null){
+                alert("请先登录！");
+                setTimeout(() => {
+                    window.location.href = "login"; // 重定向到商品管理页面
+                }, 1000);
+                return
+            }
         loadFriendList();
         connectWebSocket();
     };

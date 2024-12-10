@@ -186,6 +186,8 @@
         <button id="updateprice">修改商品价格</button>
         <button id="deleteproduct">下架商品</button>
         <button id="fetchOrderListInfo">查看购买记录</button>
+        <button id="getorderlistbystate">查看待处理订单</button>
+        <button id="friendrequest">查看好友申请列表</button>
         <button id="deletefriend">删除好友</button>
         <button id="exit">退出登录</button>
     </div>
@@ -272,6 +274,12 @@
     });
     document.getElementById('updateprice').addEventListener('click', function() {
         window.location.href = "updateprice";
+    });
+    document.getElementById('getorderlistbystate').addEventListener('click', function() {
+        window.location.href = "getorderlistbystate";
+    });
+    document.getElementById('friendrequest').addEventListener('click', function() {
+        window.location.href = "friendrequest";
     });
     document.getElementById('exit').addEventListener('click', function() {
         localStorage.removeItem('token')

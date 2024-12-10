@@ -23,6 +23,11 @@ struct UserInfo{
 2:i64 id
 3:string avatar
 }
+struct FriendApplication{
+1:string name
+2:string avatar
+3:i64 userid
+}
 struct UserLoginRequest {
     1: string username;
     2: string password;
@@ -172,6 +177,32 @@ struct GetUserListByContentResponse{
 2:string status_msg
 3:list<UserInfo> userinfolist
 }
+struct SendFriendApplicationRequest{
+1:string token
+2:i64 touserid
+}
+struct SendFriendApplicationResponse{
+1:i32 status_code
+2:string status_msg
+3:bool succed
+}
+struct GetFriendApplicationListRequest{
+1:string token
+}
+struct GetFriendApplicationListResponse{
+1:i32 status_code
+2:string status_msg
+3:list<FriendApplication> friendapplicaiton
+}
+struct RejectFriendApplicationRequest{
+1:string token
+2:i64 touserid
+}
+struct RejectFriendApplicationResponse{
+1:i32 status_code
+2:string status_msg
+3:bool succed
+}
 //kitex -module Eshop idl/user.thrift
 //kitex -module Eshop -service Eshop.item -use Eshop/kitex_gen ../../idl/user.thrift
 service UserService {
@@ -191,4 +222,7 @@ service UserService {
     GetMessageListResponse GetMessageList(1: GetMessageListRequest req)
     SendMessageResponse SendMessage(1: SendMessageRequest req)
     GetUserListByContentResponse GetUserListByContent(1: GetUserListByContentRequest req)
+    SendFriendApplicationResponse SendFriendApplication(1: SendFriendApplicationRequest req)
+    GetFriendApplicationListResponse GetFriendApplicationList(1: GetFriendApplicationListRequest req)
+    RejectFriendApplicationResponse RejectFriendApplication(1: RejectFriendApplicationRequest req)
 }

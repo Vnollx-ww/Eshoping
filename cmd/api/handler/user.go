@@ -491,3 +491,76 @@ func GetUserListByContent(ctx context.Context, c *app.RequestContext) {
 		Userinfolist: res.Userinfolist,
 	})
 }
+func SendFriendApplication(ctx context.Context, c *app.RequestContext) {
+	var reqbody struct {
+		Token    string
+		Touserid int64
+	}
+	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
+		BadBaseResponse(c, "无效的请求格式")
+		return
+	}
+	req := &user.SendFriendApplicationRequest{
+		Token:    reqbody.Token,
+		Touserid: reqbody.Touserid,
+	}
+	res, _ := rpc.SendFriendApplication(ctx, req)
+	if res.StatusCode == -1 {
+		BadBaseResponse(c, res.StatusMsg)
+		return
+	}
+	c.JSON(http.StatusOK, user.SendFriendApplicationResponse{
+		StatusMsg:  res.StatusMsg,
+		StatusCode: res.StatusCode,
+		Succed:     true,
+	})
+}
+func GetFriendApplicationList(ctx context.Context, c *app.RequestContext) {
+	var reqbody struct {
+		Token string
+	}
+	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
+		BadBaseResponse(c, "无效的请求格式")
+		return
+	}
+	req := &user.GetFriendApplicationListRequest{
+		Token: reqbody.Token,
+	}
+	res, _ := rpc.GetFriendApplicationList(ctx, req)
+	if res.StatusCode == -1 {
+		BadBaseResponse(c, res.StatusMsg)
+		return
+	}
+	c.JSON(http.StatusOK, user.GetFriendApplicationListResponse{
+		StatusMsg:         res.StatusMsg,
+		StatusCode:        res.StatusCode,
+		Friendapplicaiton: res.Friendapplicaiton,
+	})
+}
+func RejectFriendApplication(ctx context.Context, c *app.RequestContext) {
+	var reqbody struct {
+		Token    string
+		Touserid int64
+	}
+	if err := c.Bind(&reqbody); err != nil {
+		logger.Error("前后端数据绑定错误", zap.Error(err))
+		BadBaseResponse(c, "无效的请求格式")
+		return
+	}
+	req := &user.RejectFriendApplicationRequest{
+		Token:    reqbody.Token,
+		Touserid: reqbody.Touserid,
+	}
+	res, _ := rpc.RejectFriendApplication(ctx, req)
+	if res.StatusCode == -1 {
+		BadBaseResponse(c, res.StatusMsg)
+		return
+	}
+	c.JSON(http.StatusOK, user.RejectFriendApplicationResponse{
+		StatusMsg:  res.StatusMsg,
+		StatusCode: res.StatusCode,
+		Succed:     true,
+	})
+}

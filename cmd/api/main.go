@@ -91,8 +91,8 @@ func LoadHtml(hz *server.Hertz) {
 		//c.File("/app/web/html/user/updatestock.html")
 	})
 	hz.GET("/getorderlistbystate", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("/app/web/html/admin/getorderlistbystate.html")
-		c.File("D:/GolandProgram/Eshoping/web/html/admin/getorderlistbystate.html")
+		//c.File("/app/web/html/user/getorderlistbystate.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/getorderlistbystate.html")
 	})
 	hz.GET("/friend", func(ctx context.Context, c *app.RequestContext) {
 		//c.File("/app/web/html/user/friend.html")
@@ -105,6 +105,10 @@ func LoadHtml(hz *server.Hertz) {
 	hz.GET("/deletefriend", func(ctx context.Context, c *app.RequestContext) {
 		//c.File("/app/web/html/user/deletefriend.html")
 		c.File("D:/GolandProgram/Eshoping/web/html/user/deletefriend.html")
+	})
+	hz.GET("/friendrequest", func(ctx context.Context, c *app.RequestContext) {
+		//c.File("/app/web/html/user/friendrequest.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/friendrequest.html")
 	})
 }
 func registerGroup(hz *server.Hertz) {
@@ -129,6 +133,9 @@ func registerGroup(hz *server.Hertz) {
 		user.POST("/sendmessage", handler.SendMessage)
 		user.GET("/ws", handler.WebSocketConnections)
 		user.POST("/getuserlistbycontent", handler.GetUserListByContent)
+		user.POST("/sendfriendapplication", handler.SendFriendApplication)
+		user.POST("/getfriendapplicationlist", handler.GetFriendApplicationList)
+		user.POST("/rejectfriendapplication", handler.RejectFriendApplication)
 	}
 	product := hz.Group("/product")
 	{
