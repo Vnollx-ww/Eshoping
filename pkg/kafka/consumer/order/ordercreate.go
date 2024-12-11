@@ -84,7 +84,7 @@ func NewProductStockConsumer(brokerList []string) (*ProductStockConsumer, error)
 func (c *UserBalanceAndCostConsumer) ListenBalanceAndCost() {
 	log.Println("listenbalanceandcost")
 	config := sarama.NewConfig()
-	client, err := sarama.NewClient([]string{"localhost:9092"}, config)
+	client, err := sarama.NewClient([]string{kafkaAddr}, config)
 	if err != nil {
 		log.Fatalf("Error creating Kafka client: %v", err)
 	}
@@ -119,7 +119,7 @@ func (c *UserBalanceAndCostConsumer) ListenBalanceAndCost() {
 func (c *ProductStockConsumer) ListenStock() {
 	log.Println("listenstockandsales")
 	config := sarama.NewConfig()
-	client, err := sarama.NewClient([]string{"localhost:9092"}, config)
+	client, err := sarama.NewClient([]string{kafkaAddr}, config)
 	if err != nil {
 		log.Fatalf("Error creating Kafka client: %v", err)
 	}

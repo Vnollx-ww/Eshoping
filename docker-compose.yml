@@ -124,13 +124,29 @@ services:
       - ./kafka_data:/var/lib/kafka/data
     networks:
       - app-network
-
+  minio:
+    image: bitnami/minio:latest
+    container_name: my-minio
+    environment:
+      MINIO_ACCESS_KEY: vnollx           # 设置 MinIO 访问密钥
+      MINIO_SECRET_KEY: Iamvnollx        # 设置 MinIO 秘密密钥
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"                             # 映射 MinIO 服务端口
+      - "9001:9001"                             # 映射 MinIO 控制台端口
+    volumes:
+      - minio-data:/data
+    networks:
+      - app-network
 volumes:
   mysql_data:
     driver: local
   consul-data:
     driver: local
   kafka_data:
+    driver: local
+  minio-data:
     driver: local
 
 networks:

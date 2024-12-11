@@ -47,7 +47,7 @@ func NewProductImageConsumer(brokerList []string) (*ProductImageConsumer, error)
 func (c *ProductImageConsumer) Listen() {
 	log.Println("listenProductImage")
 	config := sarama.NewConfig()
-	client, err := sarama.NewClient([]string{"localhost:9092"}, config)
+	client, err := sarama.NewClient([]string{kafkaAddr}, config)
 	if err != nil {
 		log.Fatalf("Error creating Kafka client: %v", err)
 	}

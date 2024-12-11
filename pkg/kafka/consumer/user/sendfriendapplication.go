@@ -94,5 +94,6 @@ func SendFriendApplication(userID int64, toUserId int64) error {
 		logger.Error("发送好友请求失败,服务器出错：", zap.Error(err))
 		return err
 	}
+	log.Println("发送好友请求成功！")
 	return nil
 }
