@@ -136,7 +136,6 @@ func (client *Client) ReadMessages() {
 			_, _ = rpc.SendMessage(context.Background(), req)
 			targetClient := findClientByUserID(msgData.Touserid)
 			if targetClient != nil {
-				log.Println("ok?")
 				targetClient.send <- message
 			}
 		}
@@ -151,7 +150,6 @@ func (client *Client) SendMessages() {
 			log.Println("Error sending message:", err)
 			break
 		}
-		log.Println(string(message))
 	}
 }
 

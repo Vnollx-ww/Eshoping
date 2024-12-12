@@ -367,6 +367,7 @@
             }, 1000);
             return;
         }
+        console.log(token)
         const objectname = localStorage.getItem('objectname');
         if (objectname) {
             const userAvatarPath = "http://localhost:9000/user/" + "UserName=" + objectname + ".jpg" + "?t=" + new Date().getTime();

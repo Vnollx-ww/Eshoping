@@ -2,6 +2,7 @@ package main
 
 import (
 	"Eshop/cmd/api/handler"
+	"Eshop/pkg/middlerware"
 	"Eshop/pkg/viper"
 	"context"
 	"fmt"
@@ -17,84 +18,84 @@ var (
 func LoadHtml(hz *server.Hertz) {
 	hz.GET("/", func(ctx context.Context, c *app.RequestContext) {
 		// 你可以通过 c.File() 返回文件
-		//c.File("D:/GolandProgram/Eshoping/web/html/index.html")
-		c.File("/app/web/html/index.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/index.html")
+		//c.File("/app/web/html/index.html")
 	})
 	hz.GET("/login", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/user/login.html")
-		c.File("/app/web/html/user/user/login.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/user/login.html")
+		//c.File("/app/web/html/user/user/login.html")
 	})
 	hz.GET("/register", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/user/register.html")
-		c.File("/app/web/html/user/user/register.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/user/register.html")
+		//c.File("/app/web/html/user/user/register.html")
 	})
 	hz.GET("/userinfo", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/user/userinfo.html")
-		c.File("/app/web/html/user/user/userinfo.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/user/userinfo.html")
+		//c.File("/app/web/html/user/user/userinfo.html")
 	})
 	hz.GET("/homepage", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/user/homepage.html")
-		c.File("/app/web/html/user/user/homepage.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/user/homepage.html")
+		//c.File("/app/web/html/user/user/homepage.html")
 	})
 	hz.GET("/recharge", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/user/recharge.html")
-		c.File("/app/web/html/user/user/recharge.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/user/recharge.html")
+		//c.File("/app/web/html/user/user/recharge.html")
 	})
 	hz.GET("/updatename", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/user/updatename.html")
-		c.File("/app/web/html/user/user/updatename.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/user/updatename.html")
+		//c.File("/app/web/html/user/user/updatename.html")
 	})
 	hz.GET("/updatepassword", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/user/updatepassword.html")
-		c.File("/app/web/html/user/user/updatepassword.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/user/updatepassword.html")
+		//c.File("/app/web/html/user/user/updatepassword.html")
 	})
 	hz.GET("/updateaddress", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/user/updateaddress.html")
-		c.File("/app/web/html/user/user/updateaddress.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/user/updateaddress.html")
+		//c.File("/app/web/html/user/user/updateaddress.html")
 	})
 	hz.GET("/updateavatar", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/user/updateavatar.html")
-		c.File("/app/web/html/user/user/updateavatar.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/user/updateavatar.html")
+		//c.File("/app/web/html/user/user/updateavatar.html")
 	})
 	hz.GET("/getorderlist", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/order/getorderlist.html")
-		c.File("/app/web/html/user/order/getorderlist.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/order/getorderlist.html")
+		//c.File("/app/web/html/user/order/getorderlist.html")
 	})
 	hz.GET("/addproduct", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/product/addproduct.html")
-		c.File("/app/web/html/user/product/addproduct.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/product/addproduct.html")
+		//c.File("/app/web/html/user/product/addproduct.html")
 	})
 	hz.GET("/deleteproduct", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/product/deleteproduct.html")
-		c.File("/app/web/html/user/product/deleteproduct.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/product/deleteproduct.html")
+		//c.File("/app/web/html/user/product/deleteproduct.html")
 	})
 	hz.GET("/updateprice", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/product/updateprice.html")
-		c.File("/app/web/html/user/product/updateprice.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/product/updateprice.html")
+		//c.File("/app/web/html/user/product/updateprice.html")
 	})
 	hz.GET("/updatestock", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/product/updatestock.html")
-		c.File("/app/web/html/user/product/updatestock.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/product/updatestock.html")
+		//c.File("/app/web/html/user/product/updatestock.html")
 	})
 	hz.GET("/getorderlistbystate", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/order/getorderlistbystate.html")
-		c.File("/app/web/html/user/order/getorderlistbystate.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/order/getorderlistbystate.html")
+		//c.File("/app/web/html/user/order/getorderlistbystate.html")
 	})
 	hz.GET("/friend", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/friend/friend.html")
-		c.File("/app/web/html/user/friend/friend.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/friend/friend.html")
+		//c.File("/app/web/html/user/friend/friend.html")
 	})
 	hz.GET("/targetuser", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/friend/targetuser.html")
-		c.File("/app/web/html/user/friend/targetuser.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/friend/targetuser.html")
+		//c.File("/app/web/html/user/friend/targetuser.html")
 	})
 	hz.GET("/deletefriend", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/friend/deletefriend.html")
-		c.File("/app/web/html/user/friend/deletefriend.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/friend/deletefriend.html")
+		//c.File("/app/web/html/user/friend/deletefriend.html")
 	})
 	hz.GET("/friendrequest", func(ctx context.Context, c *app.RequestContext) {
-		//c.File("D:/GolandProgram/Eshoping/web/html/user/friend/friendrequest.html")
-		c.File("/app/web/html/user/friend/friendrequest.html")
+		c.File("D:/GolandProgram/Eshoping/web/html/user/friend/friendrequest.html")
+		//c.File("/app/web/html/user/friend/friendrequest.html")
 	})
 }
 func registerGroup(hz *server.Hertz) {
@@ -142,12 +143,16 @@ func registerGroup(hz *server.Hertz) {
 		order.POST("/orderlistbyproductname", handler.GetOrderListByProductName)
 		order.POST("/orderlistbystate", handler.GetOrderListByState)
 	}
+	hz.GET("/test", func(ctx context.Context, c *app.RequestContext) {
+		c.Set("error", fmt.Errorf("错误！"))
+	})
 }
 
 func main() {
 	//ws :=handler.NewWebSocketServer()
 	//go ws.HandleMessages()
 	hz := server.New(server.WithHostPorts(apiServerAddr))
+	hz.Use(middlerware.CrcuitBreakerMiddleware())
 	hz.NoHijackConnPool = true
 	LoadHtml(hz)
 	registerGroup(hz)

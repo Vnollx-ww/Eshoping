@@ -140,7 +140,7 @@ func (s *UserServiceImpl) UserLogin(ctx context.Context, req *user.UserLoginRequ
 	usr, err := db.GetUserByName(ctx, req.Username)
 	if err != nil {
 		logger.Error("登录失败，服务器内部错误：", zap.Error(err))
-		return BadLoginResponse("登录失败；服务器内部错误"), nil
+		return BadLoginResponse("登录失败；服务器内部错误"), err
 	}
 	if usr == nil {
 		return BadLoginResponse("用户不存在"), nil
@@ -153,7 +153,7 @@ func (s *UserServiceImpl) UserLogin(ctx context.Context, req *user.UserLoginRequ
 	token, err := middlerware.NewToken(int64(usr.ID))
 	if err != nil {
 		logger.Error("Token生成失败：", zap.Error(err))
-		return BadLoginResponse("Token生成失败"), nil
+		return BadLoginResponse("Token生成失败"), err
 	}
 	return GoodLoginResponse("欢迎你！ "+req.Username, token, int64(usr.ID)), nil
 }
@@ -163,7 +163,7 @@ func (s *UserServiceImpl) UserRegiter(ctx context.Context, req *user.UserRegiste
 	usr, err := db.GetUserByName(ctx, req.Username)
 	if err != nil {
 		logger.Error("注册失败，服务器内部错误：", zap.Error(err))
-		return BadRegisterResponse("注册失败：服务器内部错误"), nil
+		return BadRegisterResponse("注册失败：服务器内部错误"), err
 	}
 	if usr != nil {
 		return BadRegisterResponse("用户已存在"), nil
@@ -186,7 +186,7 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil || mc == nil {
 		logger.Error("token解析失败：", zap.Error(err))
-		return BadGetUserInfoResponse("token解析失败"), nil
+		return BadGetUserInfoResponse("token解析失败"), err
 	}
 	cachekey := fmt.Sprintf("userinfo:%d", mc.UserId)
 	u, err := rs.GetUserInfo(ctx, cachekey)
@@ -196,7 +196,7 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
 		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
-		return BadGetUserInfoResponse("获取用户信息失败：服务器内部错误"), nil
+		return BadGetUserInfoResponse("获取用户信息失败：服务器内部错误"), err
 	}
 	if usr == nil {
 		return BadGetUserInfoResponse("用户不存在"), nil
@@ -218,12 +218,12 @@ func (s *UserServiceImpl) UpdateName(ctx context.Context, req *user.UpdateNameRe
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil || mc == nil {
 		logger.Error("token解析失败：", zap.Error(err))
-		return BadUpdateNameResponse("token解析失败"), nil
+		return BadUpdateNameResponse("token解析失败"), err
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
 		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
-		return BadUpdateNameResponse("获取用户信息失败：服务器内部错误"), nil
+		return BadUpdateNameResponse("获取用户信息失败：服务器内部错误"), err
 	}
 	if usr == nil {
 		return BadUpdateNameResponse("用户不存在"), nil
@@ -231,7 +231,7 @@ func (s *UserServiceImpl) UpdateName(ctx context.Context, req *user.UpdateNameRe
 	err = minio.UserCopyFileMinio(ctx, usr.UserName, req.Newname_)
 	if err != nil {
 		logger.Error("用户头像路径修改失败：", zap.Error(err))
-		return BadUpdateNameResponse("用户头像路径修改失败"), nil
+		return BadUpdateNameResponse("用户头像路径修改失败"), err
 	}
 	kafkaProducer, err := user2.NewKafkaProducer([]string{kafkaAddr}) //初始化kafka生产者
 	if err != nil {
@@ -246,7 +246,7 @@ func (s *UserServiceImpl) UpdateName(ctx context.Context, req *user.UpdateNameRe
 	err = db.UpdateNameAndAvatar(ctx, usr, req.Newname_)
 	if err != nil {
 		logger.Error("修改用户名失败：", zap.Error(err))
-		return BadUpdateNameResponse("修改用户名失败"), nil
+		return BadUpdateNameResponse("修改用户名失败"), err
 	}
 	cacheKey := fmt.Sprintf("userinfo:%d", mc.UserId)
 	err = rs.DelKey(ctx, cacheKey) // 删除缓存
@@ -261,12 +261,12 @@ func (s *UserServiceImpl) UpdatePassword(ctx context.Context, req *user.UpdatePa
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
 		logger.Error("token解析失败：", zap.Error(err))
-		return BadUpdatePasswordResponse("token解析失败"), nil
+		return BadUpdatePasswordResponse("token解析失败"), err
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
 		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
-		return BadUpdatePasswordResponse("获取用户信息失败：服务器内部错误"), nil
+		return BadUpdatePasswordResponse("获取用户信息失败：服务器内部错误"), err
 	}
 	if usr == nil {
 		return BadUpdatePasswordResponse("用户不存在"), nil
@@ -277,7 +277,7 @@ func (s *UserServiceImpl) UpdatePassword(ctx context.Context, req *user.UpdatePa
 	err = db.UpdatePassword(ctx, usr, middlerware.MD5Encrypt(req.Newpassword_))
 	if err != nil {
 		logger.Error("修改密码失败：", zap.Error(err))
-		return BadUpdatePasswordResponse("修改密码失败"), nil
+		return BadUpdatePasswordResponse("修改密码失败"), err
 	}
 	return GoodUpdatePasswordResponse("修改密码成功", true), nil
 }
@@ -293,7 +293,7 @@ func (s *UserServiceImpl) UpdateCost(ctx context.Context, req *user.UpdateCostRe
 	locked, err := rs.AcquireLock(ctx, lockKey) //获取分布式锁
 	if err != nil {
 		logger.Error("获取Redis锁失败：", zap.Error(err)) //锁已存在
-		return BadUpdateCostResponse("获取花费锁失败，稍后重试"), nil
+		return BadUpdateCostResponse("获取花费锁失败，稍后重试"), err
 	}
 	if !locked {
 		return BadUpdateCostResponse("花费操作正在进行中，请稍后重试"), nil
@@ -331,7 +331,7 @@ func (s *UserServiceImpl) UpdateBalance(ctx context.Context, req *user.UpdateBal
 	locked, err := rs.AcquireLock(ctx, lockKey) //获取分布式锁
 	if err != nil {
 		logger.Error("获取Redis锁失败：", zap.Error(err)) //锁已存在
-		return BadUpdateBalanceResponse("获取余额锁失败，稍后重试"), nil
+		return BadUpdateBalanceResponse("获取余额锁失败，稍后重试"), err
 	}
 	if !locked {
 		return BadUpdateBalanceResponse("余额操作正在进行中，请稍后重试"), nil
@@ -343,7 +343,7 @@ func (s *UserServiceImpl) UpdateBalance(ctx context.Context, req *user.UpdateBal
 		return BadUpdateBalanceResponse("获取用户信息失败：服务器内部错误"), err
 	}
 	if usr == nil {
-		return BadUpdateBalanceResponse("用户不存在"), err
+		return BadUpdateBalanceResponse("用户不存在"), nil
 	}
 	err = db.UpdateBalance(ctx, usr, req.Addbalance)
 	if err != nil {
@@ -355,7 +355,7 @@ func (s *UserServiceImpl) UpdateBalance(ctx context.Context, req *user.UpdateBal
 	if err != nil {
 		logger.Error("删除缓存失败：", zap.Error(err))
 	}
-	return GoodUpdateBalanceResponse("修改余额成功", true), err
+	return GoodUpdateBalanceResponse("修改余额成功", true),nil
 }
 
 // UpdateAddress implements the UserServiceImpl interface.
@@ -363,12 +363,12 @@ func (s *UserServiceImpl) UpdateAddress(ctx context.Context, req *user.UpdateAdd
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
 		logger.Error("token解析失败：", zap.Error(err))
-		return BadUpdateAddressResponse("token解析失败"), nil
+		return BadUpdateAddressResponse("token解析失败"), err
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
 		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
-		return BadUpdateAddressResponse("获取用户信息失败：服务器内部错误"), nil
+		return BadUpdateAddressResponse("获取用户信息失败：服务器内部错误"), err
 	}
 	if usr == nil {
 		return BadUpdateAddressResponse("用户不存在"), nil
@@ -376,7 +376,7 @@ func (s *UserServiceImpl) UpdateAddress(ctx context.Context, req *user.UpdateAdd
 	err = db.UpdateAddress(ctx, usr, req.Address)
 	if err != nil {
 		logger.Error("用户收货地址修改失败：", zap.Error(err))
-		return BadUpdateAddressResponse("用户收货地址修改失败"), nil
+		return BadUpdateAddressResponse("用户收货地址修改失败"), err
 	}
 	cacheKey := fmt.Sprintf("userinfo:%d", mc.UserId)
 	err = rs.DelKey(ctx, cacheKey) // 删除缓存
@@ -391,12 +391,12 @@ func (s *UserServiceImpl) UpdateBalanceAndCost(ctx context.Context, req *user.Up
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
 		logger.Error("token解析失败：", zap.Error(err))
-		return BadUpdateBalanceAndCostResponse("token解析失败"), nil
+		return BadUpdateBalanceAndCostResponse("token解析失败"), err
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
 		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
-		return BadUpdateBalanceAndCostResponse("获取用户信息失败：服务器内部错误"), nil
+		return BadUpdateBalanceAndCostResponse("获取用户信息失败：服务器内部错误"), err
 	}
 	if usr == nil {
 		return BadUpdateBalanceAndCostResponse("用户不存在"), nil
@@ -404,7 +404,7 @@ func (s *UserServiceImpl) UpdateBalanceAndCost(ctx context.Context, req *user.Up
 	err = db.UpdateBalanceAndCost(ctx, usr, req.Number)
 	if err != nil {
 		logger.Error("用户余额和花费修改失败：", zap.Error(err))
-		return BadUpdateBalanceAndCostResponse("用户余额和花费修改失败"), nil
+		return BadUpdateBalanceAndCostResponse("用户余额和花费修改失败"), err
 	}
 	cacheKey := fmt.Sprintf("userinfo:%d", mc.UserId)
 	err = rs.DelKey(ctx, cacheKey) // 删除缓存
@@ -419,7 +419,7 @@ func (s *UserServiceImpl) GetUserInfoByUserID(ctx context.Context, req *user.Get
 	usr, err := db.GetUserByID(ctx, req.UserId)
 	if err != nil {
 		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
-		return BadGetUserInfoByUserIDResponse("获取用户信息失败：服务器内部错误"), nil
+		return BadGetUserInfoByUserIDResponse("获取用户信息失败：服务器内部错误"), err
 	}
 	if usr == nil {
 		return BadGetUserInfoByUserIDResponse("用户不存在"), nil
@@ -433,7 +433,7 @@ func (s *UserServiceImpl) GetFriendList(ctx context.Context, req *user.GetFriend
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
 		logger.Error("token解析失败：", zap.Error(err))
-		return BadGetFriendListResponse("token解析失败"), nil
+		return BadGetFriendListResponse("token解析失败"), err
 	}
 	flist, err := rs.GetFriendList(ctx, cacheKey+fmt.Sprintf("%d", mc.UserId))
 	if err == nil && flist != nil {
@@ -442,24 +442,24 @@ func (s *UserServiceImpl) GetFriendList(ctx context.Context, req *user.GetFriend
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
 		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
-		return BadGetFriendListResponse("获取用户信息失败：服务器内部错误"), nil
+		return BadGetFriendListResponse("获取用户信息失败：服务器内部错误"), err
 	}
 	var frlist map[int64]int
 	err = json.Unmarshal([]byte(usr.Friend), &frlist)
 	if err != nil {
 		logger.Error("反序列化好友列表失败：", zap.Error(err))
-		return BadGetFriendListResponse("反序列化好友列表失败"), nil
+		return BadGetFriendListResponse("反序列化好友列表失败"), err
 	}
 	var friendlist []*user.FriendInfo
 	for userid := range frlist {
 		f := &user.FriendInfo{}
 		f.Name, err = db.GetUserNameByID(ctx, userid)
 		if err != nil {
-			return BadGetFriendListResponse(err.Error()), nil
+			return BadGetFriendListResponse(err.Error()), err
 		}
 		f.Avatar, err = db.GetAvatarByID(ctx, userid)
 		if err != nil {
-			return BadGetFriendListResponse(err.Error()), nil
+			return BadGetFriendListResponse(err.Error()), err
 		}
 		f.UserId = userid
 		friendlist = append(friendlist, f)
@@ -481,27 +481,27 @@ func (s *UserServiceImpl) AddFriend(ctx context.Context, req *user.AddFriendRequ
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
 		logger.Error("token解析失败：", zap.Error(err))
-		return BadAddFriendResponse("token解析失败"), nil
+		return BadAddFriendResponse("token解析失败"), err
 	}
 	usra, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
 		logger.Error("获取目标用户信息失败，服务器内部错误：", zap.Error(err))
-		return BadAddFriendResponse("获取目标用户信息失败：服务器内部错误"), nil
+		return BadAddFriendResponse("获取目标用户信息失败：服务器内部错误"), err
 	}
 	usrb, err := db.GetUserByID(ctx, req.TouserId)
 	if err != nil {
 		logger.Error("获取目标用户信息失败，服务器内部错误：", zap.Error(err))
-		return BadAddFriendResponse("获取目标用户信息失败：服务器内部错误"), nil
+		return BadAddFriendResponse("获取目标用户信息失败：服务器内部错误"), err
 	}
 	err = db.AddFriend(ctx, usra, usrb)
 	if err != nil {
 		logger.Error("好友添加失败：", zap.Error(err))
-		return BadAddFriendResponse("好友添加失败"), nil
+		return BadAddFriendResponse("好友添加失败"), err
 	}
 	err = db.DeleteFriendApplication(ctx, usrb, usra)
 	if err != nil {
 		logger.Error("好友请求删除失败：", zap.Error(err))
-		return BadAddFriendResponse("好友请求删除失败"), nil
+		return BadAddFriendResponse("好友请求删除失败"), err
 	}
 	err = rs.DelKey(ctx, cacheKey+fmt.Sprintf("%d", mc.UserId)) // 删除缓存
 	if err != nil {
@@ -515,22 +515,22 @@ func (s *UserServiceImpl) DeleteFriend(ctx context.Context, req *user.DeleteFrie
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
 		logger.Error("token解析失败：", zap.Error(err))
-		return BadDeleteFriendResponse("token解析失败"), nil
+		return BadDeleteFriendResponse("token解析失败"), err
 	}
 	usra, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
 		logger.Error("获取目标用户信息失败，服务器内部错误：", zap.Error(err))
-		return BadDeleteFriendResponse("获取目标用户信息失败：服务器内部错误"), nil
+		return BadDeleteFriendResponse("获取目标用户信息失败：服务器内部错误"), err
 	}
 	usrb, err := db.GetUserByID(ctx, req.TouserId)
 	if err != nil {
 		logger.Error("获取目标用户信息失败，服务器内部错误：", zap.Error(err))
-		return BadDeleteFriendResponse("获取目标用户信息失败：服务器内部错误"), nil
+		return BadDeleteFriendResponse("获取目标用户信息失败：服务器内部错误"), err
 	}
 	err = db.DeleteFriend(ctx, usra, usrb)
 	if err != nil {
 		logger.Error("好友删除失败：", zap.Error(err))
-		return BadDeleteFriendResponse("好友删除失败"), nil
+		return BadDeleteFriendResponse("好友删除失败"), err
 	}
 	err = rs.DelKey(ctx, cacheKey+fmt.Sprintf("%d", mc.UserId)) // 删除缓存
 	if err != nil {
@@ -544,31 +544,31 @@ func (s *UserServiceImpl) GetMessageList(ctx context.Context, req *user.GetMessa
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
 		logger.Error("token解析失败：", zap.Error(err))
-		return BadGetMessageListResponse("token解析失败"), nil
+		return BadGetMessageListResponse("token解析失败"), err
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
 		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
-		return BadGetMessageListResponse("获取用户信息失败：服务器内部错误"), nil
+		return BadGetMessageListResponse("获取用户信息失败：服务器内部错误"), err
 	}
 	tousr, err := db.GetUserByID(ctx, req.TouserId)
 	if err != nil {
 		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
-		return BadGetMessageListResponse("获取用户信息失败：服务器内部错误"), nil
+		return BadGetMessageListResponse("获取用户信息失败：服务器内部错误"), err
 	}
 	var smsg map[int64][][2]string
 	smsg = make(map[int64][][2]string)
 	err = json.Unmarshal([]byte(usr.SendMessage), &smsg)
 	if err != nil {
 		logger.Error("消息记录反序列化失败", zap.Error(err))
-		return BadGetMessageListResponse("消息记录反序列化失败"), nil
+		return BadGetMessageListResponse("消息记录反序列化失败"), err
 	}
 	var amsg map[int64][][2]string
 	amsg = make(map[int64][][2]string)
 	err = json.Unmarshal([]byte(tousr.SendMessage), &amsg)
 	if err != nil {
 		logger.Error("消息记录反序列化失败", zap.Error(err))
-		return BadGetMessageListResponse("消息记录反序列化失败"), nil
+		return BadGetMessageListResponse("消息记录反序列化失败"), err
 	}
 	var message []*user.Message
 	if smsMessages, exists := smsg[int64(tousr.ID)]; exists {
@@ -616,7 +616,7 @@ func (s *UserServiceImpl) GetUserListByContent(ctx context.Context, req *user.Ge
 			usr, errr := db.GetUserByID(ctx, int64(num))
 			if errr != nil {
 				logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
-				return BadGetUserListByContentResponse("获取用户信息失败：服务器内部错误"), nil
+				return BadGetUserListByContentResponse("获取用户信息失败：服务器内部错误"), err
 			}
 			if usr != nil {
 				userr := &user.UserInfo{
@@ -631,7 +631,7 @@ func (s *UserServiceImpl) GetUserListByContent(ctx context.Context, req *user.Ge
 	uu, err := db.GetUserListByContent(ctx, req.Content)
 	if err != nil {
 		logger.Error("搜索用户信息失败：", zap.Error(err))
-		return BadGetUserListByContentResponse("搜索用户信息失败"), nil
+		return BadGetUserListByContentResponse("搜索用户信息失败"), err
 	}
 	for _, uuu := range uu {
 		userr := &user.UserInfo{}
@@ -648,17 +648,17 @@ func (s *UserServiceImpl) SendFriendApplication(ctx context.Context, req *user.S
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
 		logger.Error("token解析失败：", zap.Error(err))
-		return BadSendFriendApplicationResponse("token解析失败"), nil
+		return BadSendFriendApplicationResponse("token解析失败"), err
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
 		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
-		return BadSendFriendApplicationResponse("获取用户信息失败：服务器内部错误"), nil
+		return BadSendFriendApplicationResponse("获取用户信息失败：服务器内部错误"), err
 	}
 	ok, err := db.IsFriendJudge(ctx, usr, req.Touserid)
 	if err != nil {
 		logger.Error("查询好友列表失败，服务器内部错误：", zap.Error(err))
-		return BadSendFriendApplicationResponse("查询好友列表失败：服务器内部错误"), nil
+		return BadSendFriendApplicationResponse("查询好友列表失败：服务器内部错误"), err
 	}
 	if ok == true {
 		return BadSendFriendApplicationResponse("已是好友，无需再次添加！"), nil
@@ -681,25 +681,25 @@ func (s *UserServiceImpl) GetFriendApplicationList(ctx context.Context, req *use
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
 		logger.Error("token解析失败：", zap.Error(err))
-		return BadGetFriendApplicationListResponse("token解析失败"), nil
+		return BadGetFriendApplicationListResponse("token解析失败"), err
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
 		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
-		return BadGetFriendApplicationListResponse("获取用户信息失败：服务器内部错误"), nil
+		return BadGetFriendApplicationListResponse("获取用户信息失败：服务器内部错误"), err
 	}
 	var fa map[int64]bool
 	fa = make(map[int64]bool)
 	err = json.Unmarshal([]byte(usr.SendFriendApplication), &fa)
 	if err != nil {
-		return BadGetFriendApplicationListResponse("好友请求列表反序列化失败"), nil
+		return BadGetFriendApplicationListResponse("好友请求列表反序列化失败"), err
 	}
 	var f []*user.FriendApplication
 	for usrid, _ := range fa {
 		usr, err = db.GetUserByID(ctx, usrid)
 		if err != nil {
 			logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
-			return BadGetFriendApplicationListResponse("获取用户信息失败：服务器内部错误"), nil
+			return BadGetFriendApplicationListResponse("获取用户信息失败：服务器内部错误"), err
 		}
 		f = append(f, &user.FriendApplication{
 			Userid: usrid,
@@ -715,22 +715,22 @@ func (s *UserServiceImpl) RejectFriendApplication(ctx context.Context, req *user
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
 		logger.Error("token解析失败：", zap.Error(err))
-		return BadRejectFriendApplicationResponse("token解析失败"), nil
+		return BadRejectFriendApplicationResponse("token解析失败"), err
 	}
 	tousr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
 		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
-		return BadRejectFriendApplicationResponse("获取用户信息失败：服务器内部错误"), nil
+		return BadRejectFriendApplicationResponse("获取用户信息失败：服务器内部错误"), err
 	}
 	usr, err := db.GetUserByID(ctx, req.Touserid)
 	if err != nil {
 		logger.Error("获取用户信息失败，服务器内部错误：", zap.Error(err))
-		return BadRejectFriendApplicationResponse("获取用户信息失败：服务器内部错误"), nil
+		return BadRejectFriendApplicationResponse("获取用户信息失败：服务器内部错误"), err
 	}
 	err = db.DeleteFriendApplication(ctx, usr, tousr)
 	if err != nil {
 		logger.Error("好友请求删除失败：", zap.Error(err))
-		return BadRejectFriendApplicationResponse("好友请求删除失败"), nil
+		return BadRejectFriendApplicationResponse("好友请求删除失败"), err
 	}
 	return GoodRejectFriendApplicationResponse("好友请求删除成功", true), nil
 }

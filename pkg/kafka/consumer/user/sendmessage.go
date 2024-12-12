@@ -58,13 +58,13 @@ func (c *SendMessageConsumer) Listen() {
 	if err != nil {
 		log.Fatalf("Error refreshing metadata: %v", err)
 	}
-
 	partitionConsumer, err := c.consumer.ConsumePartition("send-message", 0, sarama.OffsetNewest)
 	if err != nil {
+		log.Println("message")
 		log.Fatalf("Error consuming partition: %v", err)
 	}
 	defer partitionConsumer.Close()
-	ticker := time.NewTicker(time.Second / 20)
+	ticker := time.NewTicker(time.Second / 100)
 	defer ticker.Stop()
 	for msg := range partitionConsumer.Messages() {
 		<-ticker.C

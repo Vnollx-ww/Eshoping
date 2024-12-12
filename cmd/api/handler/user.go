@@ -60,9 +60,10 @@ func Login(ctx context.Context, c *app.RequestContext) {
 		Password: reqbody.Password,
 		Captcha:  reqbody.Captcha,
 	}
-	res, _ := rpc.Login(ctx, req)
+	res, err := rpc.Login(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, user.UserLoginResponse{
@@ -109,9 +110,10 @@ func Register(ctx context.Context, c *app.RequestContext) {
 		Captcha:  reqbody.Captcha,
 		Avatar:   fileURL,
 	}
-	res, _ := rpc.Register(ctx, req)
+	res, err := rpc.Register(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	err = minio.UserUploadFileToMinio(ctx, file, reqbody.Username) // 传递用户 ID，这里假设为 12345
@@ -148,9 +150,10 @@ func GetUserInfo(ctx context.Context, c *app.RequestContext) {
 	req := &user.GetUserInfoRequest{
 		Token: reqbody.Token,
 	}
-	res, _ := rpc.GetUserInfo(ctx, req)
+	res, err := rpc.GetUserInfo(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, user.GetUserInfoResponse{
@@ -173,9 +176,10 @@ func UpdateName(ctx context.Context, c *app.RequestContext) {
 		Token:    reqbody.Token,
 		Newname_: reqbody.NewName,
 	}
-	res, _ := rpc.UpdateName(ctx, req)
+	res,err := rpc.UpdateName(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, user.UpdateNameResponse{
@@ -200,9 +204,10 @@ func UpdatePassword(ctx context.Context, c *app.RequestContext) {
 		Oldpassword:  reqbody.OldPass,
 		Newpassword_: reqbody.NewPass,
 	}
-	res, _ := rpc.UpdatePassword(ctx, req)
+	res, err := rpc.UpdatePassword(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, user.UpdatePasswordResponse{
@@ -225,9 +230,10 @@ func UpdateBalance(ctx context.Context, c *app.RequestContext) {
 		Token:      reqbody.Token,
 		Addbalance: reqbody.AddBalance,
 	}
-	res, _ := rpc.UpdateBalance(ctx, req)
+	res, err := rpc.UpdateBalance(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, user.UpdateBalanceResponse{
@@ -250,9 +256,10 @@ func UpdateCost(ctx context.Context, c *app.RequestContext) {
 		Token:   reqbody.Token,
 		Addcost: reqbody.AddCost,
 	}
-	res, _ := rpc.UpdateCost(ctx, req)
+	res, err := rpc.UpdateCost(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, user.UpdateCostResponse{
@@ -275,9 +282,10 @@ func UpdateAddress(ctx context.Context, c *app.RequestContext) {
 		Token:   reqbody.Token,
 		Address: reqbody.Address,
 	}
-	res, _ := rpc.UpdateAddress(ctx, req)
+	res, err:= rpc.UpdateAddress(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, user.UpdateAddressResponse{
@@ -304,9 +312,10 @@ func UpdateAvatar(ctx context.Context, c *app.RequestContext) {
 	req := &user.GetUserInfoRequest{
 		Token: reqbody.Token,
 	}
-	res, _ := rpc.GetUserInfo(ctx, req)
+	res, err := rpc.GetUserInfo(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	err = minio.UserUploadFileToMinio(ctx, file, res.User.Name) // 传递用户 ID，这里假设为 12345
@@ -332,9 +341,10 @@ func GetUserInfoByUserID(ctx context.Context, c *app.RequestContext) {
 	req := &user.GetUserInfoByUserIDRequest{
 		UserId: reqbody.UserId,
 	}
-	res, _ := rpc.GetUserInfoByUserID(ctx, req)
+	res, err := rpc.GetUserInfoByUserID(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, user.GetUserInfoResponse{
@@ -355,9 +365,10 @@ func GetFriendList(ctx context.Context, c *app.RequestContext) {
 	req := &user.GetFriendListRequest{
 		Token: reqbody.Token,
 	}
-	res, _ := rpc.GetFriendList(ctx, req)
+	res, err := rpc.GetFriendList(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, user.GetFriendListResponse{
@@ -380,9 +391,10 @@ func AddFriend(ctx context.Context, c *app.RequestContext) {
 		Token:    reqbody.Token,
 		TouserId: reqbody.ToUserId,
 	}
-	res, _ := rpc.AddFriend(ctx, req)
+	res, err := rpc.AddFriend(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, user.AddFriendResponse{
@@ -405,9 +417,10 @@ func DelFriend(ctx context.Context, c *app.RequestContext) {
 		Token:    reqbody.Token,
 		TouserId: reqbody.ToUserId,
 	}
-	res, _ := rpc.DeleteFriend(ctx, req)
+	res, err := rpc.DeleteFriend(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, user.DeleteFriendResponse{
@@ -430,9 +443,10 @@ func GetMessageList(ctx context.Context, c *app.RequestContext) {
 		Token:    reqbody.Token,
 		TouserId: reqbody.ToUserId,
 	}
-	res, _ := rpc.GetMessageList(ctx, req)
+	res, err := rpc.GetMessageList(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, user.GetMessageListResponse{
@@ -457,9 +471,10 @@ func SendMessage(ctx context.Context, c *app.RequestContext) {
 		TouserId: reqbody.ToUserId,
 		Content:  reqbody.Content,
 	}
-	res, _ := rpc.SendMessage(ctx, req)
+	res, err := rpc.SendMessage(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, user.SendMessageResponse{
@@ -480,9 +495,10 @@ func GetUserListByContent(ctx context.Context, c *app.RequestContext) {
 	req := &user.GetUserListByContentRequest{
 		Content: reqbody.Content,
 	}
-	res, _ := rpc.GetUserListByContent(ctx, req)
+	res, err := rpc.GetUserListByContent(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, user.GetUserListByContentResponse{
@@ -505,9 +521,10 @@ func SendFriendApplication(ctx context.Context, c *app.RequestContext) {
 		Token:    reqbody.Token,
 		Touserid: reqbody.Touserid,
 	}
-	res, _ := rpc.SendFriendApplication(ctx, req)
+	res, err := rpc.SendFriendApplication(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, user.SendFriendApplicationResponse{
@@ -528,9 +545,10 @@ func GetFriendApplicationList(ctx context.Context, c *app.RequestContext) {
 	req := &user.GetFriendApplicationListRequest{
 		Token: reqbody.Token,
 	}
-	res, _ := rpc.GetFriendApplicationList(ctx, req)
+	res, err := rpc.GetFriendApplicationList(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, user.GetFriendApplicationListResponse{
@@ -553,9 +571,10 @@ func RejectFriendApplication(ctx context.Context, c *app.RequestContext) {
 		Token:    reqbody.Token,
 		Touserid: reqbody.Touserid,
 	}
-	res, _ := rpc.RejectFriendApplication(ctx, req)
+	res, err := rpc.RejectFriendApplication(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, user.RejectFriendApplicationResponse{

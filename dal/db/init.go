@@ -11,8 +11,8 @@ import (
 var DB *gorm.DB
 
 func init() {
-	//host := "localhost"
-	host := "my-mysql"
+	host := "localhost"
+	//host := "my-mysql"
 	port := "3306"
 	database := "eshop"
 	username := "root"

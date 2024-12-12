@@ -6,7 +6,6 @@ import (
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	"go.uber.org/zap"
-	"log"
 	"net/http"
 )
 
@@ -35,9 +34,10 @@ func CreateOrder(ctx context.Context, c *app.RequestContext) {
 		Ol:    ol,
 		Token: reqbody.Token,
 	}
-	res, _ := rpc.CreateOrder(ctx, req)
+	res, err:= rpc.CreateOrder(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, orderlist.AddOrderResponse{
@@ -59,9 +59,10 @@ func DeleteOrder(ctx context.Context, c *app.RequestContext) {
 	req := &orderlist.DelOrderRequest{
 		OrderId: reqbody.OrderId,
 	}
-	res, _ := rpc.DeleteOrder(ctx, req)
+	res, err := rpc.DeleteOrder(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, orderlist.DelOrderResponse{
@@ -82,11 +83,13 @@ func GetOrderListByUserID(ctx context.Context, c *app.RequestContext) {
 	req := &orderlist.GetOrderListByUserIDRequest{
 		Token: reqbody.Token,
 	}
-	res, _ := rpc.GetOrderListByUserID(ctx, req)
+	res, err := rpc.GetOrderListByUserID(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
+		return
 	}
-	log.Println(res.Orderlist)
+	//log.Println(res.Orderlist)
 	c.JSON(http.StatusOK, orderlist.GetOrderListByUserIDResponse{
 		StatusCode: http.StatusOK,
 		StatusMsg:  res.StatusMsg,
@@ -106,9 +109,10 @@ func GetOrderListByProductName(ctx context.Context, c *app.RequestContext) {
 	req := &orderlist.GetOrderListByProductNameRequest{
 		ProductName: reqbody.ProductName,
 	}
-	res, _ := rpc.GetOrderListByProductName(ctx, req)
+	res, err := rpc.GetOrderListByProductName(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, orderlist.GetOrderListByProductNameResponse{
@@ -131,9 +135,10 @@ func GetOrderListByState(ctx context.Context, c *app.RequestContext) {
 		State: reqbody.state,
 		Token: reqbody.Token,
 	}
-	res, _ := rpc.GetOrderListByState(ctx, req)
+	res, err := rpc.GetOrderListByState(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, orderlist.GetOrderListByStateResponse{
@@ -154,9 +159,10 @@ func UpdateOrderState(ctx context.Context, c *app.RequestContext) {
 	req := &orderlist.UpdateOrderStateRequest{
 		OrderId: reqbody.OrderId,
 	}
-	res, _ := rpc.UpdateOrderState(ctx, req)
+	res, err := rpc.UpdateOrderState(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, orderlist.UpdateOrderStateResponse{

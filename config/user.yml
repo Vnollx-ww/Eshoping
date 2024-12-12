@@ -1,7 +1,7 @@
 server:
   name: "UserServer"
-  #host: 127.0.0.1
-  host: 0.0.0.0
+  host: 127.0.0.1
+  #host: 0.0.0.0
   port: 8888
 
 rpc:
@@ -9,16 +9,16 @@ rpc:
   port: 50055
 
 etcd:
-  #host: 127.0.0.1
-  host: my-etcd
+  host: 127.0.0.1
+  #host: my-etcd
   port: 2379
 
 kafka:
-  #host: 127.0.0.1
-  host: my-kafka
+  host: 127.0.0.1
+  #host: my-kafka
   port: 9092
 
 minio:
-  #host: 127.0.0.1
-  host: my-minio
+  host: 127.0.0.1
+  #host: my-minio
   port: 9000

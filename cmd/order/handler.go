@@ -64,7 +64,7 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 	if err != nil {
 		logger.Error("token解析失败：", zap.Error(err))
 		log.Println(err)
-		return BadAddOrderResponse("token解析失败"), nil
+		return BadAddOrderResponse("token解析失败"), err
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
@@ -130,7 +130,7 @@ func (s *OrderListServiceImpl) DelOrder(ctx context.Context, req *orderlist.DelO
 	er := db.DeleteOrder(ctx, req.OrderId)
 	if er != nil {
 		logger.Error("订单删除失败：", zap.Error(er))
-		return BadDelOrderResponse("订单删除失败"), nil
+		return BadDelOrderResponse("订单删除失败"), err
 	}
 	return GoodDelOrderResponse("订单删除成功"), nil
 }
@@ -140,13 +140,13 @@ func (s *OrderListServiceImpl) GetOrderListByUserID(ctx context.Context, req *or
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
 		logger.Error("token解析失败：", zap.Error(err))
-		return BadGetOrderListByUserIDResponse("token解析失败"), nil
+		return BadGetOrderListByUserIDResponse("token解析失败"), err
 	}
 	var or []*orderlist.Order
 	orders, err := db.GetOrderListByUserID(ctx, mc.UserId)
 	if err != nil {
 		logger.Error("用户订单列表获取失败：", zap.Error(err))
-		return BadGetOrderListByUserIDResponse("用户订单列表获取失败"), nil
+		return BadGetOrderListByUserIDResponse("用户订单列表获取失败"), err
 	}
 	for _, order := range orders {
 		var ord orderlist.Order
@@ -168,7 +168,7 @@ func (s *OrderListServiceImpl) GetOrderListByProductNameID(ctx context.Context, 
 	orders, er := db.GetOrderListByProductName(ctx, req.ProductName)
 	if er != nil {
 		logger.Error("商品订单列表获取失败：", zap.Error(er))
-		return BadGetOrderListByProductNameResponse("商品订单列表获取失败"), nil
+		return BadGetOrderListByProductNameResponse("商品订单列表获取失败"), err
 	}
 	var or []*orderlist.Order
 	for _, order := range orders {
@@ -191,19 +191,19 @@ func (s *OrderListServiceImpl) GetOrderListByState(ctx context.Context, req *ord
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
 		logger.Error("token解析失败：", zap.Error(err))
-		return BadGetOrderListByStateResponse("token解析失败"), nil
+		return BadGetOrderListByStateResponse("token解析失败"), err
 	}
 	pro, err := db.GetProductListInfoByUser(ctx, mc.UserId)
 	if err != nil {
 		logger.Error("订单未发货列表获取失败：", zap.Error(err))
-		return BadGetOrderListByStateResponse("订单未发货列表获取成功失败"), nil
+		return BadGetOrderListByStateResponse("订单未发货列表获取成功失败"), err
 	}
 	var or []*orderlist.Order
 	for _, p := range pro {
 		orders, err := db.GetOrderListByState(ctx, req.State, p.ProductName)
 		if err != nil {
 			logger.Error("用户订单列表获取失败：", zap.Error(err))
-			return BadGetOrderListByStateResponse("用户订单列表获取失败"), nil
+			return BadGetOrderListByStateResponse("用户订单列表获取失败"), err
 		}
 		for _, order := range orders {
 			var ord orderlist.Order
@@ -226,12 +226,12 @@ func (s *OrderListServiceImpl) UpdateOrderState(ctx context.Context, req *orderl
 	order, err := db.GetOrderByID(ctx, req.OrderId)
 	if err != nil {
 		logger.Error("修改订单状态失败，服务器内部错误：", zap.Error(err))
-		return BadUpdateOrderStateResponse("修改订单状态失败，服务器内部错误"), nil
+		return BadUpdateOrderStateResponse("修改订单状态失败，服务器内部错误"), err
 	}
 	err = db.UpdateOrderState(ctx, order)
 	if err != nil {
 		logger.Error("订单状态修改失败：", zap.Error(err))
-		return BadUpdateOrderStateResponse("订单状态修改失败"), nil
+		return BadUpdateOrderStateResponse("订单状态修改失败"), err
 	}
 	return GoodUpdateOrderStateResponse("订单状态修改成功"), nil
 }

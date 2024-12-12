@@ -12,8 +12,8 @@ var MinioClient *minio.Client
 var logger *zap.Logger = zaplog.GetLogger()
 
 func init() {
-	//endpoint := "localhost:9000"
-	endpoint := "my-minio:9000"
+	endpoint := "localhost:9000"
+	//endpoint := "my-minio:9000"
 	accessKeyID := "vnollxvnollx"
 	secretAccessKey := "vnollxvnollxvnollx"
 

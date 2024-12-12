@@ -58,6 +58,7 @@ func (c *SendFriendApplicationConsumer) Listen() {
 
 	partitionConsumer, err := c.consumer.ConsumePartition("send-friendapplication", 0, sarama.OffsetNewest)
 	if err != nil {
+		log.Println("friend")
 		log.Fatalf("Error consuming partition: %v", err)
 	}
 	defer partitionConsumer.Close()

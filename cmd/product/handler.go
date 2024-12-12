@@ -71,7 +71,7 @@ func (s *ProductServiceImpl) AddProduct(ctx context.Context, req *product.AddPro
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil || mc == nil {
 		logger.Error("token解析失败：", zap.Error(err))
-		return BadAddProductResponse("token解析失败"), nil
+		return BadAddProductResponse("token解析失败"), err
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	if err != nil {
@@ -131,7 +131,7 @@ func (s *ProductServiceImpl) DelProduct(ctx context.Context, req *product.DelPro
 	err = db.DeleteProduct(ctx, pro)
 	if err != nil {
 		logger.Error("删除商品失败：", zap.Error(err))
-		return BadDelProductResponse("删除商品失败"), nil
+		return BadDelProductResponse("删除商品失败"), err
 	}
 	kafkaProducer, err := product2.NewKafkaProducer([]string{kafkaAddr}) //初始化kafka生产者
 	if err != nil {
@@ -156,7 +156,7 @@ func (s *ProductServiceImpl) UpdatePrice(ctx context.Context, req *product.Updat
 	locked, err := rs.AcquireLock(ctx, lockKey) //获取分布式锁
 	if err != nil {
 		logger.Error("获取Redis锁失败：", zap.Error(err)) //锁已存在
-		return BadUpdatePriceResponse("获取价格锁失败，稍后重试"), nil
+		return BadUpdatePriceResponse("获取价格锁失败，稍后重试"), err
 	}
 	if !locked {
 		return BadUpdatePriceResponse("价格操作正在进行中，请稍后重试"), nil
@@ -165,7 +165,7 @@ func (s *ProductServiceImpl) UpdatePrice(ctx context.Context, req *product.Updat
 	pro, err := db.GetProductByID(ctx, req.ProductId)
 	if err != nil {
 		logger.Error("修改商品价格失败，服务器内部错误：", zap.Error(err))
-		return BadUpdatePriceResponse("修改商品价格失败，服务器内部错误"), nil
+		return BadUpdatePriceResponse("修改商品价格失败，服务器内部错误"), err
 	}
 	if pro == nil {
 		return BadUpdatePriceResponse("商品不存在"), nil
@@ -173,7 +173,7 @@ func (s *ProductServiceImpl) UpdatePrice(ctx context.Context, req *product.Updat
 	err = db.UpdatePrice(ctx, pro, req.Newprice_)
 	if err != nil {
 		logger.Error("修改商品价格失败：", zap.Error(err))
-		return BadUpdatePriceResponse("修改商品价格失败"), nil
+		return BadUpdatePriceResponse("修改商品价格失败"), err
 	}
 	err = rs.DelKey(ctx, cacheKey) // 删除缓存
 	if err != nil {
@@ -188,7 +188,7 @@ func (s *ProductServiceImpl) UpdateStock(ctx context.Context, req *product.Updat
 	locked, err := rs.AcquireLock(ctx, lockKey) //获取分布式锁
 	if err != nil {
 		logger.Error("获取Redis锁失败：", zap.Error(err)) //锁已存在
-		return BadUpdateStockResponse("获取库存锁失败，稍后重试"), nil
+		return BadUpdateStockResponse("获取库存锁失败，稍后重试"), err
 	}
 	if !locked {
 		return BadUpdateStockResponse("库存操作正在进行中，请稍后重试"), nil
@@ -197,7 +197,7 @@ func (s *ProductServiceImpl) UpdateStock(ctx context.Context, req *product.Updat
 	pro, err := db.GetProductByID(ctx, req.ProductId)
 	if err != nil {
 		logger.Error("修改商品库存失败，服务器内部错误：", zap.Error(err))
-		return BadUpdateStockResponse("修改商品库存失败，服务器内部错误"), nil
+		return BadUpdateStockResponse("修改商品库存失败，服务器内部错误"), err
 	}
 	if pro == nil {
 		return BadUpdateStockResponse("商品不存在"), nil
@@ -205,7 +205,7 @@ func (s *ProductServiceImpl) UpdateStock(ctx context.Context, req *product.Updat
 	err = db.UpdateStock(ctx, pro, req.Addstock)
 	if err != nil {
 		logger.Error("修改商品价格失败：", zap.Error(err))
-		return BadUpdateStockResponse("修改商品库存失败"), nil
+		return BadUpdateStockResponse("修改商品库存失败"), err
 	}
 	cacheKey := "productlistinfo"
 	err = rs.DelKey(ctx, cacheKey) // 删除缓存
@@ -224,7 +224,7 @@ func (s *ProductServiceImpl) GetProductListInfo(ctx context.Context) (resp *prod
 	prolist, err := db.GetProductListInfo(ctx)
 	if err != nil {
 		logger.Error("获取商品列表信息失败：", zap.Error(err))
-		return BadGetProductListInfoResponse("获取商品列表信息失败"), nil
+		return BadGetProductListInfoResponse("获取商品列表信息失败"), err
 	}
 	var productlist []*product.Product
 	for _, pro := range prolist {
@@ -254,13 +254,13 @@ func (s *ProductServiceImpl) GetProductListInfoByUser(ctx context.Context, req *
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil || mc == nil {
 		logger.Error("token解析失败：", zap.Error(err))
-		return BadGetProductListInfoByUserResponse("token解析失败"), nil
+		return BadGetProductListInfoByUserResponse("token解析失败"), err
 	}
 	usr, err := db.GetUserByID(ctx, mc.UserId)
 	prolist, err := db.GetProductListInfoByUser(ctx, int64(usr.ID))
 	if err != nil {
 		logger.Error("获取商品列表信息失败：", zap.Error(err))
-		return BadGetProductListInfoByUserResponse("获取商品列表信息失败"), nil
+		return BadGetProductListInfoByUserResponse("获取商品列表信息失败"), err
 	}
 	var productlist []*product.Product
 	for _, pro := range prolist {
@@ -283,7 +283,7 @@ func (s *ProductServiceImpl) UpdateStockAndSales(ctx context.Context, req *produ
 	locked, err := rs.AcquireLock(ctx, lockKey) //获取分布式锁
 	if err != nil {
 		logger.Error("获取Redis锁失败：", zap.Error(err)) //锁已存在
-		return BadUpdateStockAndSalesResponse("获取库存锁失败，稍后重试"), nil
+		return BadUpdateStockAndSalesResponse("获取库存锁失败，稍后重试"), err
 	}
 	if !locked {
 		return BadUpdateStockAndSalesResponse("库存操作正在进行中，请稍后重试"), nil
@@ -292,15 +292,15 @@ func (s *ProductServiceImpl) UpdateStockAndSales(ctx context.Context, req *produ
 	pro, err := db.GetProductByID(ctx, req.ProductId)
 	if err != nil {
 		logger.Error("修改商品库存销量失败，服务器内部错误：", zap.Error(err))
-		return BadUpdateStockAndSalesResponse("修改商品库存销量失败，服务器内部错误"), nil
+		return BadUpdateStockAndSalesResponse("修改商品库存销量失败，服务器内部错误"), err
 	}
 	if pro == nil {
-		return BadUpdateStockAndSalesResponse("商品不存在"), nil
+		return BadUpdateStockAndSalesResponse("商品不存在"), err
 	}
 	err = db.UpdateStockAndSales(ctx, pro, req.Number)
 	if err != nil {
 		logger.Error("修改商品库存和销量失败：", zap.Error(err))
-		return BadUpdateStockAndSalesResponse("修改商品库存和销量失败"), nil
+		return BadUpdateStockAndSalesResponse("修改商品库存和销量失败"), err
 	}
 	cacheKey := "productlistinfo"
 	err = rs.DelKey(ctx, cacheKey) // 删除缓存

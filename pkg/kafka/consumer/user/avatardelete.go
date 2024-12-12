@@ -60,6 +60,7 @@ func (c *AvatarConsumer) Listen() {
 	}
 	partitionConsumer, err := c.consumer.ConsumePartition("avatar-delete", 0, sarama.OffsetNewest)
 	if err != nil {
+		log.Println("avatar")
 		log.Fatalf("Error consuming partition: %v", err)
 	}
 	defer partitionConsumer.Close()

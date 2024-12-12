@@ -37,9 +37,10 @@ func AddProduct(ctx context.Context, c *app.RequestContext) {
 		Productimage: fileURL,
 		Token:        reqbody.Token,
 	}
-	res, _ := rpc.AddProduct(ctx, req)
+	res, err := rpc.AddProduct(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	err = minio.ProductUploadFileToMinio(ctx, file, reqbody.ProductName)
@@ -66,9 +67,10 @@ func DelProduct(ctx context.Context, c *app.RequestContext) {
 	req := &product.DelProductRequest{
 		Productid: reqbody.ProductId,
 	}
-	res, _ := rpc.DelProduct(ctx, req)
+	res, err := rpc.DelProduct(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, product.DelProductResponse{
@@ -89,12 +91,13 @@ func GetProductInfo(ctx context.Context, c *app.RequestContext) {
 	req := &product.GetProductInfoRequest{
 		Productid: reqbody.ProductId,
 	}
-	res, _ := rpc.GetProductInfo(ctx, req)
+	res, err := rpc.GetProductInfo(ctx, req)
 	if res == nil {
 		return
 	}
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, product.GetProductInfoResponse{
@@ -104,9 +107,10 @@ func GetProductInfo(ctx context.Context, c *app.RequestContext) {
 	})
 }
 func GetProductListInfo(ctx context.Context, c *app.RequestContext) {
-	res, _ := rpc.GetProductListInfo(ctx)
+	res, err := rpc.GetProductListInfo(ctx)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, product.GetProductListInfoResponse{
@@ -129,9 +133,10 @@ func Updatestock(ctx context.Context, c *app.RequestContext) {
 		ProductId: reqbody.ProductId,
 		Addstock:  reqbody.AddStock,
 	}
-	res, _ := rpc.UpdateStock(ctx, req)
+	res, err := rpc.UpdateStock(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, product.UpdateStockResponse{
@@ -154,9 +159,10 @@ func UpdatePrice(ctx context.Context, c *app.RequestContext) {
 		ProductId: reqbody.ProductId,
 		Newprice_: reqbody.Price,
 	}
-	res, _ := rpc.UpdatePrice(ctx, req)
+	res, err := rpc.UpdatePrice(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, product.UpdatePriceResponse{
@@ -177,9 +183,10 @@ func GetProductListInfoByUser(ctx context.Context, c *app.RequestContext) {
 	req := &product.GetProductListInfoByUserRequest{
 		Token: reqbody.Token,
 	}
-	res, _ := rpc.GetProductListInfoByUser(ctx, req)
+	res, err := rpc.GetProductListInfoByUser(ctx, req)
 	if res.StatusCode == -1 {
 		BadBaseResponse(c, res.StatusMsg)
+		c.Set("error", err)
 		return
 	}
 	c.JSON(http.StatusOK, product.GetProductListInfoByUserResponse{
