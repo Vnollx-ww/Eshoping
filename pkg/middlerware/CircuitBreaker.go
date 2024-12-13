@@ -12,13 +12,18 @@ import (
 	"time"
 )
 
+type res struct {
+	StautsCode int32
+	StautsMsg  string
+}
+
 var circuitBreakers sync.Map // 使用 sync.Map 存储每个路由的熔断器
 
 // 创建一个新的熔断器
 func createCircuitBreaker(route string) *gobreaker.CircuitBreaker {
 	settings := gobreaker.Settings{
 		Name:        route,
-		MaxRequests: 5,                // 允许最多5个请求
+		MaxRequests: 10,               // 允许最多5个请求
 		Interval:    10 * time.Second, // 每10秒进行健康检查
 		Timeout:     30 * time.Second, // 超过30秒未响应则认为熔断
 		ReadyToTrip: func(counts gobreaker.Counts) bool {
@@ -67,6 +72,7 @@ func CrcuitBreakerMiddleware() app.HandlerFunc {
 		state := cb.State()
 		if state == gobreaker.StateOpen {
 			// 如果熔断器是开启状态，直接返回服务不可用错误
+			log.Println("服务已被熔断!")
 			c.JSON(http.StatusBadRequest, base.Base{
 				StatusCode: -1,
 				StatusMsg:  "服务暂不可用，请稍后重试",
@@ -86,6 +92,7 @@ func CrcuitBreakerMiddleware() app.HandlerFunc {
 			return nil, nil
 		})
 		if err != nil {
+			log.Println("服务通过！")
 			c.JSON(http.StatusBadRequest, base.Base{
 				StatusCode: -1,
 				StatusMsg:  "服务处理失败，请重试",

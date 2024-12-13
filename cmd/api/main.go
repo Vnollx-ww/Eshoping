@@ -152,8 +152,9 @@ func main() {
 	//ws :=handler.NewWebSocketServer()
 	//go ws.HandleMessages()
 	hz := server.New(server.WithHostPorts(apiServerAddr))
-	hz.Use(middlerware.CrcuitBreakerMiddleware())
 	hz.NoHijackConnPool = true
+	hz.Use(middlerware.RateLimitMiddleware())
+	hz.Use(middlerware.CrcuitBreakerMiddleware())
 	LoadHtml(hz)
 	registerGroup(hz)
 	hz.Spin()
