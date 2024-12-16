@@ -49,7 +49,6 @@ func (k *KafkaProducer) SendCreateOrderEvent(token string, amount int64, number 
 		Value: sarama.StringEncoder(msgBytes),
 	}
 	// 发送消息到 Kafka
-	log.Println(message.Amount)
 	_, _, err = k.producer.SendMessage(msg)
 	if err != nil {
 		span.RecordError(err)

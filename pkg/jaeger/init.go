@@ -2,11 +2,15 @@ package jaeger
 
 import (
 	"context"
+	"fmt"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/sdk/resource"
 	traceSDK "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+	"go.opentelemetry.io/otel/trace"
+	"math/rand"
 	"time"
 )
 
@@ -41,7 +45,7 @@ func newJaegerTraceProvider(ctx context.Context) (*traceSDK.TracerProvider, erro
 	}
 	traceProvider := traceSDK.NewTracerProvider(
 		traceSDK.WithResource(res),
-		traceSDK.WithSampler(traceSDK.AlwaysSample()), // 采样
+		traceSDK.WithSampler(traceSDK.AlwaysSample()), // 确保每个请求都会采样
 		traceSDK.WithBatcher(exp, traceSDK.WithBatchTimeout(time.Second)),
 	)
 	return traceProvider, nil
@@ -49,7 +53,7 @@ func newJaegerTraceProvider(ctx context.Context) (*traceSDK.TracerProvider, erro
 
 // testTracer 编写一个批量创建span的tracer
 // trace 和 span
-/*func testTracer(ctx context.Context) {
+func TestTracer(ctx context.Context) {
 	tracer := otel.Tracer("test-tracer")
 	baseAttrs := []attribute.KeyValue{
 		attribute.String("domain", "liwenzhou.com"),
@@ -71,4 +75,4 @@ func newJaegerTraceProvider(ctx context.Context) (*traceSDK.TracerProvider, erro
 		iSpan.End()
 	}
 	fmt.Println("done!")
-}*/
+}

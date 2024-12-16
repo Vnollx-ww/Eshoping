@@ -4,23 +4,26 @@ import (
 	"Eshop/dal/db"
 	"Eshop/dal/rs"
 	"Eshop/kitex_gen/orderlist"
-	"Eshop/kitex_gen/product/productservice"
-	"Eshop/kitex_gen/user/userservice"
-	_ "Eshop/pkg/jaeger"
 	order2 "Eshop/pkg/kafka/producer/order"
 	"Eshop/pkg/middlerware"
 	"context"
 	"fmt"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
 // OrderListServiceImpl implements the last service interface defined in the IDL.
 type OrderListServiceImpl struct {
-	usrcli userservice.Client
-	procli productservice.Client
 }
 
+func SetSuccessSpan(span trace.Span) {
+	span.SetAttributes(attribute.String("status", "OK"))
+}
+func SetBadSpan(span trace.Span) {
+	span.SetAttributes(attribute.String("status", "FAIL"))
+}
 func BadAddOrderResponse(s string) *orderlist.AddOrderResponse {
 	return &orderlist.AddOrderResponse{StatusCode: -1, StatusMsg: s}
 }
@@ -60,9 +63,13 @@ func GoodUpdateOrderStateResponse(s string) *orderlist.UpdateOrderStateResponse 
 
 // AddOrder implements the OrderListServiceImpl interface.
 func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddOrderRequest) (resp *orderlist.AddOrderResponse, err error) {
-	tracer := otel.Tracer("order-service")
+	tracer := otel.Tracer("AddOrder")
+	baseAttrs := []attribute.KeyValue{
+		attribute.String("domain", "vnollx.com"),
+		attribute.Bool("plagiarize", false),
+	}
 	// 创建根 Span
-	ctx, span := tracer.Start(ctx, "AddOrder")
+	ctx, span := tracer.Start(ctx, "AddOrder", trace.WithAttributes(baseAttrs...))
 	defer span.End()
 	ol := req.Ol
 	mc, err := middlerware.ParseToken(req.Token)
@@ -73,12 +80,15 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 	}
 	usrCtx, usrSpan := tracer.Start(ctx, "GetUserByID")
 	usr, err := db.GetUserByID(usrCtx, mc.UserId)
-	usrSpan.End()
 	if err != nil {
 		span.RecordError(err)
+		SetBadSpan(usrSpan)
+		usrSpan.End()
 		logger.Error("服务器内部错误：", zap.Error(err))
 		return BadAddOrderResponse("服务器内部错误"), err
 	}
+	SetSuccessSpan(usrSpan)
+	usrSpan.End()
 	order := &db.Order{
 		ProductName: ol.ProductName,
 		UserID:      mc.UserId,
@@ -88,12 +98,15 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 	}
 	proCtx, proSpan := tracer.Start(ctx, "GetProductByName")
 	pro, er := db.GetProductByName(proCtx, ol.ProductName)
-	proSpan.End()
 	if er != nil {
 		span.RecordError(er)
+		SetBadSpan(proSpan)
+		proSpan.End()
 		logger.Error("服务器内部错误：", zap.Error(err))
 		return BadAddOrderResponse("服务器内部错误"), err
 	}
+	SetSuccessSpan(proSpan)
+	proSpan.End()
 	if pro == nil {
 		span.RecordError(fmt.Errorf("商品不存在"))
 		return BadAddOrderResponse("商品不存在"), nil
@@ -108,27 +121,35 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 	}
 	orderCtx, orderSpan := tracer.Start(ctx, "CreateOrder")
 	err = db.CreateOrder(orderCtx, order)
-	orderSpan.End()
 	if err != nil {
 		span.RecordError(fmt.Errorf("订单创建失败"))
+		SetBadSpan(orderSpan)
+		orderSpan.End()
 		logger.Error("订单创建失败：", zap.Error(err))
 		return BadAddOrderResponse("订单创建失败"), err
 	}
+	SetSuccessSpan(orderSpan)
+	orderSpan.End()
 	// 发送 Kafka 消息
 	_, kafkaSpan := tracer.Start(ctx, "SendCreateOrderEvent")
 	kafkaProducer, err := order2.NewKafkaProducer([]string{kafkaAddr})
 	if err != nil {
 		span.RecordError(err)
+		SetBadSpan(kafkaSpan)
 		kafkaSpan.End()
 		logger.Error("kafka生产者创建失败：", zap.Error(err))
-		return BadAddOrderResponse("Kafka生产者创建失败"), err
+		return BadAddOrderResponse("Kafka生产者创建失败"), nil
 	}
 	err = kafkaProducer.SendCreateOrderEvent(req.Token, order.Cost, order.Number, int64(pro.ID))
-	kafkaSpan.End()
 	if err != nil {
+		span.RecordError(err)
+		SetBadSpan(kafkaSpan)
+		kafkaSpan.End()
 		logger.Error("订单创建成功，但更新消息发送失败：", zap.Error(err))
 		return BadAddOrderResponse("订单创建成功，但更新消息发送失败"), err
 	}
+	SetSuccessSpan(kafkaSpan)
+	kafkaSpan.End()
 	u, err := db.GetUserByID(ctx, pro.UserID)
 	if err != nil {
 		logger.Error("服务器内部错误：", zap.Error(err))

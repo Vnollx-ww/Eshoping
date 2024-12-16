@@ -1,10 +1,11 @@
 package main
 
 import (
-	"Eshop/cmd/api/rpc"
 	orderlist "Eshop/kitex_gen/orderlist/orderlistservice"
+	"Eshop/pkg/jaeger"
 	"Eshop/pkg/viper"
 	"Eshop/pkg/zaplog"
+	"context"
 	"fmt"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
@@ -24,6 +25,20 @@ var (
 )
 
 func main() {
+	/*ok := []attribute.KeyValue{
+		attribute.String("IsOK?", "YES"),
+	}
+	bad:=[]attribute.KeyValue{
+		attribute.String("IsOK?", "NO"),
+	}*/
+	ctx := context.Background()
+	shutdown, err := jaeger.SetupTracer(ctx)
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		_ = shutdown(ctx)
+	}()
 	r, err := etcd.NewEtcdRegistry([]string{etcdAddr})
 	if err != nil {
 		log.Fatal(err)
@@ -33,8 +48,6 @@ func main() {
 		log.Fatalln(err)
 	}
 	orderlistserviceimpl := new(OrderListServiceImpl)
-	orderlistserviceimpl.usrcli = rpc.GetUserClient()
-	orderlistserviceimpl.procli = rpc.GerProductClient()
 	// 初始化etcd
 	s := orderlist.NewServer(orderlistserviceimpl,
 		server.WithServiceAddr(addr),

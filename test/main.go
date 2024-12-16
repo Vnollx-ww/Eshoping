@@ -3,10 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/app/server"
 	"math/rand"
-	"net/http"
 	"time"
 
 	"go.opentelemetry.io/otel"
@@ -91,21 +88,5 @@ func main() {
 	defer func() {
 		_ = shutdown(ctx)
 	}()
-	hz := server.New(server.WithHostPorts("localhost:7777"))
-	hz.GET("/hello", func(c context.Context, ctx *app.RequestContext) {
-		tracer := otel.Tracer("jaeger-example")
-		baseAttrs := []attribute.KeyValue{
-			attribute.String("method", "GET"),
-			attribute.String("endpoint", "/hello"),
-		}
-		// 启动一个 Span
-		_, span := tracer.Start(c, "handle-hello", trace.WithAttributes(baseAttrs...))
-		defer span.End()
-		// 设置一些自定义的 Span 属性
-		// 模拟一些工作
-		time.Sleep(100 * time.Millisecond)
-		// 写响应
-		ctx.JSON(http.StatusOK, "hello jaeger!")
-	})
-	hz.Spin()
+
 }
