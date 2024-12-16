@@ -3,9 +3,7 @@ package order
 import (
 	"Eshop/cmd/api/rpc"
 	"Eshop/kitex_gen/product"
-	"Eshop/kitex_gen/product/productservice"
 	"Eshop/kitex_gen/user"
-	"Eshop/kitex_gen/user/userservice"
 	"Eshop/pkg/viper"
 	"context"
 	"encoding/json"
@@ -35,9 +33,6 @@ type CreateOrderMessage struct {
 	Productid int64  `json:"productid"`
 }
 
-var userclient userservice.Client
-var proclient productservice.Client
-
 func init() {
 	UserBalanceAndCostConsumer, err := NewUserBalanceAndCostConsumer([]string{kafkaAddr})
 	if err != nil {
@@ -49,9 +44,6 @@ func init() {
 		log.Println("无法接收消息到 Kafka:", err)
 		return
 	}
-
-	userclient = rpc.GetUserClient() // 初始化用户客户端
-	proclient = rpc.GerProductClient()
 	go func() {
 		UserBalanceAndCostConsumer.ListenBalanceAndCost()
 	}()

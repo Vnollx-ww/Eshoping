@@ -6,12 +6,13 @@ import (
 	"Eshop/kitex_gen/orderlist"
 	"Eshop/kitex_gen/product/productservice"
 	"Eshop/kitex_gen/user/userservice"
+	_ "Eshop/pkg/jaeger"
 	order2 "Eshop/pkg/kafka/producer/order"
 	"Eshop/pkg/middlerware"
 	"context"
 	"fmt"
+	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
-	"log"
 )
 
 // OrderListServiceImpl implements the last service interface defined in the IDL.
@@ -59,15 +60,22 @@ func GoodUpdateOrderStateResponse(s string) *orderlist.UpdateOrderStateResponse 
 
 // AddOrder implements the OrderListServiceImpl interface.
 func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddOrderRequest) (resp *orderlist.AddOrderResponse, err error) {
+	tracer := otel.Tracer("order-service")
+	// 创建根 Span
+	ctx, span := tracer.Start(ctx, "AddOrder")
+	defer span.End()
 	ol := req.Ol
 	mc, err := middlerware.ParseToken(req.Token)
 	if err != nil {
+		span.RecordError(err) // 记录错误到 Span
 		logger.Error("token解析失败：", zap.Error(err))
-		log.Println(err)
 		return BadAddOrderResponse("token解析失败"), err
 	}
-	usr, err := db.GetUserByID(ctx, mc.UserId)
+	usrCtx, usrSpan := tracer.Start(ctx, "GetUserByID")
+	usr, err := db.GetUserByID(usrCtx, mc.UserId)
+	usrSpan.End()
 	if err != nil {
+		span.RecordError(err)
 		logger.Error("服务器内部错误：", zap.Error(err))
 		return BadAddOrderResponse("服务器内部错误"), err
 	}
@@ -78,31 +86,45 @@ func (s *OrderListServiceImpl) AddOrder(ctx context.Context, req *orderlist.AddO
 		Cost:        ol.Cost,
 		Address:     usr.Address,
 	}
-	pro, er := db.GetProductByName(ctx, ol.ProductName)
+	proCtx, proSpan := tracer.Start(ctx, "GetProductByName")
+	pro, er := db.GetProductByName(proCtx, ol.ProductName)
+	proSpan.End()
 	if er != nil {
+		span.RecordError(er)
 		logger.Error("服务器内部错误：", zap.Error(err))
 		return BadAddOrderResponse("服务器内部错误"), err
 	}
 	if pro == nil {
-		return BadAddOrderResponse("商品不存在"), err
+		span.RecordError(fmt.Errorf("商品不存在"))
+		return BadAddOrderResponse("商品不存在"), nil
 	}
 	if pro.Stock < order.Number {
-		return BadAddOrderResponse("商品库存不足"), err
+		span.RecordError(fmt.Errorf("商品库存不足"))
+		return BadAddOrderResponse("商品库存不足"), nil
 	}
 	if usr.Balance < order.Cost {
-		return BadAddOrderResponse("用户余额不足"), err
+		span.RecordError(fmt.Errorf("用户余额不足"))
+		return BadAddOrderResponse("用户余额不足"), nil
 	}
-	err = db.CreateOrder(ctx, order)
+	orderCtx, orderSpan := tracer.Start(ctx, "CreateOrder")
+	err = db.CreateOrder(orderCtx, order)
+	orderSpan.End()
 	if err != nil {
+		span.RecordError(fmt.Errorf("订单创建失败"))
 		logger.Error("订单创建失败：", zap.Error(err))
 		return BadAddOrderResponse("订单创建失败"), err
 	}
-	kafkaProducer, err := order2.NewKafkaProducer([]string{kafkaAddr}) //初始化kafka生产者
+	// 发送 Kafka 消息
+	_, kafkaSpan := tracer.Start(ctx, "SendCreateOrderEvent")
+	kafkaProducer, err := order2.NewKafkaProducer([]string{kafkaAddr})
 	if err != nil {
+		span.RecordError(err)
+		kafkaSpan.End()
 		logger.Error("kafka生产者创建失败：", zap.Error(err))
 		return BadAddOrderResponse("Kafka生产者创建失败"), err
 	}
 	err = kafkaProducer.SendCreateOrderEvent(req.Token, order.Cost, order.Number, int64(pro.ID))
+	kafkaSpan.End()
 	if err != nil {
 		logger.Error("订单创建成功，但更新消息发送失败：", zap.Error(err))
 		return BadAddOrderResponse("订单创建成功，但更新消息发送失败"), err

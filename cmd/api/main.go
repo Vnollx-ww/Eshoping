@@ -2,6 +2,7 @@ package main
 
 import (
 	"Eshop/cmd/api/handler"
+	"Eshop/pkg/jaeger"
 	"Eshop/pkg/middlerware"
 	"Eshop/pkg/viper"
 	"context"
@@ -151,11 +152,21 @@ func registerGroup(hz *server.Hertz) {
 func main() {
 	//ws :=handler.NewWebSocketServer()
 	//go ws.HandleMessages()
+
 	hz := server.New(server.WithHostPorts(apiServerAddr))
 	hz.NoHijackConnPool = true
 	hz.Use(middlerware.RateLimitMiddleware())
 	hz.Use(middlerware.CrcuitBreakerMiddleware())
 	LoadHtml(hz)
 	registerGroup(hz)
+	ctx := context.Background()
+	shutdown, err := jaeger.SetupTracer(ctx)
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		_ = shutdown(ctx)
+	}()
+
 	hz.Spin()
 }

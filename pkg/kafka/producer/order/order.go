@@ -2,9 +2,11 @@ package order
 
 import (
 	"Eshop/pkg/kafka/consumer/order"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/IBM/sarama"
+	"go.opentelemetry.io/otel"
 	"log"
 )
 
@@ -31,8 +33,17 @@ func NewKafkaProducer(brokerList []string) (*KafkaProducer, error) {
 	return &KafkaProducer{producer: producer}, nil
 }
 func (k *KafkaProducer) SendCreateOrderEvent(token string, amount int64, number int64, productid int64) error {
+	tracer := otel.Tracer("order-service")
+	// 创建 Span
+	_, span := tracer.Start(context.Background(), "SendCreateOrderEvent")
+	defer span.End()
 	message := &order.CreateOrderMessage{Token: token, Amount: amount, Number: number, Productid: productid}
 	msgBytes, err := json.Marshal(message)
+	if err != nil {
+		span.RecordError(err)
+		log.Printf("消息序列化失败: %v", err)
+		return err
+	}
 	msg := &sarama.ProducerMessage{
 		Topic: "order-create",
 		Value: sarama.StringEncoder(msgBytes),
@@ -41,6 +52,7 @@ func (k *KafkaProducer) SendCreateOrderEvent(token string, amount int64, number 
 	log.Println(message.Amount)
 	_, _, err = k.producer.SendMessage(msg)
 	if err != nil {
+		span.RecordError(err)
 		log.Printf("发送消息到kafka失败: %v", err)
 		return err
 	}
